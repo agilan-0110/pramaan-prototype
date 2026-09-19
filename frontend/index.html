@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="SETU — MPLADS Scheme Audit & Public Transparency Platform">
+  <title>SETU — MPLADS Audit Platform</title>
+  <link rel="stylesheet" href="./src/theme/tokens.css">
+  <link rel="stylesheet" href="./src/components/Layout.css">
+  <link rel="stylesheet" href="./src/pages/Dashboard.css">
+  <link rel="stylesheet" href="./src/pages/Landing.css">
+  <link rel="stylesheet" href="./src/pages/Login.css">
+</head>
+<body>
+  <div id="app"></div>
+
+  <script type="module">
+    import { getLandingHtml } from './src/pages/landingData.js';
+    import { officialRoles, authenticateOfficial } from './src/pages/loginData.js';
+    import { mountLayout } from './src/components/Layout.js';
+
+    const appEl = document.getElementById('app');
+    let currentLoginRole = null;
+    let loginErrorMessage = '';
+
+    function renderLoginPage() {
+      if (!currentLoginRole) {
+        // STEP 1: Role Selection Grid
+        const roleCardsHtml = officialRoles
+          .map(
+            (role) => `
+            <div class="setu-role-card" data-role-id="${role.id}">
+              <div class="setu-role-card-top">
+                <span class="setu-role-level-tag">${role.level}</span>
+              </div>
+              <h2 class="setu-role-name">${role.name}</h2>
+              <p class="setu-role-desc">${role.description}</p>
+              <div class="setu-role-action-text">Proceed to Login →</div>
+            </div>`
+          )
+          .join('');
+
+        appEl.innerHTML = `
+          <div class="setu-login-page">
+            <div class="setu-masthead">
+              <span class="setu-masthead-gov">SMART INDIA HACKATHON 2026 • PROTOTYPE FOR MoSPI PROBLEM STATEMENT SIH26102</span>
+              <span class="setu-masthead-locale">Official Authentication Portal</span>
+            </div>
+            <header class="setu-landing-header">
+              <div class="setu-landing-header-inner">
+                <div class="setu-landing-logo-badge">GOV</div>
+                <span class="setu-landing-title">SETU</span>
+                <span class="setu-landing-tagline">National Public Audit & Monitoring Platform</span>
+              </div>
+            </header>
+            <main class="setu-login-container">
+              <div class="setu-login-header-section">
+                <div class="setu-login-top-nav">
+                  <a href="#/" class="setu-back-link">← Return to Public Landing Page</a>
+                </div>
+                <h1 class="setu-login-title">Select Your Official Role</h1>
+                <p class="setu-login-subtitle">Authorized personnel must select their statutory role to proceed.</p>
+              </div>
+              <div class="setu-role-grid">
+                ${roleCardsHtml}
+              </div>
+            </main>
+            <footer class="setu-landing-footer">
+              <span class="setu-landing-footer-text">
+                Official Government Audit Portal • Governed under MoSPI & CAG Audit Oversight Guidelines
+              </span>
+            </footer>
+          </div>
+        `;
+
+        // Wire click handlers on role cards
+        appEl.querySelectorAll('.setu-role-card').forEach((card) => {
+          card.addEventListener('click', () => {
+            const roleId = card.getAttribute('data-role-id');
+            currentLoginRole = officialRoles.find((r) => r.id === roleId);
+            loginErrorMessage = '';
+            renderLoginPage();
+          });
+        });
+      } else {
+        // STEP 2: Credential Form
+        const errorHtml = loginErrorMessage
+          ? `<div class="setu-form-error">${loginErrorMessage}</div>`
+          : '';
+
+        appEl.innerHTML = `
+          <div class="setu-login-page">
+            <div class="setu-masthead">
+              <span class="setu-masthead-gov">SMART INDIA HACKATHON 2026 • PROTOTYPE FOR MoSPI PROBLEM STATEMENT SIH26102</span>
+              <span class="setu-masthead-locale">Official Authentication Portal</span>
+            </div>
+            <header class="setu-landing-header">
+              <div class="setu-landing-header-inner">
+                <div class="setu-landing-logo-badge">GOV</div>
+                <span class="setu-landing-title">SETU</span>
+                <span class="setu-landing-tagline">National Public Audit & Monitoring Platform</span>
+              </div>
+            </header>
+            <main class="setu-login-container">
+              <div class="setu-login-header-section">
+                <div class="setu-login-top-nav">
+                  <a href="#/" class="setu-back-link">← Return to Public Landing Page</a>
+                  <button type="button" class="setu-back-link" id="btn-back-to-roles">← Back to Role Selection</button>
+                </div>
+                <h1 class="setu-login-title">Official Authentication: ${currentLoginRole.name}</h1>
+                <p class="setu-login-subtitle">Enter your assigned institutional credentials for ${currentLoginRole.jurisdiction}.</p>
+              </div>
+
+              <div class="setu-form-wrapper">
+                <form class="setu-auth-card" id="official-login-form">
+                  <div class="setu-auth-role-banner">
+                    <span class="setu-auth-role-title">Selected: ${currentLoginRole.name}</span>
+                    <span class="setu-role-level-tag">${currentLoginRole.level}</span>
+                  </div>
+
+                  ${errorHtml}
+
+                  <div class="setu-form-group">
+                    <label class="setu-form-label" for="official-id">Official ID / Username</label>
+                    <input id="official-id" type="text" class="setu-form-input" value="${currentLoginRole.demoId}" placeholder="e.g. ${currentLoginRole.demoId}" required />
+                  </div>
+
+                  <div class="setu-form-group">
+                    <label class="setu-form-label" for="official-password">Password</label>
+                    <input id="official-password" type="password" class="setu-form-input" value="${currentLoginRole.demoPassword}" placeholder="Enter password" required />
+                  </div>
+
+                  <button type="submit" class="setu-btn-primary" id="btn-submit-auth" style="width: 100%; margin-top: var(--setu-space-2);">
+                    Authenticate & Access Portal
+                  </button>
+
+                  <div class="setu-demo-box">
+                    <div class="setu-demo-header">
+                      <span class="setu-card-label">Demo Credentials</span>
+                      <span class="setu-demo-badge">Simulated</span>
+                    </div>
+                    <div class="setu-demo-credentials">
+                      <span>Demo ID: <strong>${currentLoginRole.demoId}</strong></span>
+                      <span>Password: <strong>${currentLoginRole.demoPassword}</strong></span>
+                      <span style="font-size: var(--setu-font-size-caption); color: var(--setu-color-text-muted);">
+                        Jurisdiction: ${currentLoginRole.jurisdiction}
+                      </span>
+                    </div>
+                    <button type="button" class="setu-autofill-btn" id="btn-autofill">
+                      Auto-fill Demo Credentials
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </main>
+            <footer class="setu-landing-footer">
+              <span class="setu-landing-footer-text">
+                Official Government Audit Portal • Governed under MoSPI & CAG Audit Oversight Guidelines
+              </span>
+            </footer>
+          </div>
+        `;
+
+        // Back to roles handler
+        appEl.querySelector('#btn-back-to-roles').addEventListener('click', () => {
+          currentLoginRole = null;
+          loginErrorMessage = '';
+          renderLoginPage();
+        });
+
+        // Autofill handler
+        appEl.querySelector('#btn-autofill').addEventListener('click', () => {
+          appEl.querySelector('#official-id').value = currentLoginRole.demoId;
+          appEl.querySelector('#official-password').value = currentLoginRole.demoPassword;
+        });
+
+        // Form submission handler calling authenticateOfficial
+        appEl.querySelector('#official-login-form').addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const submitBtn = appEl.querySelector('#btn-submit-auth');
+          submitBtn.disabled = true;
+          submitBtn.textContent = 'Authenticating...';
+
+          const username = appEl.querySelector('#official-id').value;
+          const password = appEl.querySelector('#official-password').value;
+
+          const result = await authenticateOfficial({
+            username,
+            password,
+            roleId: currentLoginRole.id,
+          });
+
+          if (result.success) {
+            sessionStorage.setItem('setu_auth_token', result.token);
+            sessionStorage.setItem('setu_auth_role', result.role);
+            window.location.hash = '#/dashboard';
+          } else {
+            loginErrorMessage = result.error || 'Authentication failed.';
+            renderLoginPage();
+          }
+        });
+      }
+    }
+
+    function renderRoute() {
+      const hash = window.location.hash || '#/';
+
+      if (hash === '#/login') {
+        renderLoginPage();
+      } else if (hash === '#/citizen-portal') {
+        appEl.innerHTML = `
+          <div class="setu-landing">
+            <div class="setu-masthead">
+              <span class="setu-masthead-gov">SMART INDIA HACKATHON 2026 • PROTOTYPE FOR MoSPI PROBLEM STATEMENT SIH26102</span>
+              <span class="setu-masthead-locale">Public Interface</span>
+            </div>
+            <header class="setu-landing-header">
+              <div class="setu-landing-header-inner">
+                <div class="setu-landing-logo-badge">GOV</div>
+                <span class="setu-landing-title">SETU</span>
+                <span class="setu-landing-tagline">Citizen Grievance & Issue Reporting</span>
+              </div>
+            </header>
+            <main class="setu-landing-main">
+              <div class="setu-card" style="max-width: 560px; margin: var(--setu-space-6) auto; text-align: center; border: 1px solid var(--setu-color-border-strong);">
+                <div class="setu-portal-header">
+                  <span class="setu-portal-tag setu-portal-tag-citizen">Public Grievance System</span>
+                  <h2 class="setu-portal-title">Citizen Grievance Portal</h2>
+                  <p class="setu-portal-desc">
+                    [Placeholder Route] Citizen complaint submission and contradiction reporting will be built in subsequent tasks.
+                  </p>
+                </div>
+                <div style="margin-top: var(--setu-space-6); display: flex; justify-content: center;">
+                  <a href="#/" class="setu-btn-secondary">Return to Landing Page</a>
+                </div>
+              </div>
+            </main>
+            <footer class="setu-landing-footer">
+              <span class="setu-landing-footer-text">
+                Official Government Audit Portal • Public Grievance Intake Framework
+              </span>
+            </footer>
+          </div>
+        `;
+      } else if (hash === '#/dashboard') {
+        const savedRole = sessionStorage.getItem('setu_auth_role') || (currentLoginRole ? currentLoginRole.name : 'District Authority');
+        mountLayout(appEl, {
+          projectName: 'SETU',
+          subtitle: 'PM-GatiShakti & MPLADS Audit System',
+          role: savedRole,
+          disclaimer: 'Official Government Audit Portal • Strictly for Authorized Administrative & Audit Personnel Only • Confidential Audit Records',
+          onLogout: () => {
+            sessionStorage.removeItem('setu_auth_token');
+            sessionStorage.removeItem('setu_auth_role');
+            currentLoginRole = null;
+            window.location.hash = '#/';
+          }
+        });
+      } else {
+        // Root route: Render Public Landing Page
+        currentLoginRole = null;
+        appEl.innerHTML = getLandingHtml();
+      }
+    }
+
+    window.addEventListener('hashchange', renderRoute);
+    renderRoute();
+  </script>
+</body>
+</html>

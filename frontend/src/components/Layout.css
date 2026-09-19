@@ -1,0 +1,252 @@
+@import '../theme/tokens.css';
+
+/* ==========================================================================
+   SETU Layout Shell
+   Strictly adheres to tokens in /frontend/src/theme/tokens.css
+   Aesthetic: Information-dense, institutional government audit portal
+   ========================================================================== */
+
+* {
+  box-sizing: border-box;
+  margin: var(--setu-space-0);
+  padding: var(--setu-space-0);
+}
+
+body, html {
+  height: 100%;
+  font-family: var(--setu-font-sans);
+  font-size: var(--setu-font-size-body);
+  line-height: var(--setu-line-height-body);
+  color: var(--setu-color-text-primary);
+  background-color: var(--setu-color-bg-base);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* App Shell Container */
+.setu-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--setu-color-bg-base);
+}
+
+/* ==========================================================================
+   Header: Navy institutional background, logo on left, role & logout on right
+   ========================================================================== */
+.setu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--setu-space-12);
+  padding-left: var(--setu-space-5);
+  padding-right: var(--setu-space-5);
+  background-color: var(--setu-color-primary-base);
+  color: var(--setu-color-primary-text);
+  border-bottom: 1px solid var(--setu-color-primary-dark);
+  flex-shrink: 0;
+}
+
+.setu-header-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--setu-space-3);
+}
+
+.setu-brand-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--setu-space-8);
+  height: var(--setu-space-8);
+  background-color: var(--setu-color-primary-dark);
+  border: 1px solid var(--setu-color-primary-light);
+  border-radius: var(--setu-radius-sm);
+  font-weight: var(--setu-font-weight-bold);
+  font-size: var(--setu-font-size-small);
+  letter-spacing: 0.05em;
+  color: var(--setu-color-primary-text);
+}
+
+.setu-brand-title {
+  font-size: var(--setu-font-size-heading);
+  font-weight: var(--setu-font-weight-bold);
+  letter-spacing: -0.01em;
+  color: var(--setu-color-primary-text);
+}
+
+.setu-brand-subtitle {
+  font-size: var(--setu-font-size-caption);
+  font-weight: var(--setu-font-weight-regular);
+  color: var(--setu-color-neutral-300);
+  border-left: 1px solid var(--setu-color-primary-light);
+  padding-left: var(--setu-space-3);
+  margin-left: var(--setu-space-1);
+}
+
+.setu-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--setu-space-4);
+}
+
+.setu-role-badge {
+  display: inline-flex;
+  align-items: center;
+  padding-top: var(--setu-space-1);
+  padding-bottom: var(--setu-space-1);
+  padding-left: var(--setu-space-2);
+  padding-right: var(--setu-space-2);
+  background-color: var(--setu-color-primary-dark);
+  border: 1px solid var(--setu-color-primary-light);
+  border-radius: var(--setu-radius-xs);
+  font-size: var(--setu-font-size-caption);
+  font-weight: var(--setu-font-weight-medium);
+  color: var(--setu-color-neutral-200);
+}
+
+.setu-role-label {
+  color: var(--setu-color-neutral-400);
+  margin-right: var(--setu-space-1);
+}
+
+.setu-role-name {
+  color: var(--setu-color-primary-text);
+  font-weight: var(--setu-font-weight-semibold);
+}
+
+.setu-logout-btn {
+  background: transparent;
+  border: 1px solid var(--setu-color-primary-light);
+  border-radius: var(--setu-radius-sm);
+  color: var(--setu-color-primary-text);
+  font-family: inherit;
+  font-size: var(--setu-font-size-small);
+  font-weight: var(--setu-font-weight-medium);
+  padding-top: var(--setu-space-1);
+  padding-bottom: var(--setu-space-1);
+  padding-left: var(--setu-space-3);
+  padding-right: var(--setu-space-3);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.setu-logout-btn:hover {
+  background-color: var(--setu-color-primary-light);
+}
+
+/* ==========================================================================
+   Middle Workspace: Sidebar + Main Content Area
+   ========================================================================== */
+.setu-workspace {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Sidebar: Plain text links, light background, thin right border */
+.setu-sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  background-color: var(--setu-color-bg-subtle);
+  border-right: 1px solid var(--setu-color-border-default);
+  display: flex;
+  flex-direction: column;
+  padding-top: var(--setu-space-3);
+  padding-bottom: var(--setu-space-3);
+  overflow-y: auto;
+}
+
+.setu-nav-group-title {
+  font-size: var(--setu-font-size-caption);
+  font-weight: var(--setu-font-weight-bold);
+  color: var(--setu-color-neutral-700);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding-left: var(--setu-space-4);
+  padding-right: var(--setu-space-4);
+  padding-top: var(--setu-space-2);
+  padding-bottom: var(--setu-space-1);
+}
+
+.setu-nav-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.setu-nav-item {
+  width: 100%;
+}
+
+.setu-nav-link {
+  display: block;
+  padding-top: var(--setu-space-1);
+  padding-bottom: var(--setu-space-1);
+  padding-left: var(--setu-space-4);
+  padding-right: var(--setu-space-4);
+  color: var(--setu-color-neutral-900);
+  text-decoration: none;
+  font-size: var(--setu-font-size-subheading);
+  line-height: var(--setu-line-height-subheading);
+  font-weight: var(--setu-font-weight-medium);
+  border-left: 4px solid transparent;
+}
+
+.setu-nav-link:hover {
+  background-color: var(--setu-color-neutral-100);
+  color: var(--setu-color-primary-base);
+}
+
+.setu-nav-link.active {
+  background-color: var(--setu-color-primary-surface);
+  color: var(--setu-color-primary-base);
+  font-weight: var(--setu-font-weight-bold);
+  border-left: 4px solid var(--setu-color-primary-base);
+}
+
+/* ==========================================================================
+   Main Content Area: White background, adequate padding for dense content
+   ========================================================================== */
+.setu-main {
+  flex: 1;
+  background-color: var(--setu-color-bg-base);
+  padding: var(--setu-space-6);
+  overflow-y: auto;
+}
+
+.setu-content-placeholder-container {
+  border: 1px dashed var(--setu-color-border-strong);
+  border-radius: var(--setu-radius-sm);
+  background-color: var(--setu-color-bg-subtle);
+  padding: var(--setu-space-8);
+  text-align: center;
+}
+
+.setu-content-placeholder-text {
+  font-size: var(--setu-font-size-subheading);
+  font-weight: var(--setu-font-weight-medium);
+  color: var(--setu-color-text-muted);
+}
+
+/* ==========================================================================
+   Footer: Minimal, single line, government-style disclaimer placeholder
+   ========================================================================== */
+.setu-footer {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: var(--setu-space-2);
+  padding-bottom: var(--setu-space-2);
+  padding-left: var(--setu-space-4);
+  padding-right: var(--setu-space-4);
+  background-color: var(--setu-color-bg-subtle);
+  border-top: 1px solid var(--setu-color-border-default);
+}
+
+.setu-footer-text {
+  font-size: var(--setu-font-size-caption);
+  line-height: var(--setu-line-height-caption);
+  color: var(--setu-color-text-muted);
+  text-align: center;
+}

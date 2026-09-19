@@ -1,0 +1,234 @@
+@import '../theme/tokens.css';
+
+/* ==========================================================================
+   SETU Public Landing Page Styles
+   Strictly utilizes design tokens from /frontend/src/theme/tokens.css
+   Style: Dense, functional government e-filing portal (high information density)
+   ========================================================================== */
+
+.setu-landing {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--setu-color-bg-base);
+  color: var(--setu-color-text-primary);
+  font-family: var(--setu-font-sans);
+}
+
+/* Institutional Masthead Row */
+.setu-masthead {
+  background-color: var(--setu-color-primary-dark);
+  color: var(--setu-color-neutral-300);
+  padding: var(--setu-space-1) var(--setu-space-6);
+  font-size: var(--setu-font-size-caption);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: var(--setu-font-weight-medium);
+  border-bottom: 1px solid var(--setu-color-primary-light);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.setu-masthead-gov {
+  font-weight: var(--setu-font-weight-bold);
+  color: var(--setu-color-neutral-200);
+}
+
+.setu-masthead-locale {
+  color: var(--setu-color-neutral-400);
+}
+
+/* Header Branding Row */
+.setu-landing-header {
+  background-color: var(--setu-color-primary-base);
+  color: var(--setu-color-primary-text);
+  padding: var(--setu-space-3) var(--setu-space-6);
+  border-bottom: 1px solid var(--setu-color-primary-dark);
+}
+
+.setu-landing-header-inner {
+  max-width: 960px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--setu-space-3);
+}
+
+.setu-landing-logo-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--setu-space-7, 28px);
+  height: var(--setu-space-7, 28px);
+  background-color: var(--setu-color-primary-dark);
+  border: 1px solid var(--setu-color-primary-light);
+  border-radius: var(--setu-radius-sm);
+  font-weight: var(--setu-font-weight-bold);
+  font-size: var(--setu-font-size-small);
+  color: var(--setu-color-primary-text);
+}
+
+.setu-landing-title {
+  font-size: var(--setu-font-size-heading);
+  font-weight: var(--setu-font-weight-bold);
+  letter-spacing: -0.01em;
+  color: var(--setu-color-primary-text);
+}
+
+.setu-landing-tagline {
+  font-size: var(--setu-font-size-small);
+  color: var(--setu-color-neutral-200);
+  border-left: 1px solid var(--setu-color-primary-light);
+  padding-left: var(--setu-space-3);
+  margin-left: var(--setu-space-1);
+}
+
+/* Main Body Area: Compact padding and tight flow */
+.setu-landing-main {
+  flex: 1;
+  max-width: 960px;
+  width: 100%;
+  margin: 0 auto;
+  padding: var(--setu-space-5) var(--setu-space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--setu-space-5);
+}
+
+/* Hero Section: Dense 13-14px description with 1.4 line-height */
+.setu-hero {
+  border-bottom: 1px solid var(--setu-color-border-default);
+  padding-bottom: var(--setu-space-4);
+}
+
+.setu-hero-headline {
+  font-size: var(--setu-font-size-heading);
+  font-weight: var(--setu-font-weight-bold);
+  color: var(--setu-color-text-primary);
+  line-height: var(--setu-line-height-heading);
+  margin-bottom: var(--setu-space-1);
+}
+
+.setu-hero-sentence {
+  font-size: var(--setu-font-size-body);
+  color: var(--setu-color-text-secondary);
+  line-height: 1.4;
+  max-width: 820px;
+}
+
+/* Two Visually Distinct Entry Points: Tight padding and compact buttons */
+.setu-portals {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--setu-space-4);
+}
+
+.setu-portal-card {
+  background-color: var(--setu-color-bg-base);
+  border: 1px solid var(--setu-color-border-strong);
+  border-radius: var(--setu-radius-sm);
+  padding: var(--setu-space-4);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--setu-space-3);
+}
+
+.setu-portal-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--setu-space-1);
+}
+
+.setu-portal-tag {
+  font-size: var(--setu-font-size-caption);
+  font-weight: var(--setu-font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.setu-portal-tag-official {
+  color: var(--setu-color-primary-base);
+}
+
+.setu-portal-tag-citizen {
+  color: var(--setu-color-neutral-700);
+}
+
+.setu-portal-title {
+  font-size: var(--setu-font-size-subheading);
+  font-weight: var(--setu-font-weight-bold);
+  color: var(--setu-color-text-primary);
+  margin: var(--setu-space-0);
+}
+
+.setu-portal-desc {
+  font-size: var(--setu-font-size-body);
+  color: var(--setu-color-text-secondary);
+  line-height: 1.4;
+  margin: var(--setu-space-0);
+}
+
+.setu-portal-meta {
+  font-size: var(--setu-font-size-caption);
+  color: var(--setu-color-text-muted);
+  border-top: 1px solid var(--setu-color-border-subtle);
+  padding-top: var(--setu-space-1);
+  line-height: 1.35;
+}
+
+/* Compact Government-Style Buttons (not tall SaaS buttons) */
+.setu-btn-primary {
+  display: inline-block;
+  background-color: var(--setu-color-primary-base);
+  color: var(--setu-color-primary-text);
+  padding: var(--setu-space-1) var(--setu-space-4);
+  border: 1px solid var(--setu-color-primary-dark);
+  border-radius: var(--setu-radius-sm);
+  font-size: var(--setu-font-size-small);
+  line-height: 1.4;
+  font-weight: var(--setu-font-weight-semibold);
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  align-self: flex-start;
+}
+
+.setu-btn-primary:hover {
+  background-color: var(--setu-color-primary-light);
+}
+
+.setu-btn-secondary {
+  display: inline-block;
+  background-color: var(--setu-color-bg-base);
+  color: var(--setu-color-primary-base);
+  padding: var(--setu-space-1) var(--setu-space-4);
+  border: 1px solid var(--setu-color-primary-base);
+  border-radius: var(--setu-radius-sm);
+  font-size: var(--setu-font-size-small);
+  line-height: 1.4;
+  font-weight: var(--setu-font-weight-semibold);
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  align-self: flex-start;
+}
+
+.setu-btn-secondary:hover {
+  background-color: var(--setu-color-primary-surface);
+}
+
+/* Minimal Footer */
+.setu-landing-footer {
+  background-color: var(--setu-color-bg-subtle);
+  border-top: 1px solid var(--setu-color-border-default);
+  padding: var(--setu-space-2) var(--setu-space-6);
+  text-align: center;
+}
+
+.setu-landing-footer-text {
+  font-size: var(--setu-font-size-caption);
+  line-height: var(--setu-line-height-caption);
+  color: var(--setu-color-text-muted);
+}

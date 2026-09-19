@@ -1,0 +1,181 @@
+@import '../theme/tokens.css';
+
+/* ==========================================================================
+   SETU Dashboard Styles
+   Uses ONLY design tokens from /frontend/src/theme/tokens.css
+   ========================================================================== */
+
+.setu-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--setu-space-6);
+}
+
+/* Page Header */
+.setu-page-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--setu-space-1);
+}
+
+.setu-page-title {
+  font-size: var(--setu-font-size-heading);
+  font-weight: var(--setu-font-weight-bold);
+  color: var(--setu-color-text-primary);
+  margin: var(--setu-space-0);
+}
+
+.setu-page-desc {
+  font-size: var(--setu-font-size-small);
+  color: var(--setu-color-text-secondary);
+  margin: var(--setu-space-0);
+}
+
+/* Top Stat Cards Grid */
+.setu-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--setu-space-4);
+}
+
+.setu-card {
+  background-color: var(--setu-color-bg-base);
+  border: 1px solid var(--setu-color-border-default);
+  border-radius: var(--setu-radius-sm);
+  padding: var(--setu-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--setu-space-1);
+}
+
+.setu-card-label {
+  font-size: var(--setu-font-size-caption);
+  font-weight: var(--setu-font-weight-bold);
+  color: var(--setu-color-neutral-600);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.setu-card-value {
+  font-size: var(--setu-font-size-heading);
+  font-family: var(--setu-font-mono);
+  font-weight: var(--setu-font-weight-bold);
+  color: var(--setu-color-text-primary);
+  line-height: var(--setu-line-height-heading);
+}
+
+.setu-card-value-accent {
+  color: var(--setu-color-accent-dark);
+}
+
+.setu-card-meta {
+  font-size: var(--setu-font-size-caption);
+  color: var(--setu-color-text-muted);
+}
+
+/* Projects Table Section */
+.setu-table-card {
+  background-color: var(--setu-color-bg-base);
+  border: 1px solid var(--setu-color-border-default);
+  border-radius: var(--setu-radius-sm);
+  overflow: hidden;
+}
+
+.setu-table-card-header {
+  padding: var(--setu-space-3) var(--setu-space-4);
+  background-color: var(--setu-color-bg-subtle);
+  border-bottom: 1px solid var(--setu-color-border-default);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.setu-table-title {
+  font-size: var(--setu-font-size-subheading);
+  font-weight: var(--setu-font-weight-bold);
+  color: var(--setu-color-text-primary);
+  margin: var(--setu-space-0);
+}
+
+.setu-table-subtitle {
+  font-size: var(--setu-font-size-caption);
+  color: var(--setu-color-text-muted);
+}
+
+.setu-table-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.setu-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.setu-table th {
+  background-color: var(--setu-color-bg-subtle);
+  color: var(--setu-color-neutral-700);
+  font-size: var(--setu-font-size-caption);
+  font-weight: var(--setu-font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: var(--setu-space-2) var(--setu-space-4);
+  border-bottom: 1px solid var(--setu-color-border-strong);
+  white-space: nowrap;
+}
+
+.setu-table td {
+  padding: var(--setu-space-2) var(--setu-space-4);
+  border-bottom: 1px solid var(--setu-color-border-subtle);
+  font-size: var(--setu-font-size-body);
+  color: var(--setu-color-text-primary);
+  vertical-align: middle;
+}
+
+.setu-table tr:hover td {
+  background-color: var(--setu-color-neutral-50);
+}
+
+.setu-project-id {
+  font-family: var(--setu-font-mono);
+  font-size: var(--setu-font-size-caption);
+  color: var(--setu-color-text-secondary);
+}
+
+.setu-project-name {
+  font-weight: var(--setu-font-weight-semibold);
+  color: var(--setu-color-text-primary);
+}
+
+.setu-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--setu-space-1);
+  padding: var(--setu-space-0) var(--setu-space-2);
+  border-radius: var(--setu-radius-xs);
+  font-size: var(--setu-font-size-caption);
+  font-family: var(--setu-font-mono);
+  font-weight: var(--setu-font-weight-medium);
+  white-space: nowrap;
+}
+
+/* Accent badge: ONLY for High Risk */
+.setu-badge-risk-high {
+  background-color: var(--setu-color-accent-light);
+  color: var(--setu-color-accent-dark);
+  border: 1px solid var(--setu-color-accent-border);
+  font-weight: var(--setu-font-weight-bold);
+}
+
+/* Neutral badge: for Low and Medium Risk */
+.setu-badge-risk-neutral {
+  background-color: var(--setu-color-neutral-100);
+  color: var(--setu-color-neutral-800);
+  border: 1px solid var(--setu-color-neutral-300);
+}
+
+.setu-status-tag {
+  font-size: var(--setu-font-size-small);
+  color: var(--setu-color-text-secondary);
+}
