@@ -1,0 +1,535 @@
+@import '../theme/tokens.css';
+
+/* ==========================================================================
+   SETU Project Detail Page Styles
+   Uses ONLY design tokens from /frontend/src/theme/tokens.css
+   Dense, authoritative, institutional government portal layout
+   ========================================================================== */
+
+.setu-detail-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--setu-space-5);
+}
+
+/* Header & Breadcrumb */
+.setu-detail-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--setu-color-border-default);
+  padding-bottom: var(--setu-space-3);
+}
+
+.setu-back-to-dashboard {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--setu-space-2);
+  font-size: var(--setu-font-size-small);
+  font-weight: var(--setu-font-weight-semibold);
+  color: var(--setu-color-primary-base);
+  text-decoration: none;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.setu-back-to-dashboard:hover {
+  text-decoration: underline;
+  color: var(--setu-color-primary-light);
+}
+
+.setu-detail-header-card {
+  background-color: var(--setu-color-bg-base);
+  border: 1px solid var(--setu-color-border-default);
+  border-radius: var(--setu-radius-sm);
+  padding: var(--setu-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--setu-space-2);
+}
+
+.setu-detail-meta-row {
+  display: flex;
+  align-items: center;
+  gap: var(--setu-space-3);
+  flex-wrap: wrap;
+}
+
+.setu-detail-title {
+  font-size: var(--setu-font-size-heading);
+  font-weight: var(--setu-font-weight-bold);
+  color: var(--setu-color-text-primary);
+  margin: 0;
+  line-height: var(--setu-line-height-heading);
+}
+
+.setu-detail-id-tag {
+  font-family: var(--setu-font-mono);
+  font-size: var(--setu-font-size-small);
+  color: var(--setu-color-neutral-600);
+  background-color: var(--setu-color-neutral-100);
+  padding: 2px var(--setu-space-2);
+  border-radius: var(--setu-radius-sm);
+  border: 1px solid var(--setu-color-border-default);
+}
+
+/* Tab Navigation Strip (Horizontal, non-accordion) */
+.setu-tab-nav {
+  display: flex;
+  border-bottom: 1px solid var(--setu-color-border-strong);
+  background-color: var(--setu-color-bg-subtle);
+  border-radius: var(--setu-radius-sm) var(--setu-radius-sm) 0 0;
+  overflow-x: auto;
+}
+
+.setu-tab-btn {
+  padding: var(--setu-space-3) var(--setu-space-5);
+  font-family: var(--setu-font-sans);
+  font-size: var(--setu-font-size-body);
+  font-weight: var(--setu-font-weight-semibold);
+  color: var(--setu-color-neutral-600);
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--setu-space-2);
+  white-space: nowrap;
+  transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.setu-tab-btn:hover {
+  color: var(--setu-color-primary-base);
+  background-color: var(--setu-color-neutral-200);
+}
+
+.setu-tab-btn.active {
+  color: var(--setu-color-primary-base);
+  border-bottom-color: var(--setu-color-primary-base);
+  background-color: var(--setu-color-bg-base);
+}
+
+.setu-tab-badge {
+  font-size: var(--setu-font-size-caption);
+  font-family: var(--setu-font-mono);
+  padding: 1px 6px;
+  border-radius: 10px;
+  background-color: var(--setu-color-neutral-300);
+  color: var(--setu-color-text-primary);
+}
+
+.setu-tab-badge-alert {
+  background-color: var(--setu-color-accent-border);
+  color: var(--setu-color-accent-dark);
+  font-weight: var(--setu-font-weight-bold);
+}
+
+/* Tab Content Panel */
+.setu-tab-panel {
+  background-color: var(--setu-color-bg-base);
+  border: 1px solid var(--setu-color-border-default);
+  border-top: none;
+  border-radius: 0 0 var(--setu-radius-sm) var(--setu-radius-sm);
+  padding: var(--setu-space-5);
+}
+
+/* Data Tables & Grids */
+.setu-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--setu-space-4);
+}
+
+.setu-info-card {
+  border: 1px solid var(--setu-color-border-default);
+  border-radius: var(--setu-radius-sm);
+  padding: var(--setu-space-4);
+  background-color: var(--setu-color-bg-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: var(--setu-space-3);
+}
+
+.setu-info-card-title {
+  font-size: var(--setu-font-size-caption);
+  font-weight: var(--setu-font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--setu-color-neutral-600);
+  border-bottom: 1px solid var(--setu-color-border-default);
+  padding-bottom: var(--setu-space-2);
+  margin: 0;
+}
+
+.setu-kv-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--setu-space-2);
+}
+
+.setu-kv-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: var(--setu-font-size-small);
+  border-bottom: 1px dashed var(--setu-color-border-subtle);
+  padding-bottom: 4px;
+}
+
+.setu-kv-label {
+  color: var(--setu-color-text-secondary);
+  font-weight: var(--setu-font-weight-medium);
+}
+
+.setu-kv-value {
+  color: var(--setu-color-text-primary);
+  font-weight: var(--setu-font-weight-semibold);
+  text-align: right;
+}
+
+/* Progress bar */
+.setu-progress-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--setu-space-1);
+}
+
+.setu-progress-track {
+  width: 100%;
+  height: 8px;
+  background-color: var(--setu-color-neutral-200);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.setu-progress-bar {
+  height: 100%;
+  background-color: var(--setu-color-primary-base);
+  border-radius: 4px;
+}
+
+.setu-progress-bar-high {
+  background-color: var(--setu-color-accent-base);
+}
+
+/* Financial Stat Metric Callouts */
+.setu-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--setu-space-4);
+  margin-bottom: var(--setu-space-5);
+}
+
+.setu-metric-box {
+  background-color: var(--setu-color-bg-base);
+  border: 1px solid var(--setu-color-border-default);
+  border-left: 3px solid var(--setu-color-primary-base);
+  border-radius: var(--setu-radius-sm);
+  padding: var(--setu-space-3) var(--setu-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.setu-metric-box-alert {
+  border-left-color: var(--setu-color-accent-base);
+}
+
+.setu-metric-label {
+  font-size: var(--setu-font-size-caption);
+  color: var(--setu-color-neutral-600);
+  font-weight: var(--setu-font-weight-bold);
+  text-transform: uppercase;
+}
+
+.setu-metric-value {
+  font-family: var(--setu-font-mono);
+  font-size: var(--setu-font-size-heading);
+  font-weight: var(--setu-font-weight-bold);
+  color: var(--setu-color-text-primary);
+}
+
+.setu-metric-meta {
+  font-size: var(--setu-font-size-caption);
+  color: var(--setu-color-text-muted);
+}
+
+/* Alert / Flag Cards */
+.setu-flag-card {
+  border: 1px solid var(--setu-color-accent-border);
+  background-color: var(--setu-color-accent-light);
+  border-radius: var(--setu-radius-sm);
+  padding: var(--setu-space-4);
+  margin-bottom: var(--setu-space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--setu-space-2);
+}
+
+.setu-flag-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.setu-flag-title {
+  font-size: var(--setu-font-size-subheading);
+  font-weight: var(--setu-font-weight-bold);
+  color: var(--setu-color-accent-dark);
+  margin: 0;
+}
+
+.setu-flag-desc {
+  font-size: var(--setu-font-size-small);
+  color: var(--setu-color-text-primary);
+  margin: 0;
+  line-height: var(--setu-line-height-body);
+}
+
+/* Empty State Box */
+.setu-empty-state {
+  padding: var(--setu-space-6) var(--setu-space-4);
+  text-align: center;
+  border: 1px dashed var(--setu-color-border-strong);
+  border-radius: var(--setu-radius-sm);
+  background-color: var(--setu-color-bg-subtle);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--setu-space-2);
+}
+
+.setu-empty-state-title {
+  font-size: var(--setu-font-size-subheading);
+  font-weight: var(--setu-font-weight-bold);
+  color: var(--setu-color-text-primary);
+  margin: 0;
+}
+
+.setu-empty-state-text {
+  font-size: var(--setu-font-size-small);
+  color: var(--setu-color-text-muted);
+  max-width: 520px;
+  margin: 0;
+}
+
+/* Timeline (Audit Trail) */
+.setu-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: var(--setu-space-3);
+  position: relative;
+  padding-left: var(--setu-space-5);
+}
+
+.setu-timeline::before {
+  content: '';
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  left: 6px;
+  width: 2px;
+  background-color: var(--setu-color-neutral-300);
+}
+
+.setu-timeline-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.setu-timeline-dot {
+  position: absolute;
+  left: -23px;
+  top: 4px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--setu-color-primary-base);
+  border: 2px solid var(--setu-color-bg-base);
+}
+
+.setu-timeline-dot-flagged {
+  background-color: var(--setu-color-accent-base);
+}
+
+.setu-timeline-date {
+  font-family: var(--setu-font-mono);
+  font-size: var(--setu-font-size-caption);
+  color: var(--setu-color-text-muted);
+}
+
+.setu-timeline-action {
+  font-size: var(--setu-font-size-body);
+  font-weight: var(--setu-font-weight-semibold);
+  color: var(--setu-color-text-primary);
+}
+
+.setu-timeline-actor {
+  font-size: var(--setu-font-size-small);
+  color: var(--setu-color-text-secondary);
+}
+
+/* ==========================================================================
+   Citizen Ground Truth & Contradiction Badges
+   ========================================================================== */
+.setu-badge-contradiction-high {
+  background-color: var(--setu-color-accent-light);
+  color: var(--setu-color-accent-dark);
+  border: 1px solid var(--setu-color-accent-border);
+  font-weight: var(--setu-font-weight-bold);
+}
+
+.setu-badge-contradiction-med {
+  background-color: #FFFBEB;
+  color: #92400E;
+  border: 1px solid #FDE68A;
+  font-weight: var(--setu-font-weight-semibold);
+}
+
+.setu-badge-contradiction-low {
+  background-color: var(--setu-color-primary-light);
+  color: var(--setu-color-primary-base);
+  border: 1px solid var(--setu-color-border-strong);
+  font-weight: var(--setu-font-weight-medium);
+}
+
+.setu-complaint-card {
+  background-color: var(--setu-color-bg-base);
+  border: 1px solid var(--setu-color-border-default);
+  border-radius: var(--setu-radius-sm);
+  padding: var(--setu-space-4);
+  margin-bottom: var(--setu-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--setu-space-3);
+  position: relative;
+}
+
+.setu-complaint-card-contradiction {
+  border-left: 4px solid var(--setu-color-accent-base);
+  background-color: #FDFAF9;
+}
+
+.setu-complaint-card-corroborated {
+  border-left: 4px solid var(--setu-color-primary-base);
+}
+
+.setu-complaint-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--setu-color-border-subtle);
+  padding-bottom: var(--setu-space-2);
+  flex-wrap: wrap;
+  gap: var(--setu-space-2);
+}
+
+.setu-complaint-text-box {
+  display: flex;
+  flex-direction: column;
+  gap: var(--setu-space-1);
+}
+
+.setu-complaint-label {
+  font-size: var(--setu-font-size-caption);
+  font-weight: var(--setu-font-weight-bold);
+  color: var(--setu-color-neutral-700);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.setu-complaint-text {
+  font-size: var(--setu-font-size-body);
+  color: var(--setu-color-text-primary);
+  line-height: 1.5;
+  margin: 0;
+  font-style: italic;
+  background-color: var(--setu-color-bg-subtle);
+  padding: var(--setu-space-3);
+  border-radius: var(--setu-radius-xs);
+  border-left: 3px solid var(--setu-color-neutral-400);
+}
+
+.setu-claim-box {
+  background-color: #F8FAFC;
+  border: 1px solid var(--setu-color-border-default);
+  border-radius: var(--setu-radius-xs);
+  padding: var(--setu-space-2) var(--setu-space-3);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.setu-claim-label {
+  font-size: var(--setu-font-size-caption);
+  font-weight: var(--setu-font-weight-bold);
+  color: var(--setu-color-primary-base);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.setu-claim-text {
+  font-size: var(--setu-font-size-small);
+  color: var(--setu-color-text-secondary);
+  line-height: 1.4;
+}
+
+.setu-explanation-box {
+  background-color: var(--setu-color-accent-light);
+  border: 1px solid var(--setu-color-accent-border);
+  border-radius: var(--setu-radius-xs);
+  padding: var(--setu-space-2) var(--setu-space-3);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.setu-explanation-label {
+  font-size: var(--setu-font-size-caption);
+  font-weight: var(--setu-font-weight-bold);
+  color: var(--setu-color-accent-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  display: flex;
+  align-items: center;
+  gap: var(--setu-space-1);
+}
+
+.setu-explanation-text {
+  font-size: var(--setu-font-size-small);
+  color: var(--setu-color-text-primary);
+  line-height: 1.45;
+  font-weight: var(--setu-font-weight-medium);
+}
+
+/* Geo-Match Distance Badges */
+.setu-geo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--setu-font-size-caption);
+  font-family: var(--setu-font-sans);
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.setu-geo-near {
+  background-color: #F0FDF4;
+  color: #166534;
+  border: 1px solid #BBF7D0;
+  font-weight: var(--setu-font-weight-semibold);
+}
+
+.setu-geo-far {
+  background-color: var(--setu-color-accent-light);
+  color: var(--setu-color-accent-dark);
+  border: 1px solid var(--setu-color-accent-border);
+  font-weight: var(--setu-font-weight-bold);
+}
+
+

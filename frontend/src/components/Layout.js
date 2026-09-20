@@ -11,7 +11,7 @@
  */
 
 import tokens from '../theme/tokens.js';
-import { getDashboardHtml } from '../pages/dashboardData.js';
+import { getDashboardHtml, getAlertsViewHtml } from '../pages/dashboardData.js';
 
 /**
  * Generates the HTML string for the SETU Layout Shell.
@@ -25,6 +25,24 @@ import { getDashboardHtml } from '../pages/dashboardData.js';
  * @param {string} [options.disclaimer] Government disclaimer text
  * @returns {string} HTML string of layout shell
  */
+/**
+ * Role-Based Sidebar Navigation Visibility Matrix (per ROLES.md)
+ */
+export const ROLE_NAV_PERMISSIONS = {
+  'Central Nodal Agency (MoSPI)': ['projects', 'risk', 'compliance', 'duplicates', 'citizen-reports', 'audit-trail', 'alerts'],
+  'mospi_officer': ['projects', 'risk', 'compliance', 'duplicates', 'citizen-reports', 'audit-trail', 'alerts'],
+  'Auditor / CAG': ['projects', 'risk', 'compliance', 'duplicates', 'citizen-reports', 'audit-trail', 'alerts'],
+  'auditor_cag': ['projects', 'risk', 'compliance', 'duplicates', 'citizen-reports', 'audit-trail', 'alerts'],
+  'State Nodal Authority': ['projects', 'risk', 'compliance', 'duplicates', 'citizen-reports', 'audit-trail', 'alerts'],
+  'state_nodal': ['projects', 'risk', 'compliance', 'duplicates', 'citizen-reports', 'audit-trail', 'alerts'],
+  'District Authority': ['projects', 'risk', 'compliance', 'citizen-reports', 'audit-trail', 'alerts'],
+  'district_authority': ['projects', 'risk', 'compliance', 'citizen-reports', 'audit-trail', 'alerts'],
+  'Implementing Agency': ['projects', 'compliance', 'audit-trail'],
+  'implementing_agency': ['projects', 'compliance', 'audit-trail'],
+  'MP Office': ['projects', 'citizen-reports', 'alerts'],
+  'mp_office': ['projects', 'citizen-reports', 'alerts'],
+};
+
 export function getLayoutHtml({
   projectName = 'SETU',
   subtitle = 'Audit & Monitoring Platform',
@@ -41,7 +59,25 @@ export function getLayoutHtml({
   content = getDashboardHtml(),
   disclaimer = 'Official Government Audit Portal • Strictly for Authorized Personnel Only • Governed under MoSPI & CAG Audit Oversight Guidelines',
 } = {}) {
-  const navHtml = navItems
+  // Resolve allowed nav items for this role per ROLES.md
+  const roleKey = role ? role.trim() : 'District Authority';
+  const allowedNavIds = ROLE_NAV_PERMISSIONS[roleKey] || (
+    roleKey.toLowerCase().includes('mospi') || roleKey.toLowerCase().includes('auditor') || roleKey.toLowerCase().includes('cag')
+      ? ['projects', 'risk', 'compliance', 'duplicates', 'citizen-reports', 'audit-trail', 'alerts']
+      : roleKey.toLowerCase().includes('state')
+      ? ['projects', 'risk', 'compliance', 'duplicates', 'citizen-reports', 'audit-trail', 'alerts']
+      : roleKey.toLowerCase().includes('district')
+      ? ['projects', 'risk', 'compliance', 'citizen-reports', 'audit-trail', 'alerts']
+      : roleKey.toLowerCase().includes('implementing')
+      ? ['projects', 'compliance', 'audit-trail']
+      : roleKey.toLowerCase().includes('mp')
+      ? ['projects', 'citizen-reports', 'alerts']
+      : ['projects', 'risk', 'compliance', 'duplicates', 'citizen-reports', 'audit-trail', 'alerts']
+  );
+
+  const filteredNavItems = navItems.filter((item) => allowedNavIds.includes(item.id));
+
+  const navHtml = filteredNavItems
     .map(
       (item) => `
       <li class="setu-nav-item">
@@ -121,6 +157,16 @@ export function mountLayout(mountEl, options = {}) {
       if (mainContentEl) {
         if (navId === 'projects') {
           mainContentEl.innerHTML = getDashboardHtml();
+        } else if (navId === 'alerts') {
+          window.setuSetAlertFilter = (filter) => {
+            mainContentEl.innerHTML = getAlertsViewHtml(filter);
+          };
+          mainContentEl.innerHTML = getAlertsViewHtml('ALL');
+        } else if (navId === 'citizen-reports') {
+          window.setuSetAlertFilter = (filter) => {
+            mainContentEl.innerHTML = getAlertsViewHtml(filter);
+          };
+          mainContentEl.innerHTML = getAlertsViewHtml('CITIZEN_CONTRADICTION');
         } else {
           mainContentEl.innerHTML = `
             <div class="setu-content-placeholder-container">

@@ -28,12 +28,30 @@ export function getLandingHtml() {
           <p class="setu-hero-sentence">
             An institutional monitoring and contradiction-detection platform designed to detect anomalies, flag compliance violations including fund-splitting patterns, and support accountability through independent citizen verification — across MPLADS infrastructure projects in India.
           </p>
+
+          <!-- Quiet Credibility Stats Strip -->
+          <div class="setu-stats-strip" aria-label="Scheme Monitoring Statistics">
+            <div class="setu-stat-item">
+              <span class="setu-stat-num">₹500 CR</span>
+              <span class="setu-stat-label">MONITORED</span>
+            </div>
+            <span class="setu-stat-divider" aria-hidden="true">·</span>
+            <div class="setu-stat-item">
+              <span class="setu-stat-num">1,200</span>
+              <span class="setu-stat-label">PROJECTS TRACKED</span>
+            </div>
+            <span class="setu-stat-divider" aria-hidden="true">·</span>
+            <div class="setu-stat-item">
+              <span class="setu-stat-num">28</span>
+              <span class="setu-stat-label">STATES COVERED</span>
+            </div>
+          </div>
         </section>
 
         <!-- Two Visually Distinct Entry Points -->
         <section class="setu-portals">
           <!-- 1. Official Login -->
-          <div class="setu-portal-card">
+          <div class="setu-portal-card setu-portal-card-official">
             <div class="setu-portal-header">
               <span class="setu-portal-tag setu-portal-tag-official">Administrative & Statutory Access</span>
               <h2 class="setu-portal-title">Official Portal</h2>
@@ -48,7 +66,7 @@ export function getLandingHtml() {
           </div>
 
           <!-- 2. Citizen Portal / Report an Issue -->
-          <div class="setu-portal-card">
+          <div class="setu-portal-card setu-portal-card-citizen">
             <div class="setu-portal-header">
               <span class="setu-portal-tag setu-portal-tag-citizen">Public Participation & Grievance</span>
               <h2 class="setu-portal-title">Citizen Portal</h2>

@@ -113,6 +113,19 @@
   text-align: left;
 }
 
+.setu-table tbody tr:hover {
+  background-color: var(--setu-color-neutral-100);
+}
+
+.setu-clickable-row {
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.setu-clickable-row:hover {
+  background-color: var(--setu-color-neutral-100);
+}
+
 .setu-table th {
   background-color: var(--setu-color-bg-subtle);
   color: var(--setu-color-neutral-700);
@@ -179,3 +192,244 @@
   font-size: var(--setu-font-size-small);
   color: var(--setu-color-text-secondary);
 }
+
+/* ==========================================================================
+   Alerts Feed & Card Components
+   Surfaces CITIZEN_CONTRADICTION alongside FINANCIAL_RISK, COMPLIANCE_VIOLATION,
+   DUPLICATE_WORK, and SEASONAL_ANOMALY.
+   ========================================================================== */
+
+.setu-alert-section {
+  background-color: var(--setu-color-bg-base);
+  border: 1px solid var(--setu-color-border-default);
+  border-radius: var(--setu-radius-sm);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.setu-alert-section-header {
+  padding: var(--setu-space-3) var(--setu-space-4);
+  background-color: var(--setu-color-bg-subtle);
+  border-bottom: 1px solid var(--setu-color-border-default);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--setu-space-2);
+}
+
+.setu-alert-filter-group {
+  display: flex;
+  gap: var(--setu-space-1);
+  flex-wrap: wrap;
+}
+
+.setu-filter-pill {
+  font-size: var(--setu-font-size-caption);
+  padding: 3px 8px;
+  border-radius: var(--setu-radius-xs);
+  border: 1px solid var(--setu-color-border-strong);
+  background: var(--setu-color-bg-base);
+  color: var(--setu-color-text-secondary);
+  cursor: pointer;
+  font-weight: var(--setu-font-weight-medium);
+}
+
+.setu-filter-pill.active {
+  background: var(--setu-color-primary-base);
+  color: #FFFFFF;
+  border-color: var(--setu-color-primary-base);
+}
+
+.setu-alert-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--setu-space-3);
+  padding: var(--setu-space-4);
+}
+
+.setu-alert-card {
+  background-color: var(--setu-color-bg-base);
+  border: 1px solid var(--setu-color-border-default);
+  border-radius: var(--setu-radius-sm);
+  padding: var(--setu-space-3) var(--setu-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--setu-space-2);
+  transition: border-color 0.15s ease;
+}
+
+.setu-alert-card:hover {
+  border-color: var(--setu-color-neutral-400);
+}
+
+.setu-alert-card-citizen {
+  border-left: 4px solid var(--setu-color-accent-base);
+  background-color: #FDFAF9;
+}
+
+.setu-alert-card-duplicate {
+  border-left: 4px solid #4338CA;
+}
+
+.setu-alert-card-financial {
+  border-left: 4px solid #B91C1C;
+}
+
+.setu-alert-card-compliance {
+  border-left: 4px solid #D97706;
+}
+
+.setu-alert-card-seasonal {
+  border-left: 4px solid #0F766E;
+}
+
+.setu-alert-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--setu-space-2);
+}
+
+.setu-alert-badges {
+  display: flex;
+  align-items: center;
+  gap: var(--setu-space-2);
+}
+
+/* Severity Badges */
+.setu-severity-critical {
+  background-color: #9B2C2C;
+  color: #FFFFFF;
+  font-size: var(--setu-font-size-caption);
+  font-weight: var(--setu-font-weight-bold);
+  padding: 1px 6px;
+  border-radius: var(--setu-radius-xs);
+  font-family: var(--setu-font-mono);
+}
+
+.setu-severity-high {
+  background-color: var(--setu-color-accent-base);
+  color: #FFFFFF;
+  font-size: var(--setu-font-size-caption);
+  font-weight: var(--setu-font-weight-bold);
+  padding: 1px 6px;
+  border-radius: var(--setu-radius-xs);
+  font-family: var(--setu-font-mono);
+}
+
+.setu-severity-warning {
+  background-color: #D97706;
+  color: #FFFFFF;
+  font-size: var(--setu-font-size-caption);
+  font-weight: var(--setu-font-weight-bold);
+  padding: 1px 6px;
+  border-radius: var(--setu-radius-xs);
+  font-family: var(--setu-font-mono);
+}
+
+.setu-severity-low {
+  background-color: #2563EB;
+  color: #FFFFFF;
+  font-size: var(--setu-font-size-caption);
+  font-weight: var(--setu-font-weight-medium);
+  padding: 1px 6px;
+  border-radius: var(--setu-radius-xs);
+  font-family: var(--setu-font-mono);
+}
+
+/* Alert Type Badges */
+.setu-type-badge {
+  font-size: var(--setu-font-size-caption);
+  font-weight: var(--setu-font-weight-semibold);
+  padding: 1px 8px;
+  border-radius: 10px;
+}
+
+.setu-type-citizen {
+  background-color: var(--setu-color-accent-light);
+  color: var(--setu-color-accent-dark);
+  border: 1px solid var(--setu-color-accent-border);
+}
+
+.setu-type-duplicate {
+  background-color: #EEF2FF;
+  color: #3730A3;
+  border: 1px solid #C7D2FE;
+}
+
+.setu-type-financial {
+  background-color: #FEF2F2;
+  color: #991B1B;
+  border: 1px solid #FECACA;
+}
+
+.setu-type-compliance {
+  background-color: #FFFBEB;
+  color: #92400E;
+  border: 1px solid #FDE68A;
+}
+
+.setu-type-seasonal {
+  background-color: #F0FDFA;
+  color: #0F766E;
+  border: 1px solid #99F6E4;
+}
+
+.setu-alert-title {
+  font-size: var(--setu-font-size-body);
+  font-weight: var(--setu-font-weight-bold);
+  color: var(--setu-color-text-primary);
+  margin: 0;
+}
+
+.setu-alert-project-ref {
+  font-size: var(--setu-font-size-small);
+  color: var(--setu-color-primary-base);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--setu-space-1);
+}
+
+.setu-alert-project-ref:hover {
+  text-decoration: underline;
+}
+
+.setu-alert-desc {
+  font-size: var(--setu-font-size-small);
+  color: var(--setu-color-text-primary);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.setu-alert-action-box {
+  background-color: var(--setu-color-bg-subtle);
+  border: 1px solid var(--setu-color-border-subtle);
+  border-radius: var(--setu-radius-xs);
+  padding: var(--setu-space-2) var(--setu-space-3);
+  font-size: var(--setu-font-size-caption);
+  color: var(--setu-color-text-secondary);
+  line-height: 1.4;
+}
+
+.setu-alert-action-box strong {
+  color: var(--setu-color-neutral-800);
+}
+
+.setu-alert-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid var(--setu-color-border-subtle);
+  padding-top: var(--setu-space-2);
+  margin-top: 2px;
+}
+
+.setu-alert-source {
+  font-size: var(--setu-font-size-caption);
+  color: var(--setu-color-text-muted);
+}
+

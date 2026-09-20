@@ -117,7 +117,45 @@
   max-width: 820px;
 }
 
-/* Two Visually Distinct Entry Points: Tight padding and compact buttons */
+/* Quiet Credibility Stats Strip */
+.setu-stats-strip {
+  display: flex;
+  align-items: center;
+  gap: var(--setu-space-3);
+  padding-top: var(--setu-space-2);
+  padding-bottom: var(--setu-space-1);
+  flex-wrap: wrap;
+}
+
+.setu-stat-item {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--setu-space-1);
+}
+
+.setu-stat-num {
+  font-family: var(--setu-font-mono);
+  font-size: var(--setu-font-size-small);
+  font-weight: var(--setu-font-weight-bold);
+  color: var(--setu-color-neutral-800);
+}
+
+.setu-stat-label {
+  font-size: var(--setu-font-size-caption);
+  font-weight: var(--setu-font-weight-medium);
+  letter-spacing: 0.05em;
+  color: var(--setu-color-neutral-600);
+  text-transform: uppercase;
+}
+
+.setu-stat-divider {
+  color: var(--setu-color-neutral-400);
+  font-size: var(--setu-font-size-small);
+  font-weight: var(--setu-font-weight-bold);
+  user-select: none;
+}
+
+/* Two Visually Distinct Entry Points: Elevated with top accent bars */
 .setu-portals {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -133,6 +171,14 @@
   flex-direction: column;
   justify-content: space-between;
   gap: var(--setu-space-3);
+}
+
+.setu-portal-card-official {
+  border-top: 3px solid var(--setu-color-primary-base);
+}
+
+.setu-portal-card-citizen {
+  border-top: 3px solid var(--setu-color-neutral-600);
 }
 
 .setu-portal-header {

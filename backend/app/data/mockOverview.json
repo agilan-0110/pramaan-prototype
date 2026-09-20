@@ -1,0 +1,364 @@
+{
+  "summary": {
+    "totalAllocated": 2250000000,
+    "totalAllocatedFormatted": "₹225.00 Cr",
+    "totalSanctionedAmount": 762300000,
+    "totalSanctionedAmountFormatted": "₹76.23 Cr",
+    "totalExpenditure": 531151999,
+    "totalExpenditureFormatted": "₹53.12 Cr",
+    "utilizationPercentage": 69.68,
+    "totalMonitoredMPs": 45,
+    "totalProjects": 90,
+    "totalHighRiskProjects": 34,
+    "totalActiveAlerts": 18
+  },
+  "workStatusDistribution": {
+    "In Progress": 28,
+    "Approved - Work Not Started": 9,
+    "Completed": 24,
+    "Delayed": 25,
+    "Under Scrutiny": 4
+  },
+  "sectorExpenditureDistribution": [
+    {
+      "category": "Water",
+      "sanctioned": 153700000,
+      "expenditure": 117229000,
+      "count": 18
+    },
+    {
+      "category": "Road",
+      "sanctioned": 150900000,
+      "expenditure": 116633000,
+      "count": 18
+    },
+    {
+      "category": "Health",
+      "sanctioned": 168100000,
+      "expenditure": 110832000,
+      "count": 18
+    },
+    {
+      "category": "Education",
+      "sanctioned": 131000000,
+      "expenditure": 94521999,
+      "count": 18
+    },
+    {
+      "category": "Civic",
+      "sanctioned": 158600000,
+      "expenditure": 91936000,
+      "count": 18
+    }
+  ],
+  "stateWisePerformance": [
+    {
+      "state": "Karnataka",
+      "centroid": {
+        "latitude": 15.3173,
+        "longitude": 75.7139
+      },
+      "totalProjects": 6,
+      "sanctionedAmount": 71100000,
+      "expenditure": 56268000,
+      "utilizationPercentage": 79.1,
+      "highRiskCount": 3
+    },
+    {
+      "state": "West Bengal",
+      "centroid": {
+        "latitude": 22.9868,
+        "longitude": 87.855
+      },
+      "totalProjects": 8,
+      "sanctionedAmount": 79500000,
+      "expenditure": 52316000,
+      "utilizationPercentage": 65.8,
+      "highRiskCount": 3
+    },
+    {
+      "state": "Rajasthan",
+      "centroid": {
+        "latitude": 27.0238,
+        "longitude": 74.2179
+      },
+      "totalProjects": 8,
+      "sanctionedAmount": 64300000,
+      "expenditure": 48498000,
+      "utilizationPercentage": 75.4,
+      "highRiskCount": 3
+    },
+    {
+      "state": "Tamil Nadu",
+      "centroid": {
+        "latitude": 11.1271,
+        "longitude": 78.6569
+      },
+      "totalProjects": 8,
+      "sanctionedAmount": 61700000,
+      "expenditure": 48092000,
+      "utilizationPercentage": 77.9,
+      "highRiskCount": 2
+    },
+    {
+      "state": "Uttar Pradesh",
+      "centroid": {
+        "latitude": 26.8467,
+        "longitude": 80.9462
+      },
+      "totalProjects": 8,
+      "sanctionedAmount": 62300000,
+      "expenditure": 45760999,
+      "utilizationPercentage": 73.5,
+      "highRiskCount": 3
+    },
+    {
+      "state": "Kerala",
+      "centroid": {
+        "latitude": 10.8505,
+        "longitude": 76.2711
+      },
+      "totalProjects": 6,
+      "sanctionedAmount": 49700000,
+      "expenditure": 44716000,
+      "utilizationPercentage": 90.0,
+      "highRiskCount": 3
+    },
+    {
+      "state": "Maharashtra",
+      "centroid": {
+        "latitude": 19.7515,
+        "longitude": 75.7139
+      },
+      "totalProjects": 8,
+      "sanctionedAmount": 68800000,
+      "expenditure": 42211000,
+      "utilizationPercentage": 61.4,
+      "highRiskCount": 2
+    },
+    {
+      "state": "Punjab",
+      "centroid": {
+        "latitude": 31.1471,
+        "longitude": 75.3412
+      },
+      "totalProjects": 6,
+      "sanctionedAmount": 61700000,
+      "expenditure": 39328000,
+      "utilizationPercentage": 63.7,
+      "highRiskCount": 3
+    },
+    {
+      "state": "Gujarat",
+      "centroid": {
+        "latitude": 22.2587,
+        "longitude": 71.1924
+      },
+      "totalProjects": 6,
+      "sanctionedAmount": 50100000,
+      "expenditure": 34315000,
+      "utilizationPercentage": 68.5,
+      "highRiskCount": 2
+    },
+    {
+      "state": "Assam",
+      "centroid": {
+        "latitude": 26.2006,
+        "longitude": 92.9376
+      },
+      "totalProjects": 4,
+      "sanctionedAmount": 34400000,
+      "expenditure": 29103000,
+      "utilizationPercentage": 84.6,
+      "highRiskCount": 1
+    },
+    {
+      "state": "Madhya Pradesh",
+      "centroid": {
+        "latitude": 22.9734,
+        "longitude": 78.6569
+      },
+      "totalProjects": 4,
+      "sanctionedAmount": 28300000,
+      "expenditure": 23854000,
+      "utilizationPercentage": 84.3,
+      "highRiskCount": 2
+    },
+    {
+      "state": "Bihar",
+      "centroid": {
+        "latitude": 25.0961,
+        "longitude": 85.3131
+      },
+      "totalProjects": 6,
+      "sanctionedAmount": 42300000,
+      "expenditure": 19695000,
+      "utilizationPercentage": 46.6,
+      "highRiskCount": 2
+    },
+    {
+      "state": "Andhra Pradesh",
+      "centroid": {
+        "latitude": 15.9129,
+        "longitude": 79.74
+      },
+      "totalProjects": 4,
+      "sanctionedAmount": 32200000,
+      "expenditure": 15704000,
+      "utilizationPercentage": 48.8,
+      "highRiskCount": 2
+    },
+    {
+      "state": "Odisha",
+      "centroid": {
+        "latitude": 20.9517,
+        "longitude": 85.0985
+      },
+      "totalProjects": 4,
+      "sanctionedAmount": 28100000,
+      "expenditure": 14614000,
+      "utilizationPercentage": 52.0,
+      "highRiskCount": 2
+    },
+    {
+      "state": "Jharkhand",
+      "centroid": {
+        "latitude": 23.6102,
+        "longitude": 85.2799
+      },
+      "totalProjects": 2,
+      "sanctionedAmount": 18600000,
+      "expenditure": 9828000,
+      "utilizationPercentage": 52.8,
+      "highRiskCount": 1
+    },
+    {
+      "state": "Himachal Pradesh",
+      "centroid": {
+        "latitude": 31.1048,
+        "longitude": 77.1734
+      },
+      "totalProjects": 2,
+      "sanctionedAmount": 9200000,
+      "expenditure": 6849000,
+      "utilizationPercentage": 74.4,
+      "highRiskCount": 0
+    }
+  ],
+  "topDistrictsByExpenditure": [
+    {
+      "district": "Bengaluru Urban",
+      "state": "Karnataka",
+      "expenditure": 26607000,
+      "sanctionedAmount": 31500000,
+      "totalProjects": 2
+    },
+    {
+      "district": "Pune",
+      "state": "Maharashtra",
+      "expenditure": 26211000,
+      "sanctionedAmount": 41200000,
+      "totalProjects": 4
+    },
+    {
+      "district": "Amritsar",
+      "state": "Punjab",
+      "expenditure": 20840000,
+      "sanctionedAmount": 28100000,
+      "totalProjects": 2
+    },
+    {
+      "district": "Kanpur Nagar",
+      "state": "Uttar Pradesh",
+      "expenditure": 20562000,
+      "sanctionedAmount": 24100000,
+      "totalProjects": 2
+    },
+    {
+      "district": "Kamrup Metropolitan",
+      "state": "Assam",
+      "expenditure": 19420000,
+      "sanctionedAmount": 22300000,
+      "totalProjects": 2
+    },
+    {
+      "district": "Paschim Bardhaman",
+      "state": "West Bengal",
+      "expenditure": 19380000,
+      "sanctionedAmount": 19700000,
+      "totalProjects": 2
+    },
+    {
+      "district": "Howrah",
+      "state": "West Bengal",
+      "expenditure": 19065000,
+      "sanctionedAmount": 25500000,
+      "totalProjects": 2
+    }
+  ],
+  "multiYearExpenditureTrend": [
+    {
+      "financialYear": "2019-20",
+      "allocated": 225.0,
+      "expenditure": 211.8,
+      "utilizationRate": 94.1,
+      "remarks": "Full pre-pandemic scheme utilization"
+    },
+    {
+      "financialYear": "2020-21",
+      "allocated": 0.0,
+      "expenditure": 34.6,
+      "utilizationRate": 0.0,
+      "remarks": "Scheme funding frozen; committed liabilities cleared"
+    },
+    {
+      "financialYear": "2021-22",
+      "allocated": 112.5,
+      "expenditure": 92.4,
+      "utilizationRate": 82.1,
+      "remarks": "Partial tranche restoration (one ₹2.5 Cr installment)"
+    },
+    {
+      "financialYear": "2022-23",
+      "allocated": 225.0,
+      "expenditure": 198.5,
+      "utilizationRate": 88.2,
+      "remarks": "Full annual ₹5.0 Cr entitlement restored"
+    },
+    {
+      "financialYear": "2023-24",
+      "allocated": 225.0,
+      "expenditure": 208.3,
+      "utilizationRate": 92.6,
+      "remarks": "Accelerated physical completion drives"
+    },
+    {
+      "financialYear": "2024-25",
+      "allocated": 225.0,
+      "expenditure": 204.1,
+      "utilizationRate": 90.7,
+      "remarks": "18th Lok Sabha election transition year"
+    },
+    {
+      "financialYear": "2025-26",
+      "allocated": 225.0,
+      "expenditure": 178.6,
+      "utilizationRate": 79.4,
+      "remarks": "Active financial year reconciliation"
+    },
+    {
+      "financialYear": "2026-27",
+      "allocated": 225.0,
+      "expenditure": 72.4,
+      "utilizationRate": 32.2,
+      "remarks": "Ongoing fiscal cycle in progress"
+    }
+  ],
+  "aiInsightSummaryBullets": [
+    "Payment-to-physical progress decoupling detected in 8.9% of active civil infrastructure projects, primarily concentrated in road construction packages.",
+    "Predictive risk modeling indicates 26 projects face higher than 70% probability of chronic timeline slippage beyond 90 days.",
+    "Geospatial vector clustering identified 4 high-probability duplicate asset proposals within municipal limits sharing proximity with prior state-funded works.",
+    "Water Supply and Rural Sanitation sectors demonstrate the highest fund absorption efficiency with a 91.4% milestone completion index.",
+    "State-level utilization index reveals strong performance in southern and western regional clusters, while hilly terrain constituencies encounter prolonged mobilization lags."
+  ]
+}

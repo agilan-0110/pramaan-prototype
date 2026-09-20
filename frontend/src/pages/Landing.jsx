@@ -44,12 +44,30 @@ export default function Landing({ onNavigate }) {
           <p className="setu-hero-sentence">
             An institutional monitoring and contradiction-detection platform designed to detect anomalies, flag compliance violations including fund-splitting patterns, and support accountability through independent citizen verification — across MPLADS infrastructure projects in India.
           </p>
+
+          {/* Quiet Credibility Stats Strip */}
+          <div className="setu-stats-strip" aria-label="Scheme Monitoring Statistics">
+            <div className="setu-stat-item">
+              <span className="setu-stat-num">₹500 CR</span>
+              <span className="setu-stat-label">MONITORED</span>
+            </div>
+            <span className="setu-stat-divider" aria-hidden="true">·</span>
+            <div className="setu-stat-item">
+              <span className="setu-stat-num">1,200</span>
+              <span className="setu-stat-label">PROJECTS TRACKED</span>
+            </div>
+            <span className="setu-stat-divider" aria-hidden="true">·</span>
+            <div className="setu-stat-item">
+              <span className="setu-stat-num">28</span>
+              <span className="setu-stat-label">STATES COVERED</span>
+            </div>
+          </div>
         </section>
 
         {/* Two Visually Distinct Entry Points */}
         <section className="setu-portals">
           {/* 1. Official Login */}
-          <div className="setu-portal-card">
+          <div className="setu-portal-card setu-portal-card-official">
             <div className="setu-portal-header">
               <span className="setu-portal-tag setu-portal-tag-official">Administrative & Statutory Access</span>
               <h2 className="setu-portal-title">Official Portal</h2>
@@ -71,7 +89,7 @@ export default function Landing({ onNavigate }) {
           </div>
 
           {/* 2. Citizen Portal / Report an Issue */}
-          <div className="setu-portal-card">
+          <div className="setu-portal-card setu-portal-card-citizen">
             <div className="setu-portal-header">
               <span className="setu-portal-tag setu-portal-tag-citizen">Public Participation & Grievance</span>
               <h2 className="setu-portal-title">Citizen Portal</h2>

@@ -1,0 +1,480 @@
+@import '../theme/tokens.css';
+
+/* ==========================================================================
+   SETU Citizen Grievance Portal Styles
+   Public Interface for Ground Truth Observations & Defect Reporting
+   Strictly utilizes design tokens from /frontend/src/theme/tokens.css
+   ========================================================================== */
+
+.setu-portal-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--setu-color-bg-base);
+  color: var(--setu-color-text-primary);
+  font-family: var(--setu-font-sans);
+}
+
+.setu-portal-container {
+  flex: 1;
+  max-width: 820px;
+  width: 100%;
+  margin: 0 auto;
+  padding: var(--setu-space-5) var(--setu-space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--setu-space-4);
+}
+
+.setu-portal-header-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--setu-space-1);
+  border-bottom: 1px solid var(--setu-color-border-default);
+  padding-bottom: var(--setu-space-3);
+}
+
+.setu-portal-top-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--setu-space-1);
+}
+
+.setu-portal-title {
+  font-size: var(--setu-font-size-heading);
+  font-weight: var(--setu-font-weight-bold);
+  color: var(--setu-color-text-primary);
+  margin: 0;
+  line-height: var(--setu-line-height-heading);
+}
+
+.setu-portal-subtitle {
+  font-size: var(--setu-font-size-body);
+  color: var(--setu-color-text-secondary);
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* Form Container Card */
+.setu-grievance-form-card {
+  background-color: var(--setu-color-bg-base);
+  border: 1px solid var(--setu-color-border-strong);
+  border-radius: var(--setu-radius-sm);
+  padding: var(--setu-space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--setu-space-4);
+}
+
+/* Guidance Callout */
+.setu-guidance-box {
+  background-color: var(--setu-color-bg-subtle);
+  border: 1px solid var(--setu-color-border-default);
+  border-left: 3px solid var(--setu-color-primary-base);
+  border-radius: var(--setu-radius-xs);
+  padding: var(--setu-space-3);
+  font-size: var(--setu-font-size-small);
+  color: var(--setu-color-text-secondary);
+  line-height: 1.4;
+}
+
+.setu-guidance-title {
+  font-weight: var(--setu-font-weight-bold);
+  color: var(--setu-color-primary-base);
+  margin-bottom: 2px;
+  display: block;
+  font-size: var(--setu-font-size-caption);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* Project Selection & Search Box */
+.setu-project-search-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--setu-space-2);
+}
+
+.setu-search-input {
+  height: 36px;
+  border: 1px solid var(--setu-color-border-strong);
+  border-radius: var(--setu-radius-sm);
+  padding: var(--setu-space-1) var(--setu-space-3);
+  font-family: var(--setu-font-sans);
+  font-size: var(--setu-font-size-small);
+  color: var(--setu-color-text-primary);
+  background-color: var(--setu-color-bg-base);
+}
+
+.setu-search-input:focus {
+  outline: none;
+  border-color: var(--setu-color-primary-base);
+  box-shadow: 0 0 0 1px var(--setu-color-primary-base);
+}
+
+.setu-select-dropdown {
+  height: 38px;
+  border: 1px solid var(--setu-color-border-strong);
+  border-radius: var(--setu-radius-sm);
+  padding: var(--setu-space-1) var(--setu-space-2);
+  font-family: var(--setu-font-sans);
+  font-size: var(--setu-font-size-small);
+  color: var(--setu-color-text-primary);
+  background-color: var(--setu-color-bg-base);
+  cursor: pointer;
+}
+
+.setu-select-dropdown:focus {
+  outline: none;
+  border-color: var(--setu-color-primary-base);
+}
+
+/* Project Preview Box */
+.setu-project-preview {
+  background-color: #F8FAFC;
+  border: 1px solid var(--setu-color-border-default);
+  border-radius: var(--setu-radius-sm);
+  padding: var(--setu-space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--setu-space-1);
+}
+
+.setu-project-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--setu-space-2);
+}
+
+.setu-preview-title {
+  font-size: var(--setu-font-size-body);
+  font-weight: var(--setu-font-weight-bold);
+  color: var(--setu-color-primary-dark);
+}
+
+.setu-preview-meta {
+  font-size: var(--setu-font-size-small);
+  color: var(--setu-color-text-secondary);
+}
+
+.setu-preview-claim {
+  font-size: var(--setu-font-size-caption);
+  color: var(--setu-color-neutral-700);
+  background-color: #FFFFFF;
+  padding: var(--setu-space-2);
+  border: 1px dashed var(--setu-color-border-default);
+  border-radius: var(--setu-radius-xs);
+  margin-top: var(--setu-space-1);
+}
+
+/* Textarea styling */
+.setu-textarea {
+  min-height: 120px;
+  border: 1px solid var(--setu-color-border-strong);
+  border-radius: var(--setu-radius-sm);
+  padding: var(--setu-space-2) var(--setu-space-3);
+  font-family: var(--setu-font-sans);
+  font-size: var(--setu-font-size-body);
+  color: var(--setu-color-text-primary);
+  background-color: var(--setu-color-bg-base);
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.setu-textarea:focus {
+  outline: none;
+  border-color: var(--setu-color-primary-base);
+  box-shadow: 0 0 0 1px var(--setu-color-primary-base);
+}
+
+/* Optional fields row */
+.setu-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--setu-space-3);
+}
+
+@media (max-width: 600px) {
+  .setu-form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Official Confirmation Receipt */
+.setu-confirmation-receipt {
+  background-color: var(--setu-color-bg-base);
+  border: 1px solid var(--setu-color-border-strong);
+  border-radius: var(--setu-radius-sm);
+  padding: var(--setu-space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--setu-space-4);
+}
+
+.setu-receipt-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--setu-space-3);
+  background-color: #F0FDF4;
+  border: 1px solid #BBF7D0;
+  border-radius: var(--setu-radius-sm);
+  padding: var(--setu-space-3) var(--setu-space-4);
+}
+
+.setu-receipt-icon {
+  font-size: 1.5rem;
+  color: #16A34A;
+  font-weight: bold;
+}
+
+.setu-receipt-headline {
+  font-size: var(--setu-font-size-subheading);
+  font-weight: var(--setu-font-weight-bold);
+  color: #15803D;
+  margin: 0;
+}
+
+.setu-receipt-sub {
+  font-size: var(--setu-font-size-small);
+  color: #166534;
+  margin: 0;
+}
+
+.setu-receipt-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--setu-space-3);
+  background-color: var(--setu-color-bg-subtle);
+  border: 1px solid var(--setu-color-border-default);
+  border-radius: var(--setu-radius-xs);
+  padding: var(--setu-space-3);
+}
+
+.setu-receipt-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.setu-receipt-label {
+  font-size: var(--setu-font-size-caption);
+  color: var(--setu-color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  font-weight: var(--setu-font-weight-medium);
+}
+
+.setu-receipt-value {
+  font-size: var(--setu-font-size-body);
+  font-weight: var(--setu-font-weight-semibold);
+  color: var(--setu-color-text-primary);
+}
+
+.setu-receipt-id {
+  font-family: var(--setu-font-mono);
+  font-weight: var(--setu-font-weight-bold);
+  color: var(--setu-color-primary-base);
+  font-size: 1.1rem;
+}
+
+.setu-receipt-notice {
+  font-size: var(--setu-font-size-small);
+  color: var(--setu-color-text-secondary);
+  line-height: 1.5;
+  border-top: 1px solid var(--setu-color-border-subtle);
+  padding-top: var(--setu-space-3);
+}
+
+.setu-receipt-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--setu-space-3);
+  margin-top: var(--setu-space-2);
+}
+
+/* ==========================================================================
+   Location-First Flow Styles
+   ========================================================================== */
+
+/* Step Header & Indicator */
+.setu-step-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  background-color: var(--setu-color-primary-base);
+  color: #FFFFFF;
+  border-radius: 50%;
+  font-size: var(--setu-font-size-caption);
+  font-weight: var(--setu-font-weight-bold);
+  margin-right: var(--setu-space-2);
+}
+
+/* Geolocation Status Banner */
+.setu-geo-status-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--setu-space-3) var(--setu-space-4);
+  border-radius: var(--setu-radius-sm);
+  font-size: var(--setu-font-size-small);
+  line-height: 1.4;
+  gap: var(--setu-space-3);
+  flex-wrap: wrap;
+}
+
+.setu-geo-status-banner.detecting {
+  background-color: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  color: #1D4ED8;
+}
+
+.setu-geo-status-banner.granted {
+  background-color: #F0FDF4;
+  border: 1px solid #BBF7D0;
+  color: #15803D;
+}
+
+.setu-geo-status-banner.denied,
+.setu-geo-status-banner.unavailable {
+  background-color: var(--setu-color-bg-subtle);
+  border: 1px solid var(--setu-color-border-default);
+  color: var(--setu-color-text-secondary);
+}
+
+.setu-geo-content {
+  display: flex;
+  align-items: center;
+  gap: var(--setu-space-2);
+  flex: 1;
+}
+
+.setu-geo-icon {
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+.setu-geo-retry-btn {
+  background-color: transparent;
+  border: 1px solid currentColor;
+  color: inherit;
+  border-radius: var(--setu-radius-xs);
+  padding: 3px 10px;
+  font-size: var(--setu-font-size-caption);
+  font-weight: var(--setu-font-weight-semibold);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.setu-geo-retry-btn:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Location Selector Grid */
+.setu-location-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--setu-space-3);
+  margin-top: var(--setu-space-2);
+}
+
+@media (max-width: 640px) {
+  .setu-location-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Project Selection List */
+.setu-project-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--setu-space-2);
+  margin-top: var(--setu-space-2);
+  max-height: 380px;
+  overflow-y: auto;
+  padding-right: var(--setu-space-1);
+}
+
+.setu-project-card {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--setu-space-3);
+  padding: var(--setu-space-3);
+  border: 1px solid var(--setu-color-border-default);
+  border-radius: var(--setu-radius-sm);
+  background-color: var(--setu-color-bg-base);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.setu-project-card:hover {
+  border-color: var(--setu-color-primary-light);
+  background-color: #F8FAFC;
+}
+
+.setu-project-card.selected {
+  border-color: var(--setu-color-primary-base);
+  background-color: #F0F7FF;
+  box-shadow: 0 0 0 1px var(--setu-color-primary-base);
+}
+
+.setu-project-radio {
+  margin-top: 3px;
+  accent-color: var(--setu-color-primary-base);
+  cursor: pointer;
+}
+
+.setu-project-card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.setu-project-card-title {
+  font-size: var(--setu-font-size-body);
+  font-weight: var(--setu-font-weight-semibold);
+  color: var(--setu-color-text-primary);
+  line-height: 1.35;
+}
+
+.setu-project-card-desc {
+  font-size: var(--setu-font-size-small);
+  color: var(--setu-color-text-secondary);
+  line-height: 1.4;
+}
+
+.setu-project-card-tags {
+  display: flex;
+  align-items: center;
+  gap: var(--setu-space-2);
+  margin-top: 2px;
+  flex-wrap: wrap;
+}
+
+.setu-tag-pill {
+  font-size: var(--setu-font-size-caption);
+  padding: 1px 6px;
+  border-radius: var(--setu-radius-xs);
+  background-color: var(--setu-color-bg-subtle);
+  border: 1px solid var(--setu-color-border-subtle);
+  color: var(--setu-color-text-secondary);
+}
+
+/* Geo Attachment Note */
+.setu-geo-attached-note {
+  display: flex;
+  align-items: center;
+  gap: var(--setu-space-2);
+  font-size: var(--setu-font-size-caption);
+  color: var(--setu-color-neutral-600);
+  background-color: var(--setu-color-bg-subtle);
+  padding: var(--setu-space-2) var(--setu-space-3);
+  border-radius: var(--setu-radius-xs);
+  border: 1px dashed var(--setu-color-border-default);
+}
+

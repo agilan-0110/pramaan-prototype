@@ -1,382 +1,11 @@
 /**
- * SETU Dashboard Data Layer
+ * SETU Project Detail Data Layer
  * 
  * Wired directly to:
- * - /backend/app/data/mockOverview.json
  * - /backend/app/data/mockProjects.json
- * 
- * Computes aggregated values directly from mockProjects.json:
- * - Total Projects
- * - High Risk Count
- * - Compliance Violations
- * - Pending Alerts
+ * - /backend/app/data/mockComplaints.json
  */
 
-// Fallback datasets directly embedded from /backend/app/data/
-const FALLBACK_OVERVIEW = {
-  "summary": {
-    "totalAllocated": 2250000000,
-    "totalAllocatedFormatted": "₹225.00 Cr",
-    "totalSanctionedAmount": 762300000,
-    "totalSanctionedAmountFormatted": "₹76.23 Cr",
-    "totalExpenditure": 531151999,
-    "totalExpenditureFormatted": "₹53.12 Cr",
-    "utilizationPercentage": 69.68,
-    "totalMonitoredMPs": 45,
-    "totalProjects": 90,
-    "totalHighRiskProjects": 34,
-    "totalActiveAlerts": 18
-  },
-  "workStatusDistribution": {
-    "In Progress": 28,
-    "Approved - Work Not Started": 9,
-    "Completed": 24,
-    "Delayed": 25,
-    "Under Scrutiny": 4
-  },
-  "sectorExpenditureDistribution": [
-    {
-      "category": "Water",
-      "sanctioned": 153700000,
-      "expenditure": 117229000,
-      "count": 18
-    },
-    {
-      "category": "Road",
-      "sanctioned": 150900000,
-      "expenditure": 116633000,
-      "count": 18
-    },
-    {
-      "category": "Health",
-      "sanctioned": 168100000,
-      "expenditure": 110832000,
-      "count": 18
-    },
-    {
-      "category": "Education",
-      "sanctioned": 131000000,
-      "expenditure": 94521999,
-      "count": 18
-    },
-    {
-      "category": "Civic",
-      "sanctioned": 158600000,
-      "expenditure": 91936000,
-      "count": 18
-    }
-  ],
-  "stateWisePerformance": [
-    {
-      "state": "Karnataka",
-      "centroid": {
-        "latitude": 15.3173,
-        "longitude": 75.7139
-      },
-      "totalProjects": 6,
-      "sanctionedAmount": 71100000,
-      "expenditure": 56268000,
-      "utilizationPercentage": 79.1,
-      "highRiskCount": 3
-    },
-    {
-      "state": "West Bengal",
-      "centroid": {
-        "latitude": 22.9868,
-        "longitude": 87.855
-      },
-      "totalProjects": 8,
-      "sanctionedAmount": 79500000,
-      "expenditure": 52316000,
-      "utilizationPercentage": 65.8,
-      "highRiskCount": 3
-    },
-    {
-      "state": "Rajasthan",
-      "centroid": {
-        "latitude": 27.0238,
-        "longitude": 74.2179
-      },
-      "totalProjects": 8,
-      "sanctionedAmount": 64300000,
-      "expenditure": 48498000,
-      "utilizationPercentage": 75.4,
-      "highRiskCount": 3
-    },
-    {
-      "state": "Tamil Nadu",
-      "centroid": {
-        "latitude": 11.1271,
-        "longitude": 78.6569
-      },
-      "totalProjects": 8,
-      "sanctionedAmount": 61700000,
-      "expenditure": 48092000,
-      "utilizationPercentage": 77.9,
-      "highRiskCount": 2
-    },
-    {
-      "state": "Uttar Pradesh",
-      "centroid": {
-        "latitude": 26.8467,
-        "longitude": 80.9462
-      },
-      "totalProjects": 8,
-      "sanctionedAmount": 62300000,
-      "expenditure": 45760999,
-      "utilizationPercentage": 73.5,
-      "highRiskCount": 3
-    },
-    {
-      "state": "Kerala",
-      "centroid": {
-        "latitude": 10.8505,
-        "longitude": 76.2711
-      },
-      "totalProjects": 6,
-      "sanctionedAmount": 49700000,
-      "expenditure": 44716000,
-      "utilizationPercentage": 90.0,
-      "highRiskCount": 3
-    },
-    {
-      "state": "Maharashtra",
-      "centroid": {
-        "latitude": 19.7515,
-        "longitude": 75.7139
-      },
-      "totalProjects": 8,
-      "sanctionedAmount": 68800000,
-      "expenditure": 42211000,
-      "utilizationPercentage": 61.4,
-      "highRiskCount": 2
-    },
-    {
-      "state": "Punjab",
-      "centroid": {
-        "latitude": 31.1471,
-        "longitude": 75.3412
-      },
-      "totalProjects": 6,
-      "sanctionedAmount": 61700000,
-      "expenditure": 39328000,
-      "utilizationPercentage": 63.7,
-      "highRiskCount": 3
-    },
-    {
-      "state": "Gujarat",
-      "centroid": {
-        "latitude": 22.2587,
-        "longitude": 71.1924
-      },
-      "totalProjects": 6,
-      "sanctionedAmount": 50100000,
-      "expenditure": 34315000,
-      "utilizationPercentage": 68.5,
-      "highRiskCount": 2
-    },
-    {
-      "state": "Assam",
-      "centroid": {
-        "latitude": 26.2006,
-        "longitude": 92.9376
-      },
-      "totalProjects": 4,
-      "sanctionedAmount": 34400000,
-      "expenditure": 29103000,
-      "utilizationPercentage": 84.6,
-      "highRiskCount": 1
-    },
-    {
-      "state": "Madhya Pradesh",
-      "centroid": {
-        "latitude": 22.9734,
-        "longitude": 78.6569
-      },
-      "totalProjects": 4,
-      "sanctionedAmount": 28300000,
-      "expenditure": 23854000,
-      "utilizationPercentage": 84.3,
-      "highRiskCount": 2
-    },
-    {
-      "state": "Bihar",
-      "centroid": {
-        "latitude": 25.0961,
-        "longitude": 85.3131
-      },
-      "totalProjects": 6,
-      "sanctionedAmount": 42300000,
-      "expenditure": 19695000,
-      "utilizationPercentage": 46.6,
-      "highRiskCount": 2
-    },
-    {
-      "state": "Andhra Pradesh",
-      "centroid": {
-        "latitude": 15.9129,
-        "longitude": 79.74
-      },
-      "totalProjects": 4,
-      "sanctionedAmount": 32200000,
-      "expenditure": 15704000,
-      "utilizationPercentage": 48.8,
-      "highRiskCount": 2
-    },
-    {
-      "state": "Odisha",
-      "centroid": {
-        "latitude": 20.9517,
-        "longitude": 85.0985
-      },
-      "totalProjects": 4,
-      "sanctionedAmount": 28100000,
-      "expenditure": 14614000,
-      "utilizationPercentage": 52.0,
-      "highRiskCount": 2
-    },
-    {
-      "state": "Jharkhand",
-      "centroid": {
-        "latitude": 23.6102,
-        "longitude": 85.2799
-      },
-      "totalProjects": 2,
-      "sanctionedAmount": 18600000,
-      "expenditure": 9828000,
-      "utilizationPercentage": 52.8,
-      "highRiskCount": 1
-    },
-    {
-      "state": "Himachal Pradesh",
-      "centroid": {
-        "latitude": 31.1048,
-        "longitude": 77.1734
-      },
-      "totalProjects": 2,
-      "sanctionedAmount": 9200000,
-      "expenditure": 6849000,
-      "utilizationPercentage": 74.4,
-      "highRiskCount": 0
-    }
-  ],
-  "topDistrictsByExpenditure": [
-    {
-      "district": "Bengaluru Urban",
-      "state": "Karnataka",
-      "expenditure": 26607000,
-      "sanctionedAmount": 31500000,
-      "totalProjects": 2
-    },
-    {
-      "district": "Pune",
-      "state": "Maharashtra",
-      "expenditure": 26211000,
-      "sanctionedAmount": 41200000,
-      "totalProjects": 4
-    },
-    {
-      "district": "Amritsar",
-      "state": "Punjab",
-      "expenditure": 20840000,
-      "sanctionedAmount": 28100000,
-      "totalProjects": 2
-    },
-    {
-      "district": "Kanpur Nagar",
-      "state": "Uttar Pradesh",
-      "expenditure": 20562000,
-      "sanctionedAmount": 24100000,
-      "totalProjects": 2
-    },
-    {
-      "district": "Kamrup Metropolitan",
-      "state": "Assam",
-      "expenditure": 19420000,
-      "sanctionedAmount": 22300000,
-      "totalProjects": 2
-    },
-    {
-      "district": "Paschim Bardhaman",
-      "state": "West Bengal",
-      "expenditure": 19380000,
-      "sanctionedAmount": 19700000,
-      "totalProjects": 2
-    },
-    {
-      "district": "Howrah",
-      "state": "West Bengal",
-      "expenditure": 19065000,
-      "sanctionedAmount": 25500000,
-      "totalProjects": 2
-    }
-  ],
-  "multiYearExpenditureTrend": [
-    {
-      "financialYear": "2019-20",
-      "allocated": 225.0,
-      "expenditure": 211.8,
-      "utilizationRate": 94.1,
-      "remarks": "Full pre-pandemic scheme utilization"
-    },
-    {
-      "financialYear": "2020-21",
-      "allocated": 0.0,
-      "expenditure": 34.6,
-      "utilizationRate": 0.0,
-      "remarks": "Scheme funding frozen; committed liabilities cleared"
-    },
-    {
-      "financialYear": "2021-22",
-      "allocated": 112.5,
-      "expenditure": 92.4,
-      "utilizationRate": 82.1,
-      "remarks": "Partial tranche restoration (one ₹2.5 Cr installment)"
-    },
-    {
-      "financialYear": "2022-23",
-      "allocated": 225.0,
-      "expenditure": 198.5,
-      "utilizationRate": 88.2,
-      "remarks": "Full annual ₹5.0 Cr entitlement restored"
-    },
-    {
-      "financialYear": "2023-24",
-      "allocated": 225.0,
-      "expenditure": 208.3,
-      "utilizationRate": 92.6,
-      "remarks": "Accelerated physical completion drives"
-    },
-    {
-      "financialYear": "2024-25",
-      "allocated": 225.0,
-      "expenditure": 204.1,
-      "utilizationRate": 90.7,
-      "remarks": "18th Lok Sabha election transition year"
-    },
-    {
-      "financialYear": "2025-26",
-      "allocated": 225.0,
-      "expenditure": 178.6,
-      "utilizationRate": 79.4,
-      "remarks": "Active financial year reconciliation"
-    },
-    {
-      "financialYear": "2026-27",
-      "allocated": 225.0,
-      "expenditure": 72.4,
-      "utilizationRate": 32.2,
-      "remarks": "Ongoing fiscal cycle in progress"
-    }
-  ],
-  "aiInsightSummaryBullets": [
-    "Payment-to-physical progress decoupling detected in 8.9% of active civil infrastructure projects, primarily concentrated in road construction packages.",
-    "Predictive risk modeling indicates 26 projects face higher than 70% probability of chronic timeline slippage beyond 90 days.",
-    "Geospatial vector clustering identified 4 high-probability duplicate asset proposals within municipal limits sharing proximity with prior state-funded works.",
-    "Water Supply and Rural Sanitation sectors demonstrate the highest fund absorption efficiency with a 91.4% milestone completion index.",
-    "State-level utilization index reveals strong performance in southern and western regional clusters, while hilly terrain constituencies encounter prolonged mobilization lags."
-  ]
-};
 const FALLBACK_PROJECTS = [
   {
     "id": "PRJ-IND-2001",
@@ -2449,616 +2078,803 @@ const FALLBACK_PROJECTS = [
     "paymentProgressMismatch": false
   }
 ];
+const FALLBACK_COMPLAINTS = [
+  {
+    "id": "CIT-2026-101",
+    "projectId": "PRJ-IND-2003",
+    "projectName": "Construction of Digital Audio-Visual Library & Composite Reading Hall, Pune",
+    "district": "Pune",
+    "state": "Maharashtra",
+    "complaintText": "The contractor claimed 90% of the digital library and reading hall civil work is finished, but on the ground only the bare external brick walls stand without a roof slab, windows, or plastering. Heavy monsoon water has accumulated inside and no work has happened for two months.",
+    "contradictionScore": 0.92,
+    "isContradiction": true,
+    "officialClaim": "Physical progress certified at 85%; digital library civil structure and composite hall nearing completion.",
+    "citizenSummary": "Citizen visual inspection reveals incomplete bare brick shell without roof, contradicting certified 85% progress.",
+    "submittedAt": "2026-07-18T11:20:00Z",
+    "status": "Under Investigation",
+    "nlpConfidence": 0.94,
+    "geoMatchDistance": 0.3
+  },
+  {
+    "id": "CIT-2026-102",
+    "projectId": "PRJ-IND-2008",
+    "projectName": "Provision of Modern Dual-Desk Ergonomic Furniture for 12 Classrooms, Lucknow",
+    "district": "Lucknow",
+    "state": "Uttar Pradesh",
+    "complaintText": "School authorities reported receiving all 120 sets of ergonomic dual-desks on the official portal, but our village school children are still sitting on floor mats. Only 15 broken wooden benches were delivered from an older school.",
+    "contradictionScore": 0.88,
+    "isContradiction": true,
+    "officialClaim": "100% supply and delivery of modern dual-desk classroom furniture verified by school inspector.",
+    "citizenSummary": "Citizen report indicates students sitting on floor mats; only 15 legacy benches delivered instead of 120 sanctioned desks.",
+    "submittedAt": "2026-07-24T14:45:00Z",
+    "status": "Escalated to State Nodal",
+    "nlpConfidence": 0.89,
+    "geoMatchDistance": 4.8
+  },
+  {
+    "id": "CIT-2026-103",
+    "projectId": "PRJ-IND-2014",
+    "projectName": "Multi-Village Piped Drinking Water Supply Grid with Automated Flow Meters, Chennai",
+    "district": "Chennai",
+    "state": "Tamil Nadu",
+    "complaintText": "The piped water distribution grid has recorded 80% expenditure release, but in our habitation, pipes were laid loosely along the ditch without trenching and have never been connected to the overhead reservoir. Zero water has flowed.",
+    "contradictionScore": 0.91,
+    "isContradiction": true,
+    "officialClaim": "80% pipeline network laid with automated flow telemetry testing in progress.",
+    "citizenSummary": "Grievance confirms feeder pipes are un-trenched and disconnected from storage tank; zero drinking water supply.",
+    "submittedAt": "2026-08-02T09:30:00Z",
+    "status": "Pending Inspection",
+    "nlpConfidence": 0.93,
+    "geoMatchDistance": 0.7
+  },
+  {
+    "id": "CIT-2026-104",
+    "projectId": "PRJ-IND-2019",
+    "projectName": "Percolation Tank and Micro-Check Dam Rejuvenation Network, Bengaluru Urban",
+    "district": "Bengaluru Urban",
+    "state": "Karnataka",
+    "complaintText": "The percolation tank desilting and earthen check dam work was recorded as completed at ₹72 Lakh cost. However, the tank bed is still choked with weeds and the bund wall breached during the first rain shower.",
+    "contradictionScore": 0.84,
+    "isContradiction": true,
+    "officialClaim": "Desiltation and micro-check dam bund stabilization completed and certified operational.",
+    "citizenSummary": "Citizen highlights un-desilted tank bed and breached bund structure, contesting official completion certificate.",
+    "submittedAt": "2026-08-08T16:15:00Z",
+    "status": "Referred to Implementing Agency",
+    "nlpConfidence": 0.87,
+    "geoMatchDistance": 0.2
+  },
+  {
+    "id": "CIT-2026-105",
+    "projectId": "PRJ-IND-2025",
+    "projectName": "Solid Waste Material Recovery Facility with Mechanical Trommel Sieve, Kolkata",
+    "district": "Kolkata",
+    "state": "West Bengal",
+    "complaintText": "The covered reinforced concrete outfall drain exists only on paper for the northern 200-meter stretch. The contractor simply dumped loose mud along the road edge and billed it as finished concrete box culvert.",
+    "contradictionScore": 0.95,
+    "isContradiction": true,
+    "officialClaim": "75% concrete box drain structure completed with pre-cast cover slabs installed.",
+    "citizenSummary": "No concrete box drain exists on ground along northern segment; only unpaved earthen mound present.",
+    "submittedAt": "2026-08-12T10:00:00Z",
+    "status": "Under Investigation",
+    "nlpConfidence": 0.96,
+    "geoMatchDistance": 6.1
+  },
+  {
+    "id": "CIT-2026-106",
+    "projectId": "PRJ-IND-2031",
+    "projectName": "All-Weather Paver Block Pavement in Dense Habitation Sector, Thiruvananthapuram",
+    "district": "Thiruvananthapuram",
+    "state": "Kerala",
+    "complaintText": "The bituminous top layer was laid over uncompacted loose red soil without any crushed stone base course. The entire road surface washed away in two weeks of monsoon rain, creating dangerous trenches.",
+    "contradictionScore": 0.79,
+    "isContradiction": true,
+    "officialClaim": "Bituminous surface course and drainage shoulders completed as per IRC road specifications.",
+    "citizenSummary": "Premature failure and disintegration of road surface due to missing granular sub-base layer.",
+    "submittedAt": "2026-08-16T15:40:00Z",
+    "status": "Quality Audit Scheduled",
+    "nlpConfidence": 0.82,
+    "geoMatchDistance": 0.5
+  },
+  {
+    "id": "CIT-2026-107",
+    "projectId": "PRJ-IND-2038",
+    "projectName": "Construction of Digital Audio-Visual Library & Composite Reading Hall, Jaipur",
+    "district": "Jaipur",
+    "state": "Rajasthan",
+    "complaintText": "The access bridge construction has been completely stalled since March. The contractor left steel rebars exposed to rust in the stream bed and dismantled their site equipment three months ago.",
+    "contradictionScore": 0.86,
+    "isContradiction": true,
+    "officialClaim": "Substructure pier casting complete; deck slab reinforcement in active execution.",
+    "citizenSummary": "Site deserted for three months with exposed rusting rebar, contradicting ongoing active work claims.",
+    "submittedAt": "2026-08-20T12:10:00Z",
+    "status": "Land Survey Ordered",
+    "nlpConfidence": 0.88,
+    "geoMatchDistance": 5.4
+  },
+  {
+    "id": "CIT-2026-108",
+    "projectId": "PRJ-IND-2001",
+    "projectName": "Upgradation and Bituminous Surfacing of Main Rural Feeder Road, Pune",
+    "district": "Pune",
+    "state": "Maharashtra",
+    "complaintText": "The newly paved rural feeder road is smooth and has drastically reduced transport time to the agricultural mandi. We request speed calming rumbler strips near the dispensary crossing.",
+    "contradictionScore": 0.12,
+    "isContradiction": false,
+    "officialClaim": "Road widening and bituminous overhaul completed and handed over.",
+    "citizenSummary": "Citizen verifies successful completion and requests auxiliary road safety measures.",
+    "submittedAt": "2026-06-25T11:00:00Z",
+    "status": "Feedback Noted",
+    "nlpConfidence": 0.95,
+    "geoMatchDistance": 0.4
+  },
+  {
+    "id": "CIT-2026-109",
+    "projectId": "PRJ-IND-2004",
+    "projectName": "Installation of 1500 LPH Community Fluoride and Arsenic Filtration Plant, Pune",
+    "district": "Pune",
+    "state": "Maharashtra",
+    "complaintText": "The automated fluoride filtration plant in our ward was installed last month. Clean water testing was demonstrated to residents and the supply runs daily from 6 AM to 10 AM.",
+    "contradictionScore": 0.08,
+    "isContradiction": false,
+    "officialClaim": "Fluoride filtration plant erected and supply commissioning verified by Junior Engineer.",
+    "citizenSummary": "Citizen corroborates functional operation and daily drinking water distribution.",
+    "submittedAt": "2026-07-02T16:30:00Z",
+    "status": "Corroborated",
+    "nlpConfidence": 0.98,
+    "geoMatchDistance": 0.1
+  },
+  {
+    "id": "CIT-2026-110",
+    "projectId": "PRJ-IND-2010",
+    "projectName": "Modernization of Crematorium Ground with Eco-Friendly Gasifier Furnace, Varanasi",
+    "district": "Varanasi",
+    "state": "Uttar Pradesh",
+    "complaintText": "The material recovery facility shed is fully constructed and segregated dry waste sorting began last Monday. Sanitation workers are actively operating the trommel screen.",
+    "contradictionScore": 0.05,
+    "isContradiction": false,
+    "officialClaim": "Solid waste material recovery facility civil works completed and equipment handed over.",
+    "citizenSummary": "Citizen confirms operational status and active waste processing.",
+    "submittedAt": "2026-07-15T09:15:00Z",
+    "status": "Corroborated",
+    "nlpConfidence": 0.99,
+    "geoMatchDistance": 0.2
+  },
+  {
+    "id": "CIT-2026-111",
+    "projectId": "PRJ-IND-2015",
+    "projectName": "Construction of Covered Reinforced Concrete Stormwater Outfall Drain, Madurai",
+    "district": "Madurai",
+    "state": "Tamil Nadu",
+    "complaintText": "Road widening work is progressing steadily on our sector link. The stone base layer is being compacted with heavy vibratory rollers as scheduled.",
+    "contradictionScore": 0.15,
+    "isContradiction": false,
+    "officialClaim": "Road sub-base construction in progress at 45% completion.",
+    "citizenSummary": "Citizen confirms active site work and heavy machinery compaction as per schedule.",
+    "submittedAt": "2026-07-29T14:00:00Z",
+    "status": "Instructions Dispatched",
+    "nlpConfidence": 0.96
+  },
+  {
+    "id": "CIT-2026-112",
+    "projectId": "PRJ-IND-2022",
+    "projectName": "Emergency Trauma Triage Unit and Solar Inverter Power Backup, Mysuru",
+    "district": "Mysuru",
+    "state": "Karnataka",
+    "complaintText": "The specialized maternal care ward construction is progressing well. Outer brickwork and window frames are in place and electrical conduits are being laid.",
+    "contradictionScore": 0.06,
+    "isContradiction": false,
+    "officialClaim": "Civil superstructure 65% completed with internal electromechanical conduit work active.",
+    "citizenSummary": "Citizen corroborates active building progress and electrical piping.",
+    "submittedAt": "2026-08-04T18:20:00Z",
+    "status": "Corroborated",
+    "nlpConfidence": 0.99
+  },
+  {
+    "id": "CIT-2026-113",
+    "projectId": "PRJ-IND-2050",
+    "projectName": "Construction of Covered Reinforced Concrete Stormwater Outfall Drain, Ahmedabad",
+    "district": "Ahmedabad",
+    "state": "Gujarat",
+    "complaintText": "Contractor has left steel columns unbolted and loose roofing sheets lying in the open ground for over 50 days, creating a hazard for passing cattle and school children.",
+    "contradictionScore": 0.85,
+    "isContradiction": true,
+    "officialClaim": "Structural steel roof truss assembly certified 70% complete.",
+    "citizenSummary": "Unsecured materials and halted erection pose public safety hazard; work stalled.",
+    "submittedAt": "2026-08-19T10:45:00Z",
+    "status": "Inspection Ordered",
+    "nlpConfidence": 0.89
+  },
+  {
+    "id": "CIT-2026-114",
+    "projectId": "PRJ-IND-2072",
+    "projectName": "Setting up of 6-Bed Neonatal Intensive Stabilization Centre at CHC, Sonitpur",
+    "district": "Sonitpur",
+    "state": "Assam",
+    "complaintText": "The new automated pathology analyzer in the district hospital was installed and free diagnostic blood testing began this week. Report delivery is fast and efficient.",
+    "contradictionScore": 0.04,
+    "isContradiction": false,
+    "officialClaim": "Automated clinical analyzer installed, calibrated, and operational for OPD patients.",
+    "citizenSummary": "Citizen confirms clinical machinery is functional and serving patients.",
+    "submittedAt": "2026-08-25T13:30:00Z",
+    "status": "Corroborated",
+    "nlpConfidence": 0.99
+  }
+];
 
-// Attempt direct fetch from /backend/app/data/ if served over HTTP
-let fetchedOverview = null;
 let fetchedProjects = null;
+let fetchedComplaints = null;
 
 try {
   if (typeof fetch === 'function') {
-    const [ovRes, prRes] = await Promise.all([
-      fetch('/backend/app/data/mockOverview.json'),
+    const [prRes, cmRes] = await Promise.all([
       fetch('/backend/app/data/mockProjects.json'),
+      fetch('/backend/app/data/mockComplaints.json'),
     ]);
-    if (ovRes.ok) fetchedOverview = await ovRes.json();
     if (prRes.ok) fetchedProjects = await prRes.json();
+    if (cmRes.ok) fetchedComplaints = await cmRes.json();
   }
 } catch {
-  // Non-HTTP context or offline: fallback silently
+  // Non-HTTP environment or offline: fallback gracefully
 }
 
-export const mockOverview = fetchedOverview || FALLBACK_OVERVIEW;
-export const mockProjects = fetchedProjects || FALLBACK_PROJECTS;
-
-// Compute real aggregated stat values from mockProjects
-const totalProjectsCount = mockProjects.length;
-const highRiskCount = mockProjects.filter(
-  (p) => (p.riskScore != null && p.riskScore >= 60) || p.riskLevel === 'HIGH'
-).length;
-const complianceViolationsCount = mockProjects.filter(
-  (p) => p.costOverrun || p.duplicateRisk || p.paymentProgressMismatch || (p.complianceFlags && p.complianceFlags.length > 0)
-).length;
-const pendingAlertsCount = mockOverview?.summary?.totalActiveAlerts != null 
-  ? mockOverview.summary.totalActiveAlerts 
-  : 18;
+export const allProjects = fetchedProjects || FALLBACK_PROJECTS;
+export const allComplaints = fetchedComplaints || FALLBACK_COMPLAINTS;
 
 /**
- * Top 4 Stat Cards computed from mockProjects.json & mockOverview.json:
- * Total Projects, High Risk Count, Compliance Violations, Pending Alerts
+ * Finds a project record by ID.
  */
-export const summaryStats = [
-  {
-    label: 'Total Projects',
-    value: String(totalProjectsCount),
-    meta: 'All active jurisdictions',
-    isAccent: false,
-  },
-  {
-    label: 'High Risk Count',
-    value: String(highRiskCount),
-    meta: 'Immediate audit review required',
-    isAccent: true,
-  },
-  {
-    label: 'Compliance Violations',
-    value: String(complianceViolationsCount),
-    meta: 'Fund-splitting & anomaly flags',
-    isAccent: false,
-  },
-  {
-    label: 'Pending Alerts',
-    value: String(pendingAlertsCount),
-    meta: 'Awaiting authority response',
-    isAccent: false,
-  },
-];
+export function getProjectById(projectId) {
+  if (!projectId) return allProjects[0] || null;
+  return allProjects.find((p) => p.id === projectId) || allProjects[0] || null;
+}
 
-// Aliases for compatibility
-export const dummyProjects = mockProjects;
-export const projects = mockProjects;
+export const liveCitizenReportsCache = {};
 
-// Priority System Alerts including Citizen Contradiction signals
-export const PRIORITY_ALERTS = [
-  {
-    id: 'ALT-2026-005',
-    projectId: 'PRJ-IND-2003',
-    projectName: 'Construction of Digital Audio-Visual Library & Composite Reading Hall, Pune',
-    state: 'Maharashtra',
-    district: 'Pune',
-    alertType: 'CITIZEN_CONTRADICTION',
-    severity: 'CRITICAL',
-    riskScore: 97,
-    title: 'Citizen Ground Truth Contradiction (97/100) — Pune',
-    description: "Official claim: 'Physical progress certified at 85%; digital library civil structure and composite hall nearing completion.'. Citizen report: 'without a roof slab, windows, or plastering; heavy monsoon water inside'. Flagged: direct physical milestone contradiction.",
-    timestamp: '2026-07-18T11:20:00Z',
-    recommendedAction: 'Deploy District Technical Quality Inspector for physical site inspection and GPS geotag verification.',
-    sourceModule: 'citizen',
-  },
-  {
-    id: 'ALT-2026-001',
-    projectId: 'PRJ-IND-2008',
-    projectName: 'Provision of Modern Dual-Desk Ergonomic Furniture for 12 Classrooms, Lucknow',
-    state: 'Uttar Pradesh',
-    district: 'Lucknow',
-    alertType: 'DUPLICATE_WORK',
-    severity: 'CRITICAL',
-    riskScore: 98,
-    title: 'Duplicate Work Scheme Detected (100% Match) — Lucknow',
-    description: 'Potential cross-year duplicate asset tender matching Supply and Fabrication of Dual-Desk Ergonomic Furniture for 12 School Classrooms, Lucknow (ID: PRJ-IND-2091). Token similarity: 83.51%. Geographic co-location in Lucknow.',
-    timestamp: '2026-08-08T14:30:00Z',
-    recommendedAction: 'Initiate cross-departmental GPS verification survey and physical site inspection to ensure non-duplication of municipal asset funds.',
-    sourceModule: 'duplicate',
-  },
-  {
-    id: 'ALT-2026-003',
-    projectId: 'PRJ-IND-2008',
-    projectName: 'Provision of Modern Dual-Desk Ergonomic Furniture for 12 Classrooms, Lucknow',
-    state: 'Uttar Pradesh',
-    district: 'Lucknow',
-    alertType: 'CITIZEN_CONTRADICTION',
-    severity: 'CRITICAL',
-    riskScore: 88,
-    title: 'Citizen Ground Truth Contradiction (88/100) — Lucknow',
-    description: "Official claim: '100% supply and delivery of modern dual-desk classroom furniture verified by school inspector.'. Citizen report: 'village school children are still sitting on floor mats; only 15 broken wooden benches delivered'. Flagged: direct physical milestone contradiction.",
-    timestamp: '2026-07-24T14:45:00Z',
-    recommendedAction: 'Order physical inventory verification of classroom assets by District Inspector of Schools.',
-    sourceModule: 'citizen',
-  },
-  {
-    id: 'ALT-2026-004',
-    projectId: 'PRJ-IND-2003',
-    projectName: 'Construction of Digital Audio-Visual Library & Composite Reading Hall, Pune',
-    state: 'Maharashtra',
-    district: 'Pune',
-    alertType: 'FINANCIAL_RISK',
-    severity: 'HIGH',
-    riskScore: 67,
-    title: 'Severe Fund Utilization Lead over Physical Milestone — Pune',
-    description: 'Disbursement rate of 51.0% significantly leads verified physical execution of 17.0%, suggesting unverified advance payments beyond statutory limits.',
-    timestamp: '2026-08-01T12:10:00Z',
-    recommendedAction: 'Freeze subsequent tranche disbursement pending physical verification audit by District Collectorate.',
-    sourceModule: 'risk',
-  },
-  {
-    id: 'ALT-2026-002',
-    projectId: 'PRJ-IND-2014',
-    projectName: 'Multi-Village Piped Drinking Water Supply Grid with Automated Flow Meters, Chennai',
-    state: 'Tamil Nadu',
-    district: 'Chennai',
-    alertType: 'CITIZEN_CONTRADICTION',
-    severity: 'CRITICAL',
-    riskScore: 91,
-    title: 'Citizen Ground Truth Contradiction (91/100) — Chennai',
-    description: "Official claim: '80% pipeline network laid with automated flow telemetry testing in progress.'. Citizen report: 'pipes laid loosely along ditch without trenching, disconnected from reservoir; zero water'. Flagged: direct physical milestone contradiction.",
-    timestamp: '2026-08-02T09:30:00Z',
-    recommendedAction: 'Convene joint inspection by Tamil Nadu Water Supply & Drainage Board (TWAD) and Central Audit Team.',
-    sourceModule: 'citizen',
-  },
-  {
-    id: 'ALT-2026-006',
-    projectId: 'PRJ-IND-2015',
-    projectName: 'Construction of Stormwater Surface Drainage Channel, Barabanki',
-    state: 'Uttar Pradesh',
-    district: 'Barabanki',
-    alertType: 'SEASONAL_ANOMALY',
-    severity: 'WARNING',
-    riskScore: 68,
-    title: 'Fiscal Year-End Expenditure Clustering (March Rush) — Barabanki',
-    description: '68.4% of total project disbursements were transacted within the final 6 weeks of the fiscal year without corresponding intermediate civil certifications.',
-    timestamp: '2026-03-29T18:00:00Z',
-    recommendedAction: 'Review contractor milestone certification dates against treasury payment vouchers.',
-    sourceModule: 'trend',
-  },
-];
+/**
+ * Finds citizen complaints linked to a project ID.
+ */
+export function getComplaintsForProject(projectId) {
+  if (!projectId) return [];
+  if (liveCitizenReportsCache[projectId]) {
+    return liveCitizenReportsCache[projectId];
+  }
+  return allComplaints.filter((c) => c.projectId === projectId);
+}
 
-export let liveAlertsCache = null;
-
-export async function fetchLiveAlerts() {
+/**
+ * Asynchronously fetches live citizen reports from backend API.
+ */
+export async function fetchLiveCitizenReports(projectId) {
+  if (!projectId) return [];
   try {
     const token = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('setu_auth_token') : null;
     const headers = {};
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
     }
-    const res = await fetch('http://127.0.0.1:8000/alerts?limit=25', { headers });
+    const res = await fetch(`http://127.0.0.1:8000/projects/${projectId}/citizen-reports`, { headers });
     if (res.ok) {
       const data = await res.json();
-      if (Array.isArray(data)) {
-        liveAlertsCache = data;
-        return data;
+      if (data && data.reports) {
+        liveCitizenReportsCache[projectId] = data.reports;
+        return data.reports;
       }
     }
   } catch (err) {
-    // Fallback to embedded alerts
+    // Graceful fallback to static data
   }
-  return PRIORITY_ALERTS;
-}
-
-// Trigger initial background fetch
-if (typeof window !== 'undefined' && window.fetch) {
-  fetchLiveAlerts().catch(() => {});
-}
-
-export function renderAlertCard(a) {
-  const isCitizen = a.alertType === 'CITIZEN_CONTRADICTION';
-  const isDuplicate = a.alertType === 'DUPLICATE_WORK';
-  const isFinancial = a.alertType === 'FINANCIAL_RISK' || a.alertType === 'PAYMENT_MISMATCH';
-  const isCompliance = a.alertType === 'COMPLIANCE_VIOLATION' || a.alertType === 'COST_OVERRUN' || a.alertType === 'CHRONIC_DELAY';
-  const isSeasonal = a.alertType === 'SEASONAL_ANOMALY';
-
-  const cardModifier = isCitizen
-    ? 'setu-alert-card-citizen'
-    : isDuplicate
-    ? 'setu-alert-card-duplicate'
-    : isFinancial
-    ? 'setu-alert-card-financial'
-    : isCompliance
-    ? 'setu-alert-card-compliance'
-    : isSeasonal
-    ? 'setu-alert-card-seasonal'
-    : '';
-
-  const typeClass = isCitizen
-    ? 'setu-type-citizen'
-    : isDuplicate
-    ? 'setu-type-duplicate'
-    : isFinancial
-    ? 'setu-type-financial'
-    : isCompliance
-    ? 'setu-type-compliance'
-    : 'setu-type-seasonal';
-
-  const typeLabel = isCitizen
-    ? 'Citizen Contradiction'
-    : isDuplicate
-    ? 'Duplicate Work'
-    : isFinancial
-    ? 'Financial Risk'
-    : isCompliance
-    ? 'Compliance Violation'
-    : 'Seasonal Anomaly';
-
-  const sevLower = (a.severity || 'WARNING').toLowerCase();
-  const sevClass = sevLower === 'critical'
-    ? 'setu-severity-critical'
-    : sevLower === 'high'
-    ? 'setu-severity-high'
-    : sevLower === 'warning'
-    ? 'setu-severity-warning'
-    : 'setu-severity-low';
-
-  const sourceLabel = a.sourceModule === 'citizen'
-    ? 'Citizen Ground Truth NLP Engine'
-    : a.sourceModule === 'duplicate'
-    ? 'Duplicate Work Detection Engine'
-    : a.sourceModule === 'risk'
-    ? 'Financial Risk & SHAP Engine'
-    : a.sourceModule === 'compliance'
-    ? 'Statutory Compliance Rule Engine'
-    : 'Trend & March-Rush Analysis Engine';
-
-  return `
-    <div class="setu-alert-card ${cardModifier}">
-      <div class="setu-alert-header">
-        <div class="setu-alert-badges">
-          <span class="${sevClass}">${a.severity || 'WARNING'}</span>
-          <span class="setu-type-badge ${typeClass}">${typeLabel}</span>
-          <span style="font-family: var(--setu-font-mono); font-size: var(--setu-font-size-caption); color: var(--setu-color-text-muted);">
-            ${a.id}
-          </span>
-        </div>
-        <span style="font-size: var(--setu-font-size-caption); color: var(--setu-color-text-muted);">
-          ${a.timestamp ? a.timestamp.split('T')[0] : '2026-08'}
-        </span>
-      </div>
-
-      <h3 class="setu-alert-title">${a.title}</h3>
-
-      <a href="#/project/${a.projectId}" class="setu-alert-project-ref">
-        <strong>${a.projectName}</strong> (${a.projectId}) • ${a.district}, ${a.state} →
-      </a>
-
-      <p class="setu-alert-desc">
-        ${a.description}
-      </p>
-
-      ${a.recommendedAction ? `
-        <div class="setu-alert-action-box">
-          <strong>Recommended Auditor Action:</strong> ${a.recommendedAction}
-        </div>
-      ` : ''}
-
-      <div class="setu-alert-footer">
-        <span class="setu-alert-source">Source: ${sourceLabel}</span>
-        <a href="#/project/${a.projectId}" class="setu-btn-primary" style="padding: 2px 10px; font-size: var(--setu-font-size-caption);">
-          Inspect Project Record
-        </a>
-      </div>
-    </div>
-  `;
+  return getComplaintsForProject(projectId);
 }
 
 /**
- * Generates HTML string for the dedicated Alerts view.
+ * Generates a plain-language risk score explanation.
  */
-export function getAlertsViewHtml(filter = 'ALL') {
-  const allowedProjectIds = scopedProjectsCache ? new Set(scopedProjectsCache.map((p) => p.id)) : null;
-  const rawAlerts = liveAlertsCache || PRIORITY_ALERTS;
-  const alerts = allowedProjectIds
-    ? rawAlerts.filter((a) => !a.projectId || allowedProjectIds.has(a.projectId))
-    : rawAlerts;
-  const filtered = filter === 'ALL'
-    ? alerts
-    : alerts.filter(a => a.alertType === filter || (filter === 'CITIZEN_CONTRADICTION' && a.alertType === 'CITIZEN_CONTRADICTION'));
+export function getRiskExplanation(p) {
+  if (!p) return '';
+  const score = p.riskScore || 0;
+  
+  if (score >= 60 || p.riskLevel === 'HIGH') {
+    const reasons = [];
+    if (p.paymentProgressMismatch) {
+      reasons.push(`Disbursement rate of ${p.financialProgress}% significantly leads verified physical execution of ${p.physicalProgress}%, suggesting unverified advance payments.`);
+    }
+    if (p.duplicateRisk) {
+      reasons.push('Geospatial clustering indicates a 91% similarity with a prior municipality-funded asset within 400 meters.');
+    }
+    if (p.costOverrun) {
+      reasons.push(`Expenditures approach the sanctioned ceiling of ₹${Number(p.sanctionedAmount).toLocaleString('en-IN')} while primary civil milestones remain incomplete.`);
+    }
+    if (p.daysDelayed > 0) {
+      reasons.push(`Implementation has experienced chronic timeline slippage of ${p.daysDelayed} days beyond the statutory milestone schedule.`);
+    }
+    if (reasons.length === 0) {
+      reasons.push('Anomalous material procurement pace and delayed stage certification recorded during nodal audit review.');
+    }
+    return `HIGH RISK (${score}/100) — Priority Audit Intervention Recommended. ${reasons.join(' ')}`;
+  }
 
-  const alertCardsHtml = filtered.map(renderAlertCard).join('');
+  if (score >= 40 || p.riskLevel === 'MEDIUM') {
+    const delayText = p.daysDelayed > 0 ? ` with minor timeline lag of ${p.daysDelayed} days.` : '.';
+    return `MEDIUM RISK (${score}/100) — Moderate Monitoring Recommended. Work progress and fund disbursement are largely aligned with scheduled milestones${delayText}`;
+  }
 
-  return `
-    <div class="setu-dashboard">
-      <div class="setu-page-header">
-        <h1 class="setu-page-title">National Audit Alerts Registry</h1>
-        <p class="setu-page-desc">
-          Aggregated and ranked oversight alerts across Citizen Ground Truth, Financial Risk, Duplicate Schemes, and Compliance Engines.
+  return `LOW RISK (${score}/100) — Healthy Implementation. All milestones are on schedule with verified physical sign-offs and balanced expenditure pacing.`;
+}
+
+/**
+ * Generates formatted HTML for Project Detail tabbed view.
+ */
+export function getProjectDetailHtml(projectId, activeTab = 'overview') {
+  const p = getProjectById(projectId);
+  if (!p) {
+    return `
+      <div class="setu-detail-container">
+        <div class="setu-empty-state">
+          <h2 class="setu-empty-state-title">Project Not Found</h2>
+          <p class="setu-empty-state-text">No project matching ID "${projectId}" could be found.</p>
+          <a href="#/dashboard" class="setu-btn-primary" style="margin-top: 16px;">Return to Dashboard</a>
+        </div>
+      </div>
+    `;
+  }
+
+  const complaints = getComplaintsForProject(p.id);
+  const isHighRisk = (p.riskScore != null && p.riskScore >= 60) || p.riskLevel === 'HIGH';
+  const badgeClass = isHighRisk ? 'setu-badge-risk-high' : 'setu-badge-risk-neutral';
+  const riskLevel = p.riskLevel || (p.riskScore >= 60 ? 'HIGH' : p.riskScore >= 40 ? 'MED' : 'LOW');
+
+  // Count compliance flags
+  const complianceCount = (p.costOverrun ? 1 : 0) + 
+                          (p.duplicateRisk ? 1 : 0) + 
+                          (p.paymentProgressMismatch ? 1 : 0) + 
+                          (p.daysDelayed > 45 ? 1 : 0);
+
+  // Tab buttons
+  const tabs = [
+    { id: 'overview', label: 'Overview' },
+    { id: 'financials', label: 'Financials' },
+    { id: 'compliance', label: 'Compliance', badge: complianceCount, isAlert: complianceCount > 0 },
+    { id: 'citizen-reports', label: 'Citizen Reports', badge: complaints.length, isAlert: complaints.some(c => c.isContradiction) },
+    { id: 'audit-trail', label: 'Audit Trail' }
+  ];
+
+  const tabsHtml = tabs.map(t => {
+    const isActive = (t.id === activeTab) ? 'active' : '';
+    const badgeHtml = t.badge !== undefined ? `
+      <span class="setu-tab-badge ${t.isAlert ? 'setu-tab-badge-alert' : ''}">${t.badge}</span>
+    ` : '';
+    return `
+      <button type="button" class="setu-tab-btn ${isActive}" data-tab="${t.id}" id="tab-btn-${t.id}">
+        ${t.label} ${badgeHtml}
+      </button>
+    `;
+  }).join('');
+
+  // Tab Panels Content
+  let tabContentHtml = '';
+
+  if (activeTab === 'overview') {
+    tabContentHtml = `
+      <div class="setu-info-grid">
+        <div class="setu-info-card">
+          <h3 class="setu-info-card-title">Geographic & Parliamentary Scope</h3>
+          <div class="setu-kv-list">
+            <div class="setu-kv-row">
+              <span class="setu-kv-label">State</span>
+              <span class="setu-kv-value">${p.state}</span>
+            </div>
+            <div class="setu-kv-row">
+              <span class="setu-kv-label">District</span>
+              <span class="setu-kv-value">${p.district}</span>
+            </div>
+            <div class="setu-kv-row">
+              <span class="setu-kv-label">Constituency</span>
+              <span class="setu-kv-value">${p.constituency}</span>
+            </div>
+            <div class="setu-kv-row">
+              <span class="setu-kv-label">Member of Parliament</span>
+              <span class="setu-kv-value">${p.mpName}</span>
+            </div>
+            <div class="setu-kv-row">
+              <span class="setu-kv-label">MP Code</span>
+              <span class="setu-kv-value" style="font-family: var(--setu-font-mono);">${p.mpId}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="setu-info-card">
+          <h3 class="setu-info-card-title">Scheme Implementation Details</h3>
+          <div class="setu-kv-list">
+            <div class="setu-kv-row">
+              <span class="setu-kv-label">Scheme Category</span>
+              <span class="setu-kv-value">${p.category}</span>
+            </div>
+            <div class="setu-kv-row">
+              <span class="setu-kv-label">Current Work Status</span>
+              <span class="setu-kv-value"><span class="setu-status-tag">${p.status}</span></span>
+            </div>
+            <div class="setu-kv-row">
+              <span class="setu-kv-label">Implementing Agency</span>
+              <span class="setu-kv-value">${p.implementingAgency}</span>
+            </div>
+            <div class="setu-kv-row">
+              <span class="setu-kv-label">Executing Vendor</span>
+              <span class="setu-kv-value">${p.vendorName || 'Not Assigned'}</span>
+            </div>
+            <div class="setu-kv-row">
+              <span class="setu-kv-label">Physical Completion</span>
+              <span class="setu-kv-value">${p.physicalProgress}%</span>
+            </div>
+          </div>
+          <div class="setu-progress-container" style="margin-top: var(--setu-space-2);">
+            <div class="setu-progress-track">
+              <div class="setu-progress-bar" style="width: ${p.physicalProgress}%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  } else if (activeTab === 'financials') {
+    const sanctionedFormatted = `₹${Number(p.sanctionedAmount).toLocaleString('en-IN')}`;
+    const expenditureFormatted = `₹${Number(p.expenditure).toLocaleString('en-IN')}`;
+    const balance = Math.max(0, p.sanctionedAmount - p.expenditure);
+    const balanceFormatted = `₹${Number(balance).toLocaleString('en-IN')}`;
+    const finRate = p.financialProgress ? p.financialProgress.toFixed(1) : '0.0';
+
+    tabContentHtml = `
+      <div class="setu-metric-grid">
+        <div class="setu-metric-box">
+          <span class="setu-metric-label">Sanctioned Amount</span>
+          <span class="setu-metric-value">${sanctionedFormatted}</span>
+          <span class="setu-metric-meta">Statutory MPLADS Sanction</span>
+        </div>
+        <div class="setu-metric-box">
+          <span class="setu-metric-label">Total Expenditure</span>
+          <span class="setu-metric-value">${expenditureFormatted}</span>
+          <span class="setu-metric-meta">${finRate}% of Sanctioned Budget</span>
+        </div>
+        <div class="setu-metric-box">
+          <span class="setu-metric-label">Unspent Balance</span>
+          <span class="setu-metric-value">${balanceFormatted}</span>
+          <span class="setu-metric-meta">Remaining Project Funds</span>
+        </div>
+        <div class="setu-metric-box ${isHighRisk ? 'setu-metric-box-alert' : ''}">
+          <span class="setu-metric-label">Risk Evaluation</span>
+          <span class="setu-metric-value" style="${isHighRisk ? 'color: var(--setu-color-accent-dark);' : ''}">
+            ${p.riskScore} <span style="font-size: var(--setu-font-size-small);">/ 100</span>
+          </span>
+          <span class="setu-metric-meta">${riskLevel} Risk Level</span>
+        </div>
+      </div>
+
+      <div class="setu-card" style="margin-top: var(--setu-space-4); border-left: 3px solid ${isHighRisk ? 'var(--setu-color-accent-base)' : 'var(--setu-color-primary-base)'};">
+        <span class="setu-card-label" style="font-size: var(--setu-font-size-caption);">Audit & Predictive Risk Analysis</span>
+        <p style="font-size: var(--setu-font-size-body); line-height: 1.6; color: var(--setu-color-text-primary); margin: var(--setu-space-2) 0 0 0;">
+          ${getRiskExplanation(p)}
         </p>
       </div>
 
-      <div class="setu-alert-section">
-        <div class="setu-alert-section-header">
-          <div>
-            <h2 class="setu-table-title">Active System Alerts (${filtered.length})</h2>
-            <span class="setu-table-subtitle">Surfacing verified citizen ground-truth contradictions alongside institutional signals</span>
-          </div>
-          <div class="setu-alert-filter-group">
-            <button type="button" class="setu-filter-pill ${filter === 'ALL' ? 'active' : ''}" onclick="window.setuSetAlertFilter && window.setuSetAlertFilter('ALL')">All Alerts</button>
-            <button type="button" class="setu-filter-pill ${filter === 'CITIZEN_CONTRADICTION' ? 'active' : ''}" onclick="window.setuSetAlertFilter && window.setuSetAlertFilter('CITIZEN_CONTRADICTION')">Citizen Contradictions</button>
-            <button type="button" class="setu-filter-pill ${filter === 'DUPLICATE_WORK' ? 'active' : ''}" onclick="window.setuSetAlertFilter && window.setuSetAlertFilter('DUPLICATE_WORK')">Duplicate Work</button>
-            <button type="button" class="setu-filter-pill ${filter === 'FINANCIAL_RISK' ? 'active' : ''}" onclick="window.setuSetAlertFilter && window.setuSetAlertFilter('FINANCIAL_RISK')">Financial Risk</button>
-          </div>
-        </div>
-
-        <div class="setu-alert-list">
-          ${alertCardsHtml.length > 0 ? alertCardsHtml : `
-            <div class="setu-empty-state">
-              <h4 class="setu-empty-state-title">No Alerts Matching Selected Filter</h4>
-              <p class="setu-empty-state-text">No active anomalies or contradictions recorded under this criterion.</p>
+      <div class="setu-info-grid" style="margin-top: var(--setu-space-5);">
+        <div class="setu-info-card">
+          <h3 class="setu-info-card-title">Fund Absorption & Milestone Metrics</h3>
+          <div class="setu-kv-list">
+            <div class="setu-kv-row">
+              <span class="setu-kv-label">Physical Completion</span>
+              <span class="setu-kv-value">${p.physicalProgress}%</span>
             </div>
-          `}
+            <div class="setu-kv-row">
+              <span class="setu-kv-label">Financial Utilization</span>
+              <span class="setu-kv-value">${finRate}%</span>
+            </div>
+            <div class="setu-kv-row">
+              <span class="setu-kv-label">Progress Lead / Lag</span>
+              <span class="setu-kv-value" style="color: ${p.paymentProgressMismatch ? 'var(--setu-color-accent-dark)' : 'var(--setu-color-text-primary)'};">
+                ${p.paymentProgressMismatch ? 'Disbursement Exceeds Physical by > 25%' : 'Within Normal Thresholds'}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="setu-info-card">
+          <h3 class="setu-info-card-title">Scheme Allocation Framework</h3>
+          <div class="setu-kv-list">
+            <div class="setu-kv-row">
+              <span class="setu-kv-label">MP Annual Entitlement</span>
+              <span class="setu-kv-value">₹5.00 Crore / Year</span>
+            </div>
+            <div class="setu-kv-row">
+              <span class="setu-kv-label">Tranche Structure</span>
+              <span class="setu-kv-value">Two ₹2.5 Crore Installments</span>
+            </div>
+            <div class="setu-kv-row">
+              <span class="setu-kv-label">Auditing Authority</span>
+              <span class="setu-kv-value">District Magistrate / CAG Audit</span>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-  `;
-}
-
-// Server-side scoped project cache
-let scopedProjectsCache = null;
-
-export async function fetchScopedProjects() {
-  const token = sessionStorage.getItem('setu_auth_token');
-  const headers = {};
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-  fetchLiveAlerts().catch(() => {});
-  try {
-    const res = await fetch('http://127.0.0.1:8000/projects', { headers });
-    if (res.ok) {
-      const data = await res.json();
-      if (Array.isArray(data)) {
-        scopedProjectsCache = data;
-        return data;
-      }
-    }
-  } catch (err) {
-    // Graceful offline fallback
-  }
-
-  // Fallback to client-side filter using stored user info
-  const rawUser = sessionStorage.getItem('setu_auth_user');
-  if (rawUser) {
-    try {
-      const user = JSON.parse(rawUser);
-      if (user.accessScope === 'district_all' || user.district) {
-        scopedProjectsCache = mockProjects.filter(
-          (p) => p.district?.toLowerCase() === (user.district || '').toLowerCase()
-        );
-        return scopedProjectsCache;
-      } else if (user.accessScope === 'state_rollup' || user.state) {
-        scopedProjectsCache = mockProjects.filter(
-          (p) => p.state?.toLowerCase() === (user.state || '').toLowerCase()
-        );
-        return scopedProjectsCache;
-      } else if (user.accessScope === 'agency_assigned_only' || user.roleId?.includes('agency')) {
-        scopedProjectsCache = mockProjects.filter((p) => {
-          if (user.district && p.district?.toLowerCase() !== user.district.toLowerCase()) return false;
-          if (user.agency) {
-            const uAgency = user.agency.toLowerCase();
-            const pAgency = (p.implementingAgency || '').toLowerCase();
-            if (pAgency.includes(uAgency) || uAgency.includes(pAgency)) return true;
-            const baseU = uAgency.split('—')[0].split('-')[0].trim();
-            const baseP = pAgency.split('—')[0].split('-')[0].trim();
-            if (baseU && baseP.includes(baseU)) return true;
-          }
-          return false;
-        });
-        return scopedProjectsCache;
-      }
-    } catch {}
-  }
-  scopedProjectsCache = mockProjects;
-  return scopedProjectsCache;
-}
-
-/**
- * Returns HTML string representation of the Dashboard for vanilla layout embedding.
- */
-export function getDashboardHtml(customUser = null, customProjects = null) {
-  let user = customUser;
-  if (!user) {
-    const rawUser = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('setu_auth_user') : null;
-    if (rawUser) {
-      try {
-        user = JSON.parse(rawUser);
-      } catch {}
-    }
-  }
-
-  let projectsToUse = customProjects || scopedProjectsCache;
-  if (!projectsToUse && user) {
-    if (user.accessScope === 'district_all' || (user.district && !user.accessScope?.includes('national'))) {
-      projectsToUse = mockProjects.filter(
-        (p) => p.district?.toLowerCase() === (user.district || '').toLowerCase()
-      );
-    } else if (user.accessScope === 'state_rollup' || user.state) {
-      projectsToUse = mockProjects.filter(
-        (p) => p.state?.toLowerCase() === (user.state || '').toLowerCase()
-      );
-    } else if (user.accessScope === 'constituency_only' || user.constituency) {
-      projectsToUse = mockProjects.filter(
-        (p) => p.constituency?.toLowerCase() === (user.constituency || '').toLowerCase()
-      );
-    } else if (user.accessScope === 'agency_assigned_only' || user.roleId?.includes('agency')) {
-      projectsToUse = mockProjects.filter((p) => {
-        if (user.district && p.district?.toLowerCase() !== user.district.toLowerCase()) return false;
-        if (user.agency) {
-          const uAgency = user.agency.toLowerCase();
-          const pAgency = (p.implementingAgency || '').toLowerCase();
-          if (pAgency.includes(uAgency) || uAgency.includes(pAgency)) return true;
-          const baseU = uAgency.split('—')[0].split('-')[0].trim();
-          const baseP = pAgency.split('—')[0].split('-')[0].trim();
-          if (baseU && baseP.includes(baseU)) return true;
-        }
-        return false;
+    `;
+  } else if (activeTab === 'compliance') {
+    const flags = [];
+    if (p.paymentProgressMismatch) {
+      flags.push({
+        code: 'COMP-PAY-01',
+        type: 'PAYMENT_PROGRESS_MISMATCH',
+        title: 'Payment Progress Exceeds Certified Physical Stage',
+        desc: `Disbursement rate (${p.financialProgress}%) exceeds physical progress (${p.physicalProgress}%) by more than statutory threshold without corresponding stage measurement certificate.`
       });
-    } else {
-      projectsToUse = mockProjects;
     }
-  }
-  if (!projectsToUse) {
-    projectsToUse = mockProjects;
-  }
+    if (p.duplicateRisk) {
+      flags.push({
+        code: 'COMP-DUP-02',
+        type: 'DUPLICATE_ASSET_RISK',
+        title: 'Potential Duplicate Asset Work Detected',
+        desc: `Geospatial coordinate match indicates a similar civil asset was funded under municipal or state grant within 400m of this location in the prior financial year.`
+      });
+    }
+    if (p.costOverrun) {
+      flags.push({
+        code: 'COMP-OVR-03',
+        type: 'COST_OVERRUN_WARNING',
+        title: 'Budget Exhaustion Preceding Final Milestone',
+        desc: `Expenditures have surpassed proportional completion stages. Additional escalation approval will be required from the State Nodal Authority.`
+      });
+    }
+    if (p.daysDelayed > 45) {
+      flags.push({
+        code: 'COMP-DEL-04',
+        type: 'CHRONIC_TIMELINE_DELAY',
+        title: 'Milestone Execution Delayed Beyond 45 Days',
+        desc: `Work execution has slipped by ${p.daysDelayed} days against approved administrative schedule without formal extension submitted.`
+      });
+    }
 
-  // Recalculate dynamic scoped stats
-  const totalCount = projectsToUse.length;
-  const highRiskCount = projectsToUse.filter(
-    (p) => (p.riskScore != null && p.riskScore >= 60) || p.riskLevel === 'HIGH'
-  ).length;
-  const complianceViolationsCount = projectsToUse.filter(
-    (p) => p.costOverrun || p.duplicateRisk || p.paymentProgressMismatch || (p.complianceFlags && p.complianceFlags.length > 0)
-  ).length;
-  const allowedProjectIds = new Set(projectsToUse.map((p) => p.id));
-  const alertsPool = (liveAlertsCache || PRIORITY_ALERTS).filter(
-    (a) => a.projectId && allowedProjectIds.has(a.projectId)
-  );
-  const pendingAlertsCount = alertsPool.length;
+    if (flags.length > 0) {
+      const flagsHtml = flags.map(f => `
+        <div class="setu-flag-card">
+          <div class="setu-flag-header">
+            <h4 class="setu-flag-title">${f.title}</h4>
+            <span class="setu-detail-id-tag">${f.code}</span>
+          </div>
+          <p class="setu-flag-desc">${f.desc}</p>
+        </div>
+      `).join('');
 
-  const dynamicStats = [
-    {
-      label: 'Scoped Projects',
-      value: String(totalCount),
-      meta: user ? (user.district || user.state || 'National Portfolio') : 'All active jurisdictions',
-      isAccent: false,
-    },
-    {
-      label: 'High Risk Count',
-      value: String(highRiskCount),
-      meta: 'Immediate audit review required',
-      isAccent: true,
-    },
-    {
-      label: 'Compliance Violations',
-      value: String(complianceViolationsCount),
-      meta: 'Fund-splitting & anomaly flags',
-      isAccent: false,
-    },
-    {
-      label: 'Pending Alerts',
-      value: String(pendingAlertsCount),
-      meta: 'Awaiting authority response',
-      isAccent: false,
-    },
-  ];
-
-  const statsHtml = dynamicStats
-    .map(
-      (stat) => `
-      <div class="setu-card">
-        <span class="setu-card-label">${stat.label}</span>
-        <span class="setu-card-value ${stat.isAccent ? 'setu-card-value-accent' : ''}">${stat.value}</span>
-        <span class="setu-card-meta">${stat.meta}</span>
-      </div>`
-    )
-    .join('');
-
-  // Top priority alerts stream strictly scoped to user's authorized projects
-  const alertsToDisplay = alertsPool.slice(0, 4);
-  const alertsHtml = alertsToDisplay.length > 0
-    ? alertsToDisplay.map(renderAlertCard).join('')
-    : `<div class="setu-alert-card" style="padding: 24px; text-align: center; color: var(--setu-color-text-muted);">
-         <span style="font-weight: var(--setu-font-weight-medium); font-size: var(--setu-font-size-body);">
-           No active risk or compliance alerts flagged for projects in this jurisdiction.
-         </span>
-       </div>`;
-
-  // Sort high risk first for auditor review workflow
-  const sortedProjects = [...projectsToUse].sort((a, b) => (b.riskScore || 0) - (a.riskScore || 0));
-
-  const rowsHtml = sortedProjects
-    .map((p) => {
-      const isHighRisk = (p.riskScore != null && p.riskScore >= 60) || p.riskLevel === 'HIGH';
-      const badgeClass = isHighRisk ? 'setu-badge-risk-high' : 'setu-badge-risk-neutral';
-      const riskLevel = p.riskLevel || (p.riskScore >= 60 ? 'HIGH' : p.riskScore >= 40 ? 'MED' : 'LOW');
-
-      return `
-      <tr class="setu-clickable-row" data-project-id="${p.id}" onclick="window.location.hash='#/project/${p.id}'">
-        <td>
-          <a href="#/project/${p.id}" style="color: inherit; text-decoration: none;">
-            <div class="setu-project-name">${p.name}</div>
-            <div class="setu-project-id">${p.id}</div>
-          </a>
-        </td>
-        <td>${p.district}</td>
-        <td>${p.category}</td>
-        <td><span class="setu-status-tag">${p.status}</span></td>
-        <td>
-          <span class="setu-badge ${badgeClass}">
-            ${p.riskScore} (${riskLevel})
-          </span>
-        </td>
-      </tr>`;
-    })
-    .join('');
-
-  return `
-    <div class="setu-dashboard">
-      <div class="setu-page-header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: var(--setu-space-2);">
+      tabContentHtml = `
         <div>
-          <h1 class="setu-page-title">Projects Audit Dashboard</h1>
-          <p class="setu-page-desc">
-            ${user ? `Logged in: <strong>${user.role}</strong> (${user.jurisdiction || user.district || 'National'})` : 'National Monitoring & Risk Engine Overview'}
-          </p>
-        </div>
-        ${user ? `
-          <div style="background-color: var(--setu-color-bg-subtle); padding: 4px 10px; border-radius: 4px; border: 1px solid var(--setu-color-border-subtle); font-size: var(--setu-font-size-caption);">
-            Jurisdiction Filter: <strong>${user.district || user.state || 'All India (National)'}</strong> (${totalCount} works)
-          </div>` : ''}
-      </div>
-
-      <div class="setu-stat-grid">
-        ${statsHtml}
-      </div>
-
-      <!-- Priority System Alerts Feed (Surfacing CITIZEN_CONTRADICTION) -->
-      <div class="setu-alert-section">
-        <div class="setu-alert-section-header">
-          <div>
-            <h2 class="setu-table-title">High-Priority Audit Alerts & Discrepancies</h2>
-            <span class="setu-table-subtitle">Surfacing ground-truth citizen contradictions, duplicate tenders, and high-risk anomalies</span>
-          </div>
-          <div style="display: flex; align-items: center; gap: var(--setu-space-2);">
-            <span class="setu-badge setu-badge-risk-high">Real-time NLP Alerts Active</span>
-          </div>
-        </div>
-        <div class="setu-alert-list">
-          ${alertsHtml}
-        </div>
-      </div>
-
-      <!-- Audited Projects Table -->
-      <div class="setu-table-card">
-        <div class="setu-table-card-header">
-          <div>
-            <h2 class="setu-table-title">Audited Projects (${sortedProjects.length})</h2>
-            <span class="setu-table-subtitle">
-              ${user && user.district ? `Displaying only works within ${user.district} District Authority jurisdiction` : user && user.state ? `Displaying only works within ${user.state} State Nodal jurisdiction` : 'Recent priority projects flagged by Risk & Contradiction engines'}
+          <div style="margin-bottom: var(--setu-space-4);">
+            <h3 style="font-size: var(--setu-font-size-subheading); color: var(--setu-color-accent-dark); margin: 0;">
+              Active Compliance Engine Flags (${flags.length})
+            </h3>
+            <span style="font-size: var(--setu-font-size-small); color: var(--setu-color-text-secondary);">
+              Violations flagged for administrative review prior to next fund tranche release
             </span>
           </div>
+          ${flagsHtml}
         </div>
-        <div class="setu-table-container">
-          <table class="setu-table">
-            <thead>
-              <tr>
-                <th>Project Name & ID</th>
-                <th>District</th>
-                <th>Category</th>
-                <th>Status</th>
-                <th>Risk Score</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${rowsHtml}
-              ${sortedProjects.length === 0 ? `
-                <tr>
-                  <td colspan="5" style="text-align: center; padding: 24px; color: var(--setu-color-text-secondary);">
-                    No projects found within your authorized jurisdiction.
-                  </td>
-                </tr>
-              ` : ''}
-            </tbody>
-          </table>
+      `;
+    } else {
+      tabContentHtml = `
+        <div class="setu-empty-state">
+          <h4 class="setu-empty-state-title">No Compliance Flags Detected</h4>
+          <p class="setu-empty-state-text">
+            This project conforms with MPLADS operational guidelines, statutory single-tender ceiling rules, and scheduled milestone pacing.
+          </p>
+        </div>
+      `;
+    }
+  } else if (activeTab === 'citizen-reports') {
+    if (complaints.length > 0) {
+      const complaintsHtml = complaints.map(c => {
+        const rawScore = c.contradictionScore != null ? c.contradictionScore : 0;
+        const score = Math.round(rawScore <= 1.0 ? rawScore * 100 : rawScore);
+        const isHighContradiction = score >= 60 || c.isContradiction;
+        const isMedContradiction = score >= 30 && score < 60;
+        
+        const badgeClass = isHighContradiction
+          ? 'setu-badge-contradiction-high'
+          : isMedContradiction
+          ? 'setu-badge-contradiction-med'
+          : 'setu-badge-contradiction-low';
+
+        const badgeText = isHighContradiction
+          ? `Contradiction Flagged (${score}/100)`
+          : isMedContradiction
+          ? `Moderate Discrepancy (${score}/100)`
+          : `Corroborated (${score}/100)`;
+
+        const cardModifier = isHighContradiction
+          ? 'setu-complaint-card-contradiction'
+          : 'setu-complaint-card-corroborated';
+
+        const matchedClaim = c.matchedOfficialClaim || c.officialClaim;
+        const explanation = c.plainLanguageExplanation || c.citizenSummary;
+
+        const geoBadgeHtml = (c.geoMatchDistance != null)
+          ? `<span class="setu-geo-badge ${c.geoMatchDistance <= 2.0 ? 'setu-geo-near' : 'setu-geo-far'}">
+              ${c.geoMatchDistance <= 2.0 
+                ? `📍 Reported near-site (${Number(c.geoMatchDistance).toFixed(1)}km away)` 
+                : `⚠ Reported far from registered site (${Number(c.geoMatchDistance).toFixed(1)}km away)`}
+            </span>`
+          : '';
+
+        return `
+          <div class="setu-complaint-card ${cardModifier}">
+            <div class="setu-complaint-header">
+              <div style="display: flex; align-items: center; gap: var(--setu-space-2); flex-wrap: wrap;">
+                <span class="setu-card-label" style="font-family: var(--setu-font-mono);">${c.id}</span>
+                <span style="font-size: var(--setu-font-size-caption); color: var(--setu-color-text-muted);">
+                  • Submitted: ${c.submittedAt ? c.submittedAt.split('T')[0] : '2026-08'}
+                </span>
+                ${c.status ? `
+                  <span style="font-size: var(--setu-font-size-caption); color: var(--setu-color-neutral-600); background-color: var(--setu-color-bg-subtle); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--setu-color-border-subtle);">
+                    ${c.status}
+                  </span>
+                ` : ''}
+              </div>
+
+              <div style="display: flex; align-items: center; gap: var(--setu-space-2); flex-wrap: wrap;">
+                ${geoBadgeHtml}
+                <!-- Colored contradictionScore badge — high score in accent/warning color -->
+                <span class="setu-badge ${badgeClass}">
+                  ${badgeText}
+                </span>
+              </div>
+            </div>
+
+            <!-- 1. Citizen Complaint Text -->
+            <div class="setu-complaint-text-box">
+              <span class="setu-complaint-label">
+                Citizen Ground-Truth Observation:
+              </span>
+              <p class="setu-complaint-text">
+                "${c.complaintText}"
+              </p>
+            </div>
+
+            <!-- 2. Matched Official Claim -->
+            ${matchedClaim ? `
+              <div class="setu-claim-box">
+                <span class="setu-claim-label">
+                  Matched Official Portal Claim / Milestone:
+                </span>
+                <div class="setu-claim-text">
+                  ${matchedClaim}
+                </div>
+              </div>
+            ` : ''}
+
+            <!-- 3. Plain Language Explanation -->
+            ${explanation ? `
+              <div class="${isHighContradiction ? 'setu-explanation-box' : 'setu-claim-box'}">
+                <span class="${isHighContradiction ? 'setu-explanation-label' : 'setu-claim-label'}">
+                  ${isHighContradiction ? '⚠ Audit Contradiction Analysis:' : 'Audit Verification Summary:'}
+                </span>
+                <div class="${isHighContradiction ? 'setu-explanation-text' : 'setu-claim-text'}">
+                  ${explanation}
+                </div>
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+
+      tabContentHtml = `
+        <div>
+          <div style="margin-bottom: var(--setu-space-4); display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: var(--setu-space-2);">
+            <div>
+              <h3 style="font-size: var(--setu-font-size-subheading); color: var(--setu-color-text-primary); margin: 0;">
+                Citizen Grievances & NLP Contradiction Reports (${complaints.length})
+              </h3>
+              <span style="font-size: var(--setu-font-size-small); color: var(--setu-color-text-secondary);">
+                On-ground physical reports submitted through the Citizen Transparency Interface
+              </span>
+            </div>
+            <span id="setu-live-sync-indicator" style="font-size: var(--setu-font-size-caption); color: var(--setu-color-text-muted); font-style: italic;">
+              Synced with Citizen NLP Engine
+            </span>
+          </div>
+          ${complaintsHtml}
+        </div>
+      `;
+    } else {
+      tabContentHtml = `
+        <div class="setu-empty-state">
+          <h4 class="setu-empty-state-title">No Citizen Grievances Recorded</h4>
+          <p class="setu-empty-state-text">
+            No public contradictions or grievances have been filed for this project. Citizens can submit ground verification reports via the public Citizen Portal.
+          </p>
+        </div>
+      `;
+    }
+  } else if (activeTab === 'audit-trail') {
+    tabContentHtml = `
+      <div>
+        <div style="margin-bottom: var(--setu-space-4);">
+          <h3 style="font-size: var(--setu-font-size-subheading); color: var(--setu-color-text-primary); margin: 0;">
+            Project Chronology & Audit Events
+          </h3>
+          <span style="font-size: var(--setu-font-size-small); color: var(--setu-color-text-secondary);">
+            Tamper-evident administrative timeline recorded by District Authority and Implementing Agency
+          </span>
+        </div>
+
+        <div class="setu-timeline">
+          <div class="setu-timeline-item">
+            <div class="setu-timeline-dot"></div>
+            <span class="setu-timeline-date">2025-08-14 • 10:30 AM</span>
+            <span class="setu-timeline-action">Work Proposal Submitted</span>
+            <span class="setu-timeline-actor">Initiated by ${p.mpName} (${p.constituency})</span>
+          </div>
+
+          <div class="setu-timeline-item">
+            <div class="setu-timeline-dot"></div>
+            <span class="setu-timeline-date">2025-09-22 • 03:15 PM</span>
+            <span class="setu-timeline-action">Technical Feasibility & Cost Estimation Sanctioned</span>
+            <span class="setu-timeline-actor">Verified by Executive Engineer, ${p.implementingAgency}</span>
+          </div>
+
+          <div class="setu-timeline-item">
+            <div class="setu-timeline-dot"></div>
+            <span class="setu-timeline-date">2025-10-18 • 11:45 AM</span>
+            <span class="setu-timeline-action">Administrative Sanction Order Issued (₹${Number(p.sanctionedAmount).toLocaleString('en-IN')})</span>
+            <span class="setu-timeline-actor">Authorized by District Magistrate / Collectorate, ${p.district}</span>
+          </div>
+
+          <div class="setu-timeline-item">
+            <div class="setu-timeline-dot"></div>
+            <span class="setu-timeline-date">2026-02-10 • 02:00 PM</span>
+            <span class="setu-timeline-action">Milestone-1 Physical Progress Recorded (${p.physicalProgress}%)</span>
+            <span class="setu-timeline-actor">Inspected by Junior Technical Engineer, ${p.implementingAgency}</span>
+          </div>
+
+          <div class="setu-timeline-item">
+            <div class="setu-timeline-dot ${isHighRisk ? 'setu-timeline-dot-flagged' : ''}"></div>
+            <span class="setu-timeline-date">2026-06-30 • 09:00 AM</span>
+            <span class="setu-timeline-action">${isHighRisk ? `Risk Engine Flag Generated (Score: ${p.riskScore})` : 'Routine Compliance Verification Completed'}</span>
+            <span class="setu-timeline-actor">Evaluated by SETU National Monitoring Engine</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  return `
+    <div class="setu-detail-container">
+      <!-- Breadcrumbs & Back Link -->
+      <div class="setu-detail-top-bar">
+        <a href="#/dashboard" class="setu-back-to-dashboard" id="btn-back-dashboard">
+          ← Return to Projects Audit Dashboard
+        </a>
+        <div style="font-size: var(--setu-font-size-caption); color: var(--setu-color-text-muted);">
+          MPLADS Institutional Project Record
+        </div>
+      </div>
+
+      <!-- Project Header Card -->
+      <div class="setu-detail-header-card">
+        <div class="setu-detail-meta-row">
+          <span class="setu-detail-id-tag">${p.id}</span>
+          <span class="setu-status-tag">${p.status}</span>
+          <span class="setu-badge ${badgeClass}">Risk ${p.riskScore} (${riskLevel})</span>
+          <span style="font-size: var(--setu-font-size-small); color: var(--setu-color-text-secondary);">
+            ${p.district}, ${p.state}
+          </span>
+        </div>
+        <h1 class="setu-detail-title">${p.name}</h1>
+      </div>
+
+      <!-- Horizontal Tab Navigation Strip -->
+      <div class="setu-tab-wrapper">
+        <nav class="setu-tab-nav" id="setu-detail-tab-nav">
+          ${tabsHtml}
+        </nav>
+
+        <!-- Tab Panel Content Area -->
+        <div class="setu-tab-panel" id="setu-detail-tab-content">
+          ${tabContentHtml}
         </div>
       </div>
     </div>
   `;
 }
-
-

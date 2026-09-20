@@ -1,0 +1,852 @@
+[
+  {
+    "projectId": "PRJ-IND-2003",
+    "projectName": "Construction of Digital Audio-Visual Library & Composite Reading Hall, Pune",
+    "district": "Pune",
+    "state": "Maharashtra",
+    "riskScore": 67,
+    "riskLevel": "HIGH",
+    "riskFactors": {
+      "costAnomaly": 20,
+      "delay": 19,
+      "paymentProgressMismatch": 43,
+      "duplicateProbability": 8,
+      "other": 10
+    },
+    "predictions": {
+      "delayProbability": 0.71,
+      "predictedDelayDays": 198,
+      "costOverrunProbability": 0.75
+    },
+    "explanations": [
+      "Cumulative expenditure of 51.0% significantly decouples from physical verification of 17%.",
+      "Disbursement vouchers lack corresponding Measurement Book (MB) sign-offs from Assistant Executive Engineer.",
+      "Project expenditures approach the sanctioned ceiling of ₹4,800,000 with significant structural milestones incomplete."
+    ]
+  },
+  {
+    "projectId": "PRJ-IND-2004",
+    "projectName": "Installation of 1500 LPH Community Fluoride and Arsenic Filtration Plant, Pune",
+    "district": "Pune",
+    "state": "Maharashtra",
+    "riskScore": 76,
+    "riskLevel": "HIGH",
+    "riskFactors": {
+      "costAnomaly": 40,
+      "delay": 26,
+      "paymentProgressMismatch": 10,
+      "duplicateProbability": 8,
+      "other": 16
+    },
+    "predictions": {
+      "delayProbability": 0.79,
+      "predictedDelayDays": 302,
+      "costOverrunProbability": 0.62
+    },
+    "explanations": [
+      "Project expenditures approach the sanctioned ceiling of ₹11,600,000 with significant structural milestones incomplete.",
+      "Escalation request submitted citing unseasonal material procurement costs.",
+      "Milestone completion slipped by 199 days against the statutory schedule stipulated in the administrative sanction."
+    ]
+  },
+  {
+    "projectId": "PRJ-IND-2008",
+    "projectName": "Provision of Modern Dual-Desk Ergonomic Furniture for 12 Classrooms, Lucknow",
+    "district": "Lucknow",
+    "state": "Uttar Pradesh",
+    "riskScore": 83,
+    "riskLevel": "HIGH",
+    "riskFactors": {
+      "costAnomaly": 13,
+      "delay": 10,
+      "paymentProgressMismatch": 12,
+      "duplicateProbability": 48,
+      "other": 17
+    },
+    "predictions": {
+      "delayProbability": 0.9,
+      "predictedDelayDays": 84,
+      "costOverrunProbability": 0.4
+    },
+    "explanations": [
+      "Spatial asset vector analysis detected 91% alignment with prior municipality-funded works within a 400-meter radius.",
+      "Elevated probability of redundant capital allocation on an existing durable asset.",
+      "Milestone completion slipped by 68 days against the statutory schedule stipulated in the administrative sanction."
+    ]
+  },
+  {
+    "projectId": "PRJ-IND-2012",
+    "projectName": "Setting up of 6-Bed Neonatal Intensive Stabilization Centre at CHC, Kanpur Nagar",
+    "district": "Kanpur Nagar",
+    "state": "Uttar Pradesh",
+    "riskScore": 66,
+    "riskLevel": "HIGH",
+    "riskFactors": {
+      "costAnomaly": 43,
+      "delay": 25,
+      "paymentProgressMismatch": 14,
+      "duplicateProbability": 7,
+      "other": 11
+    },
+    "predictions": {
+      "delayProbability": 0.74,
+      "predictedDelayDays": 333,
+      "costOverrunProbability": 0.68
+    },
+    "explanations": [
+      "Project expenditures approach the sanctioned ceiling of ₹14,300,000 with significant structural milestones incomplete.",
+      "Escalation request submitted citing unseasonal material procurement costs.",
+      "Milestone completion slipped by 214 days against the statutory schedule stipulated in the administrative sanction."
+    ]
+  },
+  {
+    "projectId": "PRJ-IND-2014",
+    "projectName": "Multi-Village Piped Drinking Water Supply Grid with Automated Flow Meters, Chennai",
+    "district": "Chennai",
+    "state": "Tamil Nadu",
+    "riskScore": 85,
+    "riskLevel": "HIGH",
+    "riskFactors": {
+      "costAnomaly": 20,
+      "delay": 19,
+      "paymentProgressMismatch": 46,
+      "duplicateProbability": 8,
+      "other": 7
+    },
+    "predictions": {
+      "delayProbability": 0.92,
+      "predictedDelayDays": 208,
+      "costOverrunProbability": 0.76
+    },
+    "explanations": [
+      "Cumulative expenditure of 71.0% significantly decouples from physical verification of 23%.",
+      "Disbursement vouchers lack corresponding Measurement Book (MB) sign-offs from Assistant Executive Engineer.",
+      "Milestone completion slipped by 139 days against the statutory schedule stipulated in the administrative sanction."
+    ]
+  },
+  {
+    "projectId": "PRJ-IND-2016",
+    "projectName": "Widening and Shoulder Concrete Paving of Inter-Panchayat Corridor, Madurai",
+    "district": "Madurai",
+    "state": "Tamil Nadu",
+    "riskScore": 91,
+    "riskLevel": "HIGH",
+    "riskFactors": {
+      "costAnomaly": 42,
+      "delay": 26,
+      "paymentProgressMismatch": 11,
+      "duplicateProbability": 7,
+      "other": 14
+    },
+    "predictions": {
+      "delayProbability": 0.97,
+      "predictedDelayDays": 160,
+      "costOverrunProbability": 0.64
+    },
+    "explanations": [
+      "Project expenditures approach the sanctioned ceiling of ₹13,300,000 with significant structural milestones incomplete.",
+      "Escalation request submitted citing unseasonal material procurement costs.",
+      "Milestone completion slipped by 114 days against the statutory schedule stipulated in the administrative sanction."
+    ]
+  },
+  {
+    "projectId": "PRJ-IND-2019",
+    "projectName": "Percolation Tank and Micro-Check Dam Rejuvenation Network, Bengaluru Urban",
+    "district": "Bengaluru Urban",
+    "state": "Karnataka",
+    "riskScore": 79,
+    "riskLevel": "HIGH",
+    "riskFactors": {
+      "costAnomaly": 42,
+      "delay": 23,
+      "paymentProgressMismatch": 10,
+      "duplicateProbability": 7,
+      "other": 18
+    },
+    "predictions": {
+      "delayProbability": 0.82,
+      "predictedDelayDays": 132,
+      "costOverrunProbability": 0.66
+    },
+    "explanations": [
+      "Project expenditures approach the sanctioned ceiling of ₹15,700,000 with significant structural milestones incomplete.",
+      "Escalation request submitted citing unseasonal material procurement costs.",
+      "Milestone completion slipped by 99 days against the statutory schedule stipulated in the administrative sanction."
+    ]
+  },
+  {
+    "projectId": "PRJ-IND-2020",
+    "projectName": "Erection of Covered Farmers Vegetable Trading Platform and Cold Store Room, Bengaluru Urban",
+    "district": "Bengaluru Urban",
+    "state": "Karnataka",
+    "riskScore": 75,
+    "riskLevel": "HIGH",
+    "riskFactors": {
+      "costAnomaly": 15,
+      "delay": 42,
+      "paymentProgressMismatch": 11,
+      "duplicateProbability": 6,
+      "other": 26
+    },
+    "predictions": {
+      "delayProbability": 0.79,
+      "predictedDelayDays": 216,
+      "costOverrunProbability": 0.4
+    },
+    "explanations": [
+      "Milestone completion slipped by 172 days against the statutory schedule stipulated in the administrative sanction.",
+      "Low contractor mobilization pace observed during recent nodal quarterly monitoring review.",
+      "Pending statutory clearances from local utility authorities delaying subsequent phase execution."
+    ]
+  },
+  {
+    "projectId": "PRJ-IND-2024",
+    "projectName": "High-Yield Deep Borewell and Overhead Storage Reservoir with Solar Pump, Dharwad",
+    "district": "Dharwad",
+    "state": "Karnataka",
+    "riskScore": 94,
+    "riskLevel": "HIGH",
+    "riskFactors": {
+      "costAnomaly": 43,
+      "delay": 23,
+      "paymentProgressMismatch": 12,
+      "duplicateProbability": 8,
+      "other": 14
+    },
+    "predictions": {
+      "delayProbability": 0.98,
+      "predictedDelayDays": 87,
+      "costOverrunProbability": 0.64
+    },
+    "explanations": [
+      "Project expenditures approach the sanctioned ceiling of ₹15,500,000 with significant structural milestones incomplete.",
+      "Escalation request submitted citing unseasonal material procurement costs.",
+      "Milestone completion slipped by 68 days against the statutory schedule stipulated in the administrative sanction."
+    ]
+  },
+  {
+    "projectId": "PRJ-IND-2025",
+    "projectName": "Solid Waste Material Recovery Facility with Mechanical Trommel Sieve, Kolkata",
+    "district": "Kolkata",
+    "state": "West Bengal",
+    "riskScore": 72,
+    "riskLevel": "HIGH",
+    "riskFactors": {
+      "costAnomaly": 19,
+      "delay": 20,
+      "paymentProgressMismatch": 40,
+      "duplicateProbability": 8,
+      "other": 13
+    },
+    "predictions": {
+      "delayProbability": 0.76,
+      "predictedDelayDays": 241,
+      "costOverrunProbability": 0.67
+    },
+    "explanations": [
+      "Cumulative expenditure of 67.0% significantly decouples from physical verification of 27%.",
+      "Disbursement vouchers lack corresponding Measurement Book (MB) sign-offs from Assistant Executive Engineer.",
+      "Project expenditures approach the sanctioned ceiling of ₹5,300,000 with significant structural milestones incomplete."
+    ]
+  },
+  {
+    "projectId": "PRJ-IND-2028",
+    "projectName": "Modular Multi-Disciplinary Science Laboratory Block with Safety Hoods, Howrah",
+    "district": "Howrah",
+    "state": "West Bengal",
+    "riskScore": 69,
+    "riskLevel": "HIGH",
+    "riskFactors": {
+      "costAnomaly": 18,
+      "delay": 46,
+      "paymentProgressMismatch": 14,
+      "duplicateProbability": 6,
+      "other": 16
+    },
+    "predictions": {
+      "delayProbability": 0.73,
+      "predictedDelayDays": 238,
+      "costOverrunProbability": 0.42
+    },
+    "explanations": [
+      "Milestone completion slipped by 182 days against the statutory schedule stipulated in the administrative sanction.",
+      "Low contractor mobilization pace observed during recent nodal quarterly monitoring review.",
+      "Pending statutory clearances from local utility authorities delaying subsequent phase execution."
+    ]
+  },
+  {
+    "projectId": "PRJ-IND-2031",
+    "projectName": "All-Weather Paver Block Pavement in Dense Habitation Sector, Thiruvananthapuram",
+    "district": "Thiruvananthapuram",
+    "state": "Kerala",
+    "riskScore": 78,
+    "riskLevel": "HIGH",
+    "riskFactors": {
+      "costAnomaly": 43,
+      "delay": 22,
+      "paymentProgressMismatch": 13,
+      "duplicateProbability": 6,
+      "other": 16
+    },
+    "predictions": {
+      "delayProbability": 0.85,
+      "predictedDelayDays": 141,
+      "costOverrunProbability": 0.71
+    },
+    "explanations": [
+      "Project expenditures approach the sanctioned ceiling of ₹5,800,000 with significant structural milestones incomplete.",
+      "Escalation request submitted citing unseasonal material procurement costs.",
+      "Milestone completion slipped by 90 days against the statutory schedule stipulated in the administrative sanction."
+    ]
+  },
+  {
+    "projectId": "PRJ-IND-2032",
+    "projectName": "Provision of Medical Gas Pipeline Network and Central Oxygen Manifold, Thiruvananthapuram",
+    "district": "Thiruvananthapuram",
+    "state": "Kerala",
+    "riskScore": 94,
+    "riskLevel": "HIGH",
+    "riskFactors": {
+      "costAnomaly": 44,
+      "delay": 20,
+      "paymentProgressMismatch": 13,
+      "duplicateProbability": 5,
+      "other": 18
+    },
+    "predictions": {
+      "delayProbability": 0.96,
+      "predictedDelayDays": 130,
+      "costOverrunProbability": 0.71
+    },
+    "explanations": [
+      "Project expenditures approach the sanctioned ceiling of ₹9,200,000 with significant structural milestones incomplete.",
+      "Escalation request submitted citing unseasonal material procurement costs.",
+      "Milestone completion slipped by 95 days against the statutory schedule stipulated in the administrative sanction."
+    ]
+  },
+  {
+    "projectId": "PRJ-IND-2036",
+    "projectName": "Upgradation and Bituminous Surfacing of Main Rural Feeder Road, Kozhikode",
+    "district": "Kozhikode",
+    "state": "Kerala",
+    "riskScore": 67,
+    "riskLevel": "HIGH",
+    "riskFactors": {
+      "costAnomaly": 41,
+      "delay": 20,
+      "paymentProgressMismatch": 12,
+      "duplicateProbability": 8,
+      "other": 19
+    },
+    "predictions": {
+      "delayProbability": 0.7,
+      "predictedDelayDays": 233,
+      "costOverrunProbability": 0.61
+    },
+    "explanations": [
+      "Project expenditures approach the sanctioned ceiling of ₹14,200,000 with significant structural milestones incomplete.",
+      "Escalation request submitted citing unseasonal material procurement costs.",
+      "Milestone completion slipped by 169 days against the statutory schedule stipulated in the administrative sanction."
+    ]
+  },
+  {
+    "projectId": "PRJ-IND-2038",
+    "projectName": "Construction of Digital Audio-Visual Library & Composite Reading Hall, Jaipur",
+    "district": "Jaipur",
+    "state": "Rajasthan",
+    "riskScore": 89,
+    "riskLevel": "HIGH",
+    "riskFactors": {
+      "costAnomaly": 13,
+      "delay": 12,
+      "paymentProgressMismatch": 11,
+      "duplicateProbability": 49,
+      "other": 15
+    },
+    "predictions": {
+      "delayProbability": 0.96,
+      "predictedDelayDays": 254,
+      "costOverrunProbability": 0.4
+    },
+    "explanations": [
+      "Spatial asset vector analysis detected 91% alignment with prior municipality-funded works within a 400-meter radius.",
+      "Elevated probability of redundant capital allocation on an existing durable asset.",
+      "Project expenditures approach the sanctioned ceiling of ₹13,300,000 with significant structural milestones incomplete."
+    ]
+  },
+  {
+    "projectId": "PRJ-IND-2040",
+    "projectName": "Development of Green Community Recreation Park with Rainwater Harvesting, Jodhpur",
+    "district": "Jodhpur",
+    "state": "Rajasthan",
+    "riskScore": 90,
+    "riskLevel": "HIGH",
+    "riskFactors": {
+      "costAnomaly": 40,
+      "delay": 22,
+      "paymentProgressMismatch": 11,
+      "duplicateProbability": 5,
+      "other": 22
+    },
+    "predictions": {
+      "delayProbability": 0.96,
+      "predictedDelayDays": 157,
+      "costOverrunProbability": 0.64
+    },
+    "explanations": [
+      "Project expenditures approach the sanctioned ceiling of ₹5,300,000 with significant structural milestones incomplete.",
+      "Escalation request submitted citing unseasonal material procurement costs.",
+      "Milestone completion slipped by 108 days against the statutory schedule stipulated in the administrative sanction."
+    ]
+  },
+  {
+    "projectId": "PRJ-IND-2044",
+    "projectName": "Groundwater Recharge Shafts with Silt Traps along Lake Catchment, Patna",
+    "district": "Patna",
+    "state": "Bihar",
+    "riskScore": 79,
+    "riskLevel": "HIGH",
+    "riskFactors": {
+      "costAnomaly": 41,
+      "delay": 21,
+      "paymentProgressMismatch": 10,
+      "duplicateProbability": 6,
+      "other": 22
+    },
+    "predictions": {
+      "delayProbability": 0.82,
+      "predictedDelayDays": 234,
+      "costOverrunProbability": 0.57
+    },
+    "explanations": [
+      "Project expenditures approach the sanctioned ceiling of ₹11,400,000 with significant structural milestones incomplete.",
+      "Escalation request submitted citing unseasonal material procurement costs.",
+      "Milestone completion slipped by 169 days against the statutory schedule stipulated in the administrative sanction."
+    ]
+  },
+  {
+    "projectId": "PRJ-IND-2048",
+    "projectName": "Establishment of Interactive STEM Robotic Lab in Higher Secondary School, Muzaffarpur",
+    "district": "Muzaffarpur",
+    "state": "Bihar",
+    "riskScore": 65,
+    "riskLevel": "HIGH",
+    "riskFactors": {
+      "costAnomaly": 41,
+      "delay": 23,
+      "paymentProgressMismatch": 12,
+      "duplicateProbability": 7,
+      "other": 17
+    },
+    "predictions": {
+      "delayProbability": 0.67,
+      "predictedDelayDays": 305,
+      "costOverrunProbability": 0.65
+    },
+    "explanations": [
+      "Project expenditures approach the sanctioned ceiling of ₹5,700,000 with significant structural milestones incomplete.",
+      "Escalation request submitted citing unseasonal material procurement costs.",
+      "Milestone completion slipped by 212 days against the statutory schedule stipulated in the administrative sanction."
+    ]
+  },
+  {
+    "projectId": "PRJ-IND-2050",
+    "projectName": "Construction of Covered Reinforced Concrete Stormwater Outfall Drain, Ahmedabad",
+    "district": "Ahmedabad",
+    "state": "Gujarat",
+    "riskScore": 90,
+    "riskLevel": "HIGH",
+    "riskFactors": {
+      "costAnomaly": 15,
+      "delay": 16,
+      "paymentProgressMismatch": 44,
+      "duplicateProbability": 5,
+      "other": 20
+    },
+    "predictions": {
+      "delayProbability": 0.95,
+      "predictedDelayDays": 240,
+      "costOverrunProbability": 0.7
+    },
+    "explanations": [
+      "Cumulative expenditure of 64.0% significantly decouples from physical verification of 29%.",
+      "Disbursement vouchers lack corresponding Measurement Book (MB) sign-offs from Assistant Executive Engineer.",
+      "Project expenditures approach the sanctioned ceiling of ₹8,000,000 with significant structural milestones incomplete."
+    ]
+  },
+  {
+    "projectId": "PRJ-IND-2052",
+    "projectName": "Construction of Dedicated Maternal Care Ward with Thermal Insulation, Surat",
+    "district": "Surat",
+    "state": "Gujarat",
+    "riskScore": 68,
+    "riskLevel": "HIGH",
+    "riskFactors": {
+      "costAnomaly": 43,
+      "delay": 23,
+      "paymentProgressMismatch": 11,
+      "duplicateProbability": 5,
+      "other": 18
+    },
+    "predictions": {
+      "delayProbability": 0.73,
+      "predictedDelayDays": 323,
+      "costOverrunProbability": 0.61
+    },
+    "explanations": [
+      "Project expenditures approach the sanctioned ceiling of ₹15,200,000 with significant structural milestones incomplete.",
+      "Escalation request submitted citing unseasonal material procurement costs.",
+      "Milestone completion slipped by 211 days against the statutory schedule stipulated in the administrative sanction."
+    ]
+  },
+  {
+    "projectId": "PRJ-IND-2055",
+    "projectName": "Installation of Energy-Saving Smart LED High-Mast Lighting Grid, Amritsar",
+    "district": "Amritsar",
+    "state": "Punjab",
+    "riskScore": 86,
+    "riskLevel": "HIGH",
+    "riskFactors": {
+      "costAnomaly": 20,
+      "delay": 44,
+      "paymentProgressMismatch": 15,
+      "duplicateProbability": 5,
+      "other": 16
+    },
+    "predictions": {
+      "delayProbability": 0.93,
+      "predictedDelayDays": 205,
+      "costOverrunProbability": 0.4
+    },
+    "explanations": [
+      "Milestone completion slipped by 144 days against the statutory schedule stipulated in the administrative sanction.",
+      "Low contractor mobilization pace observed during recent nodal quarterly monitoring review.",
+      "Pending statutory clearances from local utility authorities delaying subsequent phase execution."
+    ]
+  },
+  {
+    "projectId": "PRJ-IND-2056",
+    "projectName": "Elevated Storm-Proof Feeder Link to Primary Agricultural Cooperative, Amritsar",
+    "district": "Amritsar",
+    "state": "Punjab",
+    "riskScore": 80,
+    "riskLevel": "HIGH",
+    "riskFactors": {
+      "costAnomaly": 44,
+      "delay": 23,
+      "paymentProgressMismatch": 12,
+      "duplicateProbability": 5,
+      "other": 16
+    },
+    "predictions": {
+      "delayProbability": 0.85,
+      "predictedDelayDays": 249,
+      "costOverrunProbability": 0.69
+    },
+    "explanations": [
+      "Project expenditures approach the sanctioned ceiling of ₹13,600,000 with significant structural milestones incomplete.",
+      "Escalation request submitted citing unseasonal material procurement costs.",
+      "Milestone completion slipped by 187 days against the statutory schedule stipulated in the administrative sanction."
+    ]
+  },
+  {
+    "projectId": "PRJ-IND-2060",
+    "projectName": "Solid Waste Material Recovery Facility with Mechanical Trommel Sieve, Jalandhar",
+    "district": "Jalandhar",
+    "state": "Punjab",
+    "riskScore": 72,
+    "riskLevel": "HIGH",
+    "riskFactors": {
+      "costAnomaly": 46,
+      "delay": 23,
+      "paymentProgressMismatch": 10,
+      "duplicateProbability": 8,
+      "other": 13
+    },
+    "predictions": {
+      "delayProbability": 0.8,
+      "predictedDelayDays": 254,
+      "costOverrunProbability": 0.69
+    },
+    "explanations": [
+      "Project expenditures approach the sanctioned ceiling of ₹15,300,000 with significant structural milestones incomplete.",
+      "Escalation request submitted citing unseasonal material procurement costs.",
+      "Milestone completion slipped by 175 days against the statutory schedule stipulated in the administrative sanction."
+    ]
+  },
+  {
+    "projectId": "PRJ-IND-2061",
+    "projectName": "Upgradation and Bituminous Surfacing of Main Rural Feeder Road, Bhopal",
+    "district": "Bhopal",
+    "state": "Madhya Pradesh",
+    "riskScore": 66,
+    "riskLevel": "HIGH",
+    "riskFactors": {
+      "costAnomaly": 20,
+      "delay": 42,
+      "paymentProgressMismatch": 13,
+      "duplicateProbability": 6,
+      "other": 19
+    },
+    "predictions": {
+      "delayProbability": 0.72,
+      "predictedDelayDays": 166,
+      "costOverrunProbability": 0.41
+    },
+    "explanations": [
+      "Milestone completion slipped by 105 days against the statutory schedule stipulated in the administrative sanction.",
+      "Low contractor mobilization pace observed during recent nodal quarterly monitoring review.",
+      "Pending statutory clearances from local utility authorities delaying subsequent phase execution."
+    ]
+  },
+  {
+    "projectId": "PRJ-IND-2064",
+    "projectName": "Installation of 1500 LPH Community Fluoride and Arsenic Filtration Plant, Gwalior",
+    "district": "Gwalior",
+    "state": "Madhya Pradesh",
+    "riskScore": 82,
+    "riskLevel": "HIGH",
+    "riskFactors": {
+      "costAnomaly": 19,
+      "delay": 47,
+      "paymentProgressMismatch": 13,
+      "duplicateProbability": 8,
+      "other": 13
+    },
+    "predictions": {
+      "delayProbability": 0.89,
+      "predictedDelayDays": 160,
+      "costOverrunProbability": 0.4
+    },
+    "explanations": [
+      "Milestone completion slipped by 112 days against the statutory schedule stipulated in the administrative sanction.",
+      "Low contractor mobilization pace observed during recent nodal quarterly monitoring review.",
+      "Pending statutory clearances from local utility authorities delaying subsequent phase execution."
+    ]
+  },
+  {
+    "projectId": "PRJ-IND-2067",
+    "projectName": "Mobile Diagnostic & Telemedicine Van with Satellite Uplink, Puri",
+    "district": "Puri",
+    "state": "Odisha",
+    "riskScore": 68,
+    "riskLevel": "HIGH",
+    "riskFactors": {
+      "costAnomaly": 11,
+      "delay": 10,
+      "paymentProgressMismatch": 11,
+      "duplicateProbability": 52,
+      "other": 16
+    },
+    "predictions": {
+      "delayProbability": 0.71,
+      "predictedDelayDays": 252,
+      "costOverrunProbability": 0.4
+    },
+    "explanations": [
+      "Spatial asset vector analysis detected 91% alignment with prior municipality-funded works within a 400-meter radius.",
+      "Elevated probability of redundant capital allocation on an existing durable asset.",
+      "Project expenditures approach the sanctioned ceiling of ₹10,900,000 with significant structural milestones incomplete."
+    ]
+  },
+  {
+    "projectId": "PRJ-IND-2068",
+    "projectName": "Provision of Modern Dual-Desk Ergonomic Furniture for 12 Classrooms, Puri",
+    "district": "Puri",
+    "state": "Odisha",
+    "riskScore": 84,
+    "riskLevel": "HIGH",
+    "riskFactors": {
+      "costAnomaly": 18,
+      "delay": 45,
+      "paymentProgressMismatch": 10,
+      "duplicateProbability": 8,
+      "other": 19
+    },
+    "predictions": {
+      "delayProbability": 0.91,
+      "predictedDelayDays": 136,
+      "costOverrunProbability": 0.4
+    },
+    "explanations": [
+      "Milestone completion slipped by 107 days against the statutory schedule stipulated in the administrative sanction.",
+      "Low contractor mobilization pace observed during recent nodal quarterly monitoring review.",
+      "Pending statutory clearances from local utility authorities delaying subsequent phase execution."
+    ]
+  },
+  {
+    "projectId": "PRJ-IND-2072",
+    "projectName": "Setting up of 6-Bed Neonatal Intensive Stabilization Centre at CHC, Sonitpur",
+    "district": "Sonitpur",
+    "state": "Assam",
+    "riskScore": 69,
+    "riskLevel": "HIGH",
+    "riskFactors": {
+      "costAnomaly": 17,
+      "delay": 17,
+      "paymentProgressMismatch": 44,
+      "duplicateProbability": 7,
+      "other": 15
+    },
+    "predictions": {
+      "delayProbability": 0.74,
+      "predictedDelayDays": 261,
+      "costOverrunProbability": 0.68
+    },
+    "explanations": [
+      "Cumulative expenditure of 71.0% significantly decouples from physical verification of 24%.",
+      "Disbursement vouchers lack corresponding Measurement Book (MB) sign-offs from Assistant Executive Engineer.",
+      "Project expenditures approach the sanctioned ceiling of ₹7,900,000 with significant structural milestones incomplete."
+    ]
+  },
+  {
+    "projectId": "PRJ-IND-2076",
+    "projectName": "Widening and Shoulder Concrete Paving of Inter-Panchayat Corridor, Ranchi",
+    "district": "Ranchi",
+    "state": "Jharkhand",
+    "riskScore": 64,
+    "riskLevel": "HIGH",
+    "riskFactors": {
+      "costAnomaly": 41,
+      "delay": 25,
+      "paymentProgressMismatch": 13,
+      "duplicateProbability": 8,
+      "other": 13
+    },
+    "predictions": {
+      "delayProbability": 0.69,
+      "predictedDelayDays": 168,
+      "costOverrunProbability": 0.64
+    },
+    "explanations": [
+      "Project expenditures approach the sanctioned ceiling of ₹12,600,000 with significant structural milestones incomplete.",
+      "Escalation request submitted citing unseasonal material procurement costs.",
+      "Milestone completion slipped by 130 days against the statutory schedule stipulated in the administrative sanction."
+    ]
+  },
+  {
+    "projectId": "PRJ-IND-2078",
+    "projectName": "High-Speed Smart Classroom Connectivity Network & Rooftop Solar Array, Krishna",
+    "district": "Krishna",
+    "state": "Andhra Pradesh",
+    "riskScore": 89,
+    "riskLevel": "HIGH",
+    "riskFactors": {
+      "costAnomaly": 45,
+      "delay": 23,
+      "paymentProgressMismatch": 13,
+      "duplicateProbability": 5,
+      "other": 14
+    },
+    "predictions": {
+      "delayProbability": 0.91,
+      "predictedDelayDays": 60,
+      "costOverrunProbability": 0.7
+    },
+    "explanations": [
+      "Project expenditures approach the sanctioned ceiling of ₹5,400,000 with significant structural milestones incomplete.",
+      "Escalation request submitted citing unseasonal material procurement costs.",
+      "Milestone completion slipped by 47 days against the statutory schedule stipulated in the administrative sanction."
+    ]
+  },
+  {
+    "projectId": "PRJ-IND-2080",
+    "projectName": "Erection of Covered Farmers Vegetable Trading Platform and Cold Store Room, Visakhapatnam",
+    "district": "Visakhapatnam",
+    "state": "Andhra Pradesh",
+    "riskScore": 89,
+    "riskLevel": "HIGH",
+    "riskFactors": {
+      "costAnomaly": 17,
+      "delay": 45,
+      "paymentProgressMismatch": 13,
+      "duplicateProbability": 7,
+      "other": 18
+    },
+    "predictions": {
+      "delayProbability": 0.93,
+      "predictedDelayDays": 82,
+      "costOverrunProbability": 0.4
+    },
+    "explanations": [
+      "Milestone completion slipped by 55 days against the statutory schedule stipulated in the administrative sanction.",
+      "Low contractor mobilization pace observed during recent nodal quarterly monitoring review.",
+      "Pending statutory clearances from local utility authorities delaying subsequent phase execution."
+    ]
+  },
+  {
+    "projectId": "PRJ-IND-2084",
+    "projectName": "High-Yield Deep Borewell and Overhead Storage Reservoir with Solar Pump, Gorakhpur",
+    "district": "Gorakhpur",
+    "state": "Uttar Pradesh",
+    "riskScore": 88,
+    "riskLevel": "HIGH",
+    "riskFactors": {
+      "costAnomaly": 15,
+      "delay": 13,
+      "paymentProgressMismatch": 11,
+      "duplicateProbability": 49,
+      "other": 12
+    },
+    "predictions": {
+      "delayProbability": 0.91,
+      "predictedDelayDays": 112,
+      "costOverrunProbability": 0.4
+    },
+    "explanations": [
+      "Spatial asset vector analysis detected 91% alignment with prior municipality-funded works within a 400-meter radius.",
+      "Elevated probability of redundant capital allocation on an existing durable asset.",
+      "Project expenditures approach the sanctioned ceiling of ₹8,700,000 with significant structural milestones incomplete."
+    ]
+  },
+  {
+    "projectId": "PRJ-IND-2088",
+    "projectName": "Modular Multi-Disciplinary Science Laboratory Block with Safety Hoods, Darjeeling",
+    "district": "Darjeeling",
+    "state": "West Bengal",
+    "riskScore": 81,
+    "riskLevel": "HIGH",
+    "riskFactors": {
+      "costAnomaly": 40,
+      "delay": 25,
+      "paymentProgressMismatch": 14,
+      "duplicateProbability": 6,
+      "other": 15
+    },
+    "predictions": {
+      "delayProbability": 0.83,
+      "predictedDelayDays": 152,
+      "costOverrunProbability": 0.62
+    },
+    "explanations": [
+      "Project expenditures approach the sanctioned ceiling of ₹12,900,000 with significant structural milestones incomplete.",
+      "Escalation request submitted citing unseasonal material procurement costs.",
+      "Milestone completion slipped by 102 days against the statutory schedule stipulated in the administrative sanction."
+    ]
+  },
+  {
+    "projectId": "PRJ-IND-2089",
+    "projectName": "Installation of 1500 LPH Community Fluoride and Arsenic Filtration Plant, Bikaner",
+    "district": "Bikaner",
+    "state": "Rajasthan",
+    "riskScore": 83,
+    "riskLevel": "HIGH",
+    "riskFactors": {
+      "costAnomaly": 19,
+      "delay": 19,
+      "paymentProgressMismatch": 44,
+      "duplicateProbability": 5,
+      "other": 13
+    },
+    "predictions": {
+      "delayProbability": 0.9,
+      "predictedDelayDays": 81,
+      "costOverrunProbability": 0.72
+    },
+    "explanations": [
+      "Cumulative expenditure of 79.0% significantly decouples from physical verification of 35%.",
+      "Disbursement vouchers lack corresponding Measurement Book (MB) sign-offs from Assistant Executive Engineer.",
+      "Milestone completion slipped by 62 days against the statutory schedule stipulated in the administrative sanction."
+    ]
+  }
+]

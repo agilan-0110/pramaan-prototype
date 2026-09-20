@@ -1,0 +1,626 @@
+import json
+from pathlib import Path
+
+DATA_DIR = Path(__file__).resolve().parent.parent / "backend" / "app" / "data"
+PROJECTS_FILE = DATA_DIR / "mockProjects.json"
+ALERTS_FILE = DATA_DIR / "mockAlerts.json"
+
+with open(PROJECTS_FILE, "r", encoding="utf-8") as f:
+    projects = json.load(f)
+
+existing_ids = set(p["id"] for p in projects)
+
+# Define 6 new projects in Chennai (so Chennai has 8 total: 2 existing + 6 new),
+# 4 new in Coimbatore (so Coimbatore has 6 total: 2 existing + 4 new),
+# 4 new in Madurai (so Madurai has 6 total: 2 existing + 4 new).
+# Total Tamil Nadu = 2 + 6 + 2 + 4 + 2 + 4 + 2 (Thanjavur) = 22 projects!
+
+raw_projects_json = """
+[
+  {
+    "id": "PRJ-IND-TN-101",
+    "name": "Widening and Storm-Resistant Bituminous Paving of Arterial Port Feeder Road, Chennai",
+    "state": "Tamil Nadu",
+    "district": "Chennai",
+    "constituency": "Chennai Central",
+    "mpName": "Thiru Dayanidhi Maran (Fictional)",
+    "mpId": "MP-LS-TN-01",
+    "category": "Road",
+    "implementingAgency": "Public Works Department (PWD) — Chennai",
+    "vendorName": "Coromandel Heavy Infrastructure Ltd (Fictional)",
+    "sanctionedAmount": 16500000,
+    "expenditure": 12870000,
+    "physicalProgress": 62,
+    "financialProgress": 78.0,
+    "status": "In Progress",
+    "riskScore": 68,
+    "riskLevel": "HIGH",
+    "daysDelayed": 45,
+    "costOverrun": true,
+    "duplicateRisk": false,
+    "paymentProgressMismatch": true,
+    "vendorId": "VND-TN-001",
+    "financialYear": "2025-26",
+    "dateSpent": "2025-11-12",
+    "quarterSpent": "Q3",
+    "fundDumpingFlag": false,
+    "disbursements": [
+      {"tranche": "T1", "date": "2025-06-10", "amount": 6435000, "percentage": 50.0, "quarter": "Q1"},
+      {"tranche": "T2", "date": "2025-11-12", "amount": 6435000, "percentage": 50.0, "quarter": "Q3"}
+    ],
+    "siteCoordinates": {"latitude": 13.0827, "longitude": 80.2707},
+    "latitude": 13.0827,
+    "longitude": 80.2707
+  },
+  {
+    "id": "PRJ-IND-TN-102",
+    "name": "Construction of Grade-Separated Multi-Lane Vehicular Overbridge at Rajaji Junction, Chennai",
+    "state": "Tamil Nadu",
+    "district": "Chennai",
+    "constituency": "Chennai Central",
+    "mpName": "Thiru Dayanidhi Maran (Fictional)",
+    "mpId": "MP-LS-TN-01",
+    "category": "Road",
+    "implementingAgency": "Public Works Department (PWD) — Chennai",
+    "vendorName": "Pallava Bridge Engineering Works (Fictional)",
+    "sanctionedAmount": 24000000,
+    "expenditure": 19200000,
+    "physicalProgress": 48,
+    "financialProgress": 80.0,
+    "status": "Delayed",
+    "riskScore": 82,
+    "riskLevel": "CRITICAL",
+    "daysDelayed": 180,
+    "costOverrun": true,
+    "duplicateRisk": false,
+    "paymentProgressMismatch": true,
+    "vendorId": "VND-TN-002",
+    "financialYear": "2025-26",
+    "dateSpent": "2026-03-24",
+    "quarterSpent": "Q4",
+    "fundDumpingFlag": true,
+    "disbursements": [
+      {"tranche": "T1", "date": "2025-07-15", "amount": 7200000, "percentage": 37.5, "quarter": "Q2"},
+      {"tranche": "T2", "date": "2026-03-24", "amount": 12000000, "percentage": 62.5, "quarter": "Q4"}
+    ],
+    "siteCoordinates": {"latitude": 13.0878, "longitude": 80.2785},
+    "latitude": 13.0878,
+    "longitude": 80.2785
+  },
+  {
+    "id": "PRJ-IND-TN-103",
+    "name": "Establishment of Advanced Pediatric Critical Care Wing at Government Hospital, Chennai",
+    "state": "Tamil Nadu",
+    "district": "Chennai",
+    "constituency": "Chennai Central",
+    "mpName": "Thiru Dayanidhi Maran (Fictional)",
+    "mpId": "MP-LS-TN-01",
+    "category": "Health",
+    "implementingAgency": "District Health Mission — Chennai",
+    "vendorName": "Kaveri Meditech Diagnostics (Fictional)",
+    "sanctionedAmount": 14200000,
+    "expenditure": 11360000,
+    "physicalProgress": 85,
+    "financialProgress": 80.0,
+    "status": "Completed",
+    "riskScore": 25,
+    "riskLevel": "LOW",
+    "daysDelayed": 0,
+    "costOverrun": false,
+    "duplicateRisk": false,
+    "paymentProgressMismatch": false,
+    "vendorId": "VND-TN-003",
+    "financialYear": "2024-25",
+    "dateSpent": "2025-01-18",
+    "quarterSpent": "Q4",
+    "fundDumpingFlag": false,
+    "disbursements": [
+      {"tranche": "T1", "date": "2024-05-10", "amount": 5680000, "percentage": 50.0, "quarter": "Q1"},
+      {"tranche": "T2", "date": "2025-01-18", "amount": 5680000, "percentage": 50.0, "quarter": "Q4"}
+    ],
+    "siteCoordinates": {"latitude": 13.0760, "longitude": 80.2437},
+    "latitude": 13.0760,
+    "longitude": 80.2437
+  },
+  {
+    "id": "PRJ-IND-TN-104",
+    "name": "Reconstruction of Heavy-Duty Reinforced Stormwater Trunk Drain, Chepauk, Chennai",
+    "state": "Tamil Nadu",
+    "district": "Chennai",
+    "constituency": "Chennai Central",
+    "mpName": "Thiru Dayanidhi Maran (Fictional)",
+    "mpId": "MP-LS-TN-01",
+    "category": "Road",
+    "implementingAgency": "Public Works Department (PWD) — Chennai",
+    "vendorName": "Coromandel Heavy Infrastructure Ltd (Fictional)",
+    "sanctionedAmount": 18500000,
+    "expenditure": 13875000,
+    "physicalProgress": 65,
+    "financialProgress": 75.0,
+    "status": "In Progress",
+    "riskScore": 58,
+    "riskLevel": "MEDIUM",
+    "daysDelayed": 25,
+    "costOverrun": false,
+    "duplicateRisk": false,
+    "paymentProgressMismatch": false,
+    "vendorId": "VND-TN-001",
+    "financialYear": "2025-26",
+    "dateSpent": "2025-10-20",
+    "quarterSpent": "Q3",
+    "disbursements": [
+      {"tranche": "T1", "date": "2025-06-15", "amount": 6937500, "percentage": 50.0, "quarter": "Q1"},
+      {"tranche": "T2", "date": "2025-10-20", "amount": 6937500, "percentage": 50.0, "quarter": "Q3"}
+    ],
+    "siteCoordinates": {"latitude": 13.0645, "longitude": 80.2831},
+    "latitude": 13.0645,
+    "longitude": 80.2831
+  },
+  {
+    "id": "PRJ-IND-TN-105",
+    "name": "Erection of Solar-Powered Decentralized Material Recovery Center, George Town, Chennai",
+    "state": "Tamil Nadu",
+    "district": "Chennai",
+    "constituency": "Chennai Central",
+    "mpName": "Thiru Dayanidhi Maran (Fictional)",
+    "mpId": "MP-LS-TN-01",
+    "category": "Civic",
+    "implementingAgency": "Municipal Corporation & Urban Development Authority — Chennai",
+    "vendorName": "Chola Civic Utilities & Engineering (Fictional)",
+    "sanctionedAmount": 11000000,
+    "expenditure": 9350000,
+    "physicalProgress": 55,
+    "financialProgress": 85.0,
+    "status": "In Progress",
+    "riskScore": 76,
+    "riskLevel": "HIGH",
+    "daysDelayed": 110,
+    "costOverrun": true,
+    "duplicateRisk": false,
+    "paymentProgressMismatch": true,
+    "vendorId": "VND-TN-004",
+    "financialYear": "2025-26",
+    "dateSpent": "2026-03-15",
+    "quarterSpent": "Q4",
+    "fundDumpingFlag": true,
+    "disbursements": [
+      {"tranche": "T1", "date": "2025-08-10", "amount": 2805000, "percentage": 30.0, "quarter": "Q2"},
+      {"tranche": "T2", "date": "2026-03-15", "amount": 6545000, "percentage": 70.0, "quarter": "Q4"}
+    ],
+    "siteCoordinates": {"latitude": 13.0913, "longitude": 80.2858},
+    "latitude": 13.0913,
+    "longitude": 80.2858
+  },
+  {
+    "id": "PRJ-IND-TN-106",
+    "name": "Installation of Skywalk Footbridge with Automated Elevators at Central Railway Interchange, Chennai",
+    "state": "Tamil Nadu",
+    "district": "Chennai",
+    "constituency": "Chennai Central",
+    "mpName": "Thiru Dayanidhi Maran (Fictional)",
+    "mpId": "MP-LS-TN-01",
+    "category": "Road",
+    "implementingAgency": "Public Works Department (PWD) — Chennai",
+    "vendorName": "Pallava Bridge Engineering Works (Fictional)",
+    "sanctionedAmount": 19500000,
+    "expenditure": 15600000,
+    "physicalProgress": 70,
+    "financialProgress": 80.0,
+    "status": "In Progress",
+    "riskScore": 45,
+    "riskLevel": "MEDIUM",
+    "daysDelayed": 15,
+    "costOverrun": false,
+    "duplicateRisk": false,
+    "paymentProgressMismatch": false,
+    "vendorId": "VND-TN-002",
+    "financialYear": "2025-26",
+    "dateSpent": "2025-12-05",
+    "quarterSpent": "Q3",
+    "disbursements": [
+      {"tranche": "T1", "date": "2025-07-20", "amount": 7800000, "percentage": 50.0, "quarter": "Q2"},
+      {"tranche": "T2", "date": "2025-12-05", "amount": 7800000, "percentage": 50.0, "quarter": "Q3"}
+    ],
+    "siteCoordinates": {"latitude": 13.0818, "longitude": 80.2748},
+    "latitude": 13.0818,
+    "longitude": 80.2748
+  },
+  {
+    "id": "PRJ-IND-TN-201",
+    "name": "Four-Lane Bituminous Upgradation of Pollachi Agricultural Link Corridor, Coimbatore",
+    "state": "Tamil Nadu",
+    "district": "Coimbatore",
+    "constituency": "Coimbatore",
+    "mpName": "Thiru Ganapathy Rajkumar (Fictional)",
+    "mpId": "MP-LS-TN-02",
+    "category": "Road",
+    "implementingAgency": "Public Works Department (PWD) — Coimbatore",
+    "vendorName": "Kongu Highway Developers Pvt Ltd (Fictional)",
+    "sanctionedAmount": 21000000,
+    "expenditure": 17850000,
+    "physicalProgress": 55,
+    "financialProgress": 85.0,
+    "status": "Delayed",
+    "riskScore": 74,
+    "riskLevel": "HIGH",
+    "daysDelayed": 95,
+    "costOverrun": true,
+    "duplicateRisk": false,
+    "paymentProgressMismatch": true,
+    "vendorId": "VND-TN-005",
+    "financialYear": "2025-26",
+    "dateSpent": "2026-02-28",
+    "quarterSpent": "Q4",
+    "disbursements": [
+      {"tranche": "T1", "date": "2025-08-14", "amount": 5355000, "percentage": 30.0, "quarter": "Q2"},
+      {"tranche": "T2", "date": "2026-02-28", "amount": 12495000, "percentage": 70.0, "quarter": "Q4"}
+    ],
+    "siteCoordinates": {"latitude": 11.0168, "longitude": 76.9558},
+    "latitude": 11.0168,
+    "longitude": 76.9558
+  },
+  {
+    "id": "PRJ-IND-TN-202",
+    "name": "Multi-Zone Piped Drinking Water Distribution Network and Storage Reservoir, Coimbatore",
+    "state": "Tamil Nadu",
+    "district": "Coimbatore",
+    "constituency": "Coimbatore",
+    "mpName": "Thiru Ganapathy Rajkumar (Fictional)",
+    "mpId": "MP-LS-TN-02",
+    "category": "Water",
+    "implementingAgency": "Rural Water Supply & Sanitation Board — Coimbatore",
+    "vendorName": "Bhavani Aqua Engineering (Fictional)",
+    "sanctionedAmount": 15000000,
+    "expenditure": 12000000,
+    "physicalProgress": 75,
+    "financialProgress": 80.0,
+    "status": "In Progress",
+    "riskScore": 38,
+    "riskLevel": "LOW",
+    "daysDelayed": 0,
+    "costOverrun": false,
+    "duplicateRisk": false,
+    "paymentProgressMismatch": false,
+    "vendorId": "VND-TN-006",
+    "financialYear": "2025-26",
+    "dateSpent": "2025-10-15",
+    "quarterSpent": "Q3",
+    "disbursements": [
+      {"tranche": "T1", "date": "2025-05-18", "amount": 6000000, "percentage": 50.0, "quarter": "Q1"},
+      {"tranche": "T2", "date": "2025-10-15", "amount": 6000000, "percentage": 50.0, "quarter": "Q3"}
+    ],
+    "siteCoordinates": {"latitude": 10.9982, "longitude": 76.9634},
+    "latitude": 10.9982,
+    "longitude": 76.9634
+  },
+  {
+    "id": "PRJ-IND-TN-203",
+    "name": "Setting up of Covered Agro-Produce Cold Storage Complex at Singanallur, Coimbatore",
+    "state": "Tamil Nadu",
+    "district": "Coimbatore",
+    "constituency": "Coimbatore",
+    "mpName": "Thiru Ganapathy Rajkumar (Fictional)",
+    "mpId": "MP-LS-TN-02",
+    "category": "Civic",
+    "implementingAgency": "Municipal Corporation & Urban Development Authority — Coimbatore",
+    "vendorName": "Kongu Highway Developers Pvt Ltd (Fictional)",
+    "sanctionedAmount": 12500000,
+    "expenditure": 9375000,
+    "physicalProgress": 60,
+    "financialProgress": 75.0,
+    "status": "In Progress",
+    "riskScore": 62,
+    "riskLevel": "HIGH",
+    "daysDelayed": 60,
+    "costOverrun": false,
+    "duplicateRisk": false,
+    "paymentProgressMismatch": false,
+    "vendorId": "VND-TN-005",
+    "financialYear": "2025-26",
+    "dateSpent": "2026-01-20",
+    "quarterSpent": "Q4",
+    "disbursements": [
+      {"tranche": "T1", "date": "2025-07-10", "amount": 4687500, "percentage": 50.0, "quarter": "Q2"},
+      {"tranche": "T2", "date": "2026-01-20", "amount": 4687500, "percentage": 50.0, "quarter": "Q4"}
+    ],
+    "siteCoordinates": {"latitude": 11.0020, "longitude": 77.0190},
+    "latitude": 11.0020,
+    "longitude": 77.0190
+  },
+  {
+    "id": "PRJ-IND-TN-204",
+    "name": "Widening and Strengthened Cross-Drainage Culverts along Thudiyalur Bypass, Coimbatore",
+    "state": "Tamil Nadu",
+    "district": "Coimbatore",
+    "constituency": "Coimbatore",
+    "mpName": "Thiru Ganapathy Rajkumar (Fictional)",
+    "mpId": "MP-LS-TN-02",
+    "category": "Road",
+    "implementingAgency": "Public Works Department (PWD) — Coimbatore",
+    "vendorName": "Kongu Highway Developers Pvt Ltd (Fictional)",
+    "sanctionedAmount": 13800000,
+    "expenditure": 11040000,
+    "physicalProgress": 68,
+    "financialProgress": 80.0,
+    "status": "In Progress",
+    "riskScore": 42,
+    "riskLevel": "MEDIUM",
+    "daysDelayed": 0,
+    "costOverrun": false,
+    "duplicateRisk": false,
+    "paymentProgressMismatch": false,
+    "vendorId": "VND-TN-005",
+    "financialYear": "2025-26",
+    "dateSpent": "2025-11-20",
+    "quarterSpent": "Q3",
+    "disbursements": [
+      {"tranche": "T1", "date": "2025-06-12", "amount": 5520000, "percentage": 50.0, "quarter": "Q1"},
+      {"tranche": "T2", "date": "2025-11-20", "amount": 5520000, "percentage": 50.0, "quarter": "Q3"}
+    ],
+    "siteCoordinates": {"latitude": 11.0770, "longitude": 76.9440},
+    "latitude": 11.0770,
+    "longitude": 76.9440
+  },
+  {
+    "id": "PRJ-IND-TN-301",
+    "name": "Reinforced Cement Concrete Paving of Vaigai South Bank Relief Road, Madurai",
+    "state": "Tamil Nadu",
+    "district": "Madurai",
+    "constituency": "Madurai",
+    "mpName": "Shri S. Venkatesan (Fictional)",
+    "mpId": "MP-LS-TN-03",
+    "category": "Road",
+    "implementingAgency": "Public Works Department (PWD) — Madurai",
+    "vendorName": "Pandya Roads & Civil Works Ltd (Fictional)",
+    "sanctionedAmount": 17200000,
+    "expenditure": 13760000,
+    "physicalProgress": 52,
+    "financialProgress": 80.0,
+    "status": "In Progress",
+    "riskScore": 71,
+    "riskLevel": "HIGH",
+    "daysDelayed": 85,
+    "costOverrun": true,
+    "duplicateRisk": false,
+    "paymentProgressMismatch": true,
+    "vendorId": "VND-TN-007",
+    "financialYear": "2025-26",
+    "dateSpent": "2026-02-18",
+    "quarterSpent": "Q4",
+    "disbursements": [
+      {"tranche": "T1", "date": "2025-08-20", "amount": 4128000, "percentage": 30.0, "quarter": "Q2"},
+      {"tranche": "T2", "date": "2026-02-18", "amount": 9632000, "percentage": 70.0, "quarter": "Q4"}
+    ],
+    "siteCoordinates": {"latitude": 9.9252, "longitude": 78.1198},
+    "latitude": 9.9252,
+    "longitude": 78.1198
+  },
+  {
+    "id": "PRJ-IND-TN-302",
+    "name": "Modernization of Government Rajaji Hospital Emergency Diagnostics Center, Madurai",
+    "state": "Tamil Nadu",
+    "district": "Madurai",
+    "constituency": "Madurai",
+    "mpName": "Shri S. Venkatesan (Fictional)",
+    "mpId": "MP-LS-TN-03",
+    "category": "Health",
+    "implementingAgency": "District Health Mission — Madurai",
+    "vendorName": "Kaveri Meditech Diagnostics (Fictional)",
+    "sanctionedAmount": 14000000,
+    "expenditure": 11200000,
+    "physicalProgress": 78,
+    "financialProgress": 80.0,
+    "status": "In Progress",
+    "riskScore": 35,
+    "riskLevel": "LOW",
+    "daysDelayed": 0,
+    "costOverrun": false,
+    "duplicateRisk": false,
+    "paymentProgressMismatch": false,
+    "vendorId": "VND-TN-003",
+    "financialYear": "2025-26",
+    "dateSpent": "2025-09-15",
+    "quarterSpent": "Q2",
+    "disbursements": [
+      {"tranche": "T1", "date": "2025-05-10", "amount": 5600000, "percentage": 50.0, "quarter": "Q1"},
+      {"tranche": "T2", "date": "2025-09-15", "amount": 5600000, "percentage": 50.0, "quarter": "Q2"}
+    ],
+    "siteCoordinates": {"latitude": 9.9320, "longitude": 78.1350},
+    "latitude": 9.9320,
+    "longitude": 78.1350
+  },
+  {
+    "id": "PRJ-IND-TN-303",
+    "name": "Community Drinking Water Fluoride Reduction Plant and Over-Head Reservoir, Madurai",
+    "state": "Tamil Nadu",
+    "district": "Madurai",
+    "constituency": "Madurai",
+    "mpName": "Shri S. Venkatesan (Fictional)",
+    "mpId": "MP-LS-TN-03",
+    "category": "Water",
+    "implementingAgency": "Rural Water Supply & Sanitation Board — Madurai",
+    "vendorName": "Pandya Roads & Civil Works Ltd (Fictional)",
+    "sanctionedAmount": 10500000,
+    "expenditure": 7875000,
+    "physicalProgress": 65,
+    "financialProgress": 75.0,
+    "status": "In Progress",
+    "riskScore": 48,
+    "riskLevel": "MEDIUM",
+    "daysDelayed": 0,
+    "costOverrun": false,
+    "duplicateRisk": false,
+    "paymentProgressMismatch": false,
+    "vendorId": "VND-TN-007",
+    "financialYear": "2025-26",
+    "dateSpent": "2025-10-25",
+    "quarterSpent": "Q3",
+    "disbursements": [
+      {"tranche": "T1", "date": "2025-06-18", "amount": 3937500, "percentage": 50.0, "quarter": "Q1"},
+      {"tranche": "T2", "date": "2025-10-25", "amount": 3937500, "percentage": 50.0, "quarter": "Q3"}
+    ],
+    "siteCoordinates": {"latitude": 9.9180, "longitude": 78.1090},
+    "latitude": 9.9180,
+    "longitude": 78.1090
+  },
+  {
+    "id": "PRJ-IND-TN-304",
+    "name": "Construction of Science and Digital Innovation Block at Municipal Higher Secondary School, Madurai",
+    "state": "Tamil Nadu",
+    "district": "Madurai",
+    "constituency": "Madurai",
+    "mpName": "Shri S. Venkatesan (Fictional)",
+    "mpId": "MP-LS-TN-03",
+    "category": "Education",
+    "implementingAgency": "Department of Public Instruction — Madurai",
+    "vendorName": "Pandya Roads & Civil Works Ltd (Fictional)",
+    "sanctionedAmount": 9800000,
+    "expenditure": 7840000,
+    "physicalProgress": 72,
+    "financialProgress": 80.0,
+    "status": "In Progress",
+    "riskScore": 30,
+    "riskLevel": "LOW",
+    "daysDelayed": 0,
+    "costOverrun": false,
+    "duplicateRisk": false,
+    "paymentProgressMismatch": false,
+    "vendorId": "VND-TN-007",
+    "financialYear": "2025-26",
+    "dateSpent": "2025-11-10",
+    "quarterSpent": "Q3",
+    "disbursements": [
+      {"tranche": "T1", "date": "2025-06-20", "amount": 3920000, "percentage": 50.0, "quarter": "Q1"},
+      {"tranche": "T2", "date": "2025-11-10", "amount": 3920000, "percentage": 50.0, "quarter": "Q3"}
+    ],
+    "siteCoordinates": {"latitude": 9.9215, "longitude": 78.1270},
+    "latitude": 9.9215,
+    "longitude": 78.1270
+  }
+]
+"""
+
+new_projects = json.loads(raw_projects_json)
+added_count = 0
+for np in new_projects:
+    if np["id"] not in existing_ids:
+        projects.append(np)
+        existing_ids.add(np["id"])
+        added_count += 1
+
+with open(PROJECTS_FILE, "w", encoding="utf-8") as f:
+    json.dump(projects, f, indent=2, ensure_ascii=False)
+
+print(f"Added {added_count} new Tamil Nadu projects. Total projects in catalog: {len(projects)}")
+
+# Update alerts with corresponding Tamil Nadu alerts
+with open(ALERTS_FILE, "r", encoding="utf-8") as f:
+    alerts = json.load(f)
+
+existing_alert_ids = set(a["id"] for a in alerts)
+
+raw_alerts_json = """
+[
+  {
+    "id": "ALT-TN-2026-001",
+    "projectId": "PRJ-IND-TN-102",
+    "projectName": "Construction of Grade-Separated Multi-Lane Vehicular Overbridge at Rajaji Junction, Chennai",
+    "state": "Tamil Nadu",
+    "district": "Chennai",
+    "alertType": "FINANCIAL_RISK",
+    "severity": "CRITICAL",
+    "riskScore": 82,
+    "title": "Severe Cost Overrun & Milestone Delay (180 days) - Chennai",
+    "description": "Critical milestone mismatch: 80% fund disbursement with only 48% physical progress recorded at Rajaji Overbridge.",
+    "timestamp": "2026-08-14T09:30:00Z",
+    "recommendedAction": "Freeze third tranche disbursement pending joint technical inspection by District Collectorate and CAG audit cell.",
+    "sourceModule": "risk"
+  },
+  {
+    "id": "ALT-TN-2026-002",
+    "projectId": "PRJ-IND-TN-101",
+    "projectName": "Widening and Storm-Resistant Bituminous Paving of Arterial Port Feeder Road, Chennai",
+    "state": "Tamil Nadu",
+    "district": "Chennai",
+    "alertType": "COMPLIANCE_VIOLATION",
+    "severity": "HIGH",
+    "riskScore": 68,
+    "title": "Payment-Progress Milestone Discrepancy Flagged - Chennai",
+    "description": "Financial expenditure exceeds certified measurement sheet progress by 16% on Arterial Port Feeder Road.",
+    "timestamp": "2026-08-12T11:15:00Z",
+    "recommendedAction": "Issue formal compliance explanation request to Public Works Department (PWD) Executive Division.",
+    "sourceModule": "compliance"
+  },
+  {
+    "id": "ALT-TN-2026-003",
+    "projectId": "PRJ-IND-TN-105",
+    "projectName": "Erection of Solar-Powered Decentralized Material Recovery Center, George Town, Chennai",
+    "state": "Tamil Nadu",
+    "district": "Chennai",
+    "alertType": "SEASONAL_ANOMALY",
+    "severity": "HIGH",
+    "riskScore": 76,
+    "title": "March Rush Fund Dumping Detected (70% outlay in Q4) - Chennai",
+    "description": "70% of scheme expenditure disbursed in final four weeks of fiscal year without corresponding stage inspection report.",
+    "timestamp": "2026-08-08T14:45:00Z",
+    "recommendedAction": "Conduct retrospective voucher examination and field audit for George Town material recovery asset.",
+    "sourceModule": "trend"
+  },
+  {
+    "id": "ALT-TN-2026-004",
+    "projectId": "PRJ-IND-TN-104",
+    "projectName": "Reconstruction of Heavy-Duty Reinforced Stormwater Trunk Drain, Chepauk, Chennai",
+    "state": "Tamil Nadu",
+    "district": "Chennai",
+    "alertType": "CITIZEN_CONTRADICTION",
+    "severity": "WARNING",
+    "riskScore": 58,
+    "title": "Ground-Truth Citizen Discrepancy (Chepauk Stormwater Drain) - Chennai",
+    "description": "Citizen reports indicate excavation debris blocking canal, contradicting official report of 65% completed silt-clearing.",
+    "timestamp": "2026-08-16T16:20:00Z",
+    "recommendedAction": "Dispatch independent field verification officer to photograph Chepauk trunk drain alignment.",
+    "sourceModule": "citizen"
+  },
+  {
+    "id": "ALT-TN-2026-005",
+    "projectId": "PRJ-IND-TN-201",
+    "projectName": "Four-Lane Bituminous Upgradation of Pollachi Agricultural Link Corridor, Coimbatore",
+    "state": "Tamil Nadu",
+    "district": "Coimbatore",
+    "alertType": "FINANCIAL_RISK",
+    "severity": "HIGH",
+    "riskScore": 74,
+    "title": "Delayed Execution & Expenditure Pacing Anomaly - Coimbatore",
+    "description": "Physical progress lagging by 30% against sanctioned timeline on Pollachi Agricultural Corridor.",
+    "timestamp": "2026-08-10T10:00:00Z",
+    "recommendedAction": "Summon PWD Coimbatore executive engineer for milestone review meeting.",
+    "sourceModule": "risk"
+  },
+  {
+    "id": "ALT-TN-2026-006",
+    "projectId": "PRJ-IND-TN-301",
+    "projectName": "Reinforced Cement Concrete Paving of Vaigai South Bank Relief Road, Madurai",
+    "state": "Tamil Nadu",
+    "district": "Madurai",
+    "alertType": "FINANCIAL_RISK",
+    "severity": "HIGH",
+    "riskScore": 71,
+    "title": "Milestone Delay & Expenditure Pacing Mismatch - Madurai",
+    "description": "80% financial outlay disbursed while physical works stand at 52% on Vaigai South Bank Relief Road.",
+    "timestamp": "2026-08-09T13:10:00Z",
+    "recommendedAction": "Order on-site audit measurement verification by Madurai District Vigilance Cell.",
+    "sourceModule": "risk"
+  }
+]
+"""
+
+new_alerts = json.loads(raw_alerts_json)
+for na in new_alerts:
+    if na["id"] not in existing_alert_ids:
+        alerts.append(na)
+        existing_alert_ids.add(na["id"])
+
+with open(ALERTS_FILE, "w", encoding="utf-8") as f:
+    json.dump(alerts, f, indent=2, ensure_ascii=False)
+
+print(f"Updated mockAlerts.json. Total alerts: {len(alerts)}")
