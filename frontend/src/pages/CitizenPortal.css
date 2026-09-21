@@ -467,14 +467,18 @@
 
 /* Geo Attachment Note */
 .setu-geo-attached-note {
-  display: flex;
-  align-items: center;
-  gap: var(--setu-space-2);
-  font-size: var(--setu-font-size-caption);
-  color: var(--setu-color-neutral-600);
-  background-color: var(--setu-color-bg-subtle);
-  padding: var(--setu-space-2) var(--setu-space-3);
-  border-radius: var(--setu-radius-xs);
-  border: 1px dashed var(--setu-color-border-default);
+/* Custom clean scrollbar for project selection box */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
 }
-
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}

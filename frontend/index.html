@@ -24,6 +24,14 @@
         theme: {
           extend: {
             "colors": {
+              "govNavy": {
+                "DEFAULT": "#0f2b5c",
+                "dark": "#0a1d3f",
+                "light": "#1e3a8a"
+              },
+              "govSlate": "#5b6b82",
+              "govBorder": "#d5dbe5",
+              "govBg": "#f8fafc",
               "surface-container-high": "#e1e8fd",
               "error": "#ba1a1a",
               "surface-tint": "#465d91",
@@ -967,7 +975,7 @@
 
       if (hash === '#/login') {
         renderLoginPage();
-      } else if (hash === '#/citizen-portal') {
+      } else if (hash === '#/citizen-portal' || hash.startsWith('#/citizen-portal') || hash === '#citizen-portal') {
         currentLoginRole = null;
         mountCitizenPortal(appEl);
       } else if (hash === '#/dashboard') {
