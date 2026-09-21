@@ -5,24 +5,133 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="SETU — MPLADS Scheme Audit & Public Transparency Platform">
   <title>SETU — MPLADS Audit Platform</title>
-  <link rel="stylesheet" href="./src/theme/tokens.css">
-  <link rel="stylesheet" href="./src/components/Layout.css">
-  <link rel="stylesheet" href="./src/pages/Dashboard.css">
-  <link rel="stylesheet" href="./src/pages/ProjectDetail.css">
-  <link rel="stylesheet" href="./src/pages/Landing.css">
-  <link rel="stylesheet" href="./src/pages/Login.css">
-  <link rel="stylesheet" href="./src/pages/CitizenPortal.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Public+Sans:wght@600;700&family=Noto+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block" rel="stylesheet">
+  <link rel="stylesheet" href="./src/theme/tokens.css?v=20260920_v2">
+  <link rel="stylesheet" href="./src/components/Layout.css?v=20260920_v2">
+  <link rel="stylesheet" href="./src/pages/Dashboard.css?v=20260920_v2">
+  <link rel="stylesheet" href="./src/pages/ProjectDetail.css?v=20260920_v2">
+  <link rel="stylesheet" href="./src/pages/Landing.css?v=20260920_v2">
+  <link rel="stylesheet" href="./src/pages/Login.css?v=20260920_v2">
+  <link rel="stylesheet" href="./src/pages/CitizenPortal.css?v=20260920_v2">
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">
+    try {
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+              "surface-container-high": "#e1e8fd",
+              "error": "#ba1a1a",
+              "surface-tint": "#465d91",
+              "on-secondary-fixed-variant": "#763300",
+              "primary-fixed": "#d9e2ff",
+              "background": "#f9f9ff",
+              "on-tertiary-fixed-variant": "#00513a",
+              "on-background": "#141b2b",
+              "inverse-primary": "#afc6ff",
+              "primary-fixed-dim": "#afc6ff",
+              "on-secondary-container": "#682c00",
+              "on-surface": "#141b2b",
+              "surface-dim": "#d3daef",
+              "on-secondary": "#ffffff",
+              "on-tertiary-fixed": "#002115",
+              "tertiary-container": "#003424",
+              "surface-container-low": "#f1f3ff",
+              "inverse-surface": "#293040",
+              "on-primary": "#ffffff",
+              "on-primary-container": "#7c94cb",
+              "surface-bright": "#f9f9ff",
+              "on-surface-variant": "#44464f",
+              "surface-variant": "#dce2f7",
+              "error-container": "#ffdad6",
+              "tertiary-fixed-dim": "#7bd8b1",
+              "primary-container": "#0f2b5c",
+              "tertiary": "#001d12",
+              "on-primary-fixed-variant": "#2d4678",
+              "tertiary-fixed": "#97f5cc",
+              "on-error-container": "#93000a",
+              "secondary-fixed": "#ffdbca",
+              "surface": "#f9f9ff",
+              "on-tertiary-container": "#46a480",
+              "secondary": "#9b4500",
+              "on-tertiary": "#ffffff",
+              "surface-container-lowest": "#ffffff",
+              "secondary-container": "#fd8a42",
+              "surface-container": "#e9edff",
+              "on-secondary-fixed": "#331200",
+              "primary": "#00163d",
+              "outline-variant": "#c4c6d0",
+              "outline": "#747780",
+              "inverse-on-surface": "#edf0ff",
+              "secondary-fixed-dim": "#ffb68e",
+              "on-error": "#ffffff",
+              "surface-container-highest": "#dce2f7",
+              "on-primary-fixed": "#001944"
+            },
+            "borderRadius": {
+              "DEFAULT": "0.125rem",
+              "lg": "0.25rem",
+              "xl": "0.5rem",
+              "full": "0.75rem"
+            },
+            "spacing": {
+              "space-xs": "0.25rem",
+              "margin": "1rem",
+              "space-sm": "0.5rem",
+              "gutter": "1rem",
+              "space-lg": "1rem",
+              "margin-desktop": "2rem",
+              "margin-tablet": "1.5rem",
+              "space-md": "0.75rem",
+              "space-xl": "1.5rem",
+              "gutter-desktop": "1.5rem"
+            },
+            "fontFamily": {
+              "body-sm": ["Inter"],
+              "headline-md": ["Public Sans"],
+              "headline-lg-mobile": ["Public Sans"],
+              "body-md": ["Inter"],
+              "headline-xl-mobile": ["Public Sans"],
+              "label-sm": ["Inter"],
+              "label-lg": ["Inter"],
+              "headline-lg": ["Public Sans"],
+              "body-lg": ["Inter"],
+              "label-md": ["Inter"],
+              "headline-xl": ["Public Sans"]
+            },
+            "fontSize": {
+              "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+              "headline-md": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+              "headline-lg-mobile": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+              "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+              "headline-xl-mobile": ["26px", { "lineHeight": "32px", "fontWeight": "700" }],
+              "label-sm": ["11px", { "lineHeight": "14px", "fontWeight": "500" }],
+              "label-lg": ["14px", { "lineHeight": "20px", "fontWeight": "600" }],
+              "headline-lg": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+              "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+              "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "600" }],
+              "headline-xl": ["32px", { "lineHeight": "40px", "fontWeight": "700" }]
+            }
+          }
+        }
+      }
+    } catch (_e) {}
+  </script>
 </head>
 <body>
   <div id="app"></div>
 
   <script type="module">
-    import { getLandingHtml } from './src/pages/landingData.js';
-    import { officialRoles, authenticateOfficial } from './src/pages/loginData.js';
-    import { mountLayout } from './src/components/Layout.js';
-    import { getProjectDetailHtml, fetchLiveCitizenReports } from './src/pages/projectDetailData.js';
-    import { mountCitizenPortal } from './src/pages/citizenPortalData.js';
-    import { fetchScopedProjects } from './src/pages/dashboardData.js';
+    import { getLandingHtml } from './src/pages/landingData.js?v=20260920_v2';
+    import { officialRoles, authenticateOfficial } from './src/pages/loginData.js?v=20260920_v2';
+    import { mountLayout, resolveSessionRole } from './src/components/Layout.js?v=20260920_v2';
+    import { getProjectDetailHtml, fetchLiveCitizenReports } from './src/pages/projectDetailData.js?v=20260920_v2';
+    import { mountCitizenPortal } from './src/pages/citizenPortalData.js?v=20260920_v2';
+    import { fetchScopedProjects, wireAgencyModals } from './src/pages/dashboardData.js?v=20260920_v2';
 
     const appEl = document.getElementById('app');
     let currentLoginRole = null;
@@ -30,154 +139,788 @@
 
     function renderLoginPage() {
       if (!currentLoginRole) {
-        // STEP 1: Role Selection Grid
-        const roleCardsHtml = officialRoles
-          .map(
-            (role) => `
-            <div class="setu-role-card" data-role-id="${role.id}">
-              <div class="setu-role-card-top">
-                <span class="setu-role-level-tag">${role.level}</span>
-              </div>
-              <h2 class="setu-role-name">${role.name}</h2>
-              <p class="setu-role-desc">${role.description}</p>
-              <div class="setu-role-action-text">Proceed to Login →</div>
-            </div>`
-          )
-          .join('');
-
+        // STEP 1: Role Selection Grid (Modern Institutional Design)
         appEl.innerHTML = `
-          <div class="setu-login-page">
-            <div class="setu-masthead">
-              <span class="setu-masthead-gov">SMART INDIA HACKATHON 2026 • PROTOTYPE FOR MoSPI PROBLEM STATEMENT SIH26102</span>
-              <span class="setu-masthead-locale">Official Authentication Portal</span>
-            </div>
-            <header class="setu-landing-header">
-              <div class="setu-landing-header-inner">
-                <div class="setu-landing-logo-badge">GOV</div>
-                <span class="setu-landing-title">SETU</span>
-                <span class="setu-landing-tagline">National Public Audit & Monitoring Platform</span>
+          <div class="bg-background font-body-md text-body-md text-on-surface antialiased min-h-screen flex flex-col">
+            <!-- FIXED TOP HEADER -->
+            <header class="fixed top-0 w-full z-50 bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
+              <!-- Top Masthead Utility Bar -->
+              <div class="w-full bg-primary text-on-primary">
+                <div class="max-w-7xl mx-auto px-margin lg:px-margin-desktop h-7 flex items-center justify-between text-label-sm font-label-sm">
+                  <div class="flex items-center gap-space-xs truncate">
+                    <span class="material-symbols-outlined text-[14px]">school</span>
+                    <span class="truncate font-medium">SMART INDIA HACKATHON 2026 · PROTOTYPE FOR MoSPI PROBLEM STATEMENT SIH26102</span>
+                  </div>
+                  <div class="flex items-center gap-space-md">
+                    <div class="flex items-center gap-space-xs">
+                      <button class="hover:text-primary-fixed transition-colors px-1" type="button" onclick="document.body.style.fontSize='12px'">A-</button>
+                      <button class="hover:text-primary-fixed transition-colors px-1 font-bold" type="button" onclick="document.body.style.fontSize='14px'">A</button>
+                      <button class="hover:text-primary-fixed transition-colors px-1" type="button" onclick="document.body.style.fontSize='16px'">A+</button>
+                    </div>
+                    <span class="text-outline">|</span>
+                    <button class="flex items-center gap-1 hover:text-primary-fixed transition-colors" type="button">
+                      <span class="material-symbols-outlined text-[13px]">record_voice_over</span>
+                      Screen Reader
+                    </button>
+                    <span class="text-outline">|</span>
+                    <div class="flex items-center gap-1">
+                      <span class="text-on-primary font-semibold">English</span>
+                      <span class="text-outline">/</span>
+                      <button class="hover:text-primary-fixed transition-colors" type="button">हिन्दी</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Main Branding & Search Header -->
+              <div class="max-w-7xl mx-auto px-margin lg:px-margin-desktop py-space-sm flex items-center justify-between gap-space-lg">
+                <a href="#/" class="flex items-center gap-space-md no-underline text-inherit">
+                  <div class="flex items-center justify-center w-9 h-9 rounded bg-primary text-on-primary font-bold text-sm tracking-wider shadow-sm">
+                    SETU
+                  </div>
+                  <div class="flex flex-col">
+                    <div class="font-headline-md text-headline-md text-primary tracking-tight font-bold">SETU: National Public Audit &amp; Monitoring Platform</div>
+                    <div class="font-body-sm text-body-sm text-on-surface-variant font-medium">MPLADS Fund Oversight &amp; Anomaly Surveillance</div>
+                  </div>
+                </a>
+
+                <div class="hidden md:flex items-center gap-space-lg">
+                  <div class="flex flex-col items-end gap-space-xs">
+                    <form class="flex items-center" onsubmit="event.preventDefault(); const val=document.getElementById('login-header-search-input').value.trim(); if(val){ if(val.toUpperCase().startsWith('PRJ-')) { window.location.hash='#/project/'+encodeURIComponent(val); } else { window.location.hash='#/citizen-portal?q='+encodeURIComponent(val); } }">
+                      <div class="relative flex items-center">
+                        <span class="material-symbols-outlined absolute left-2.5 text-outline text-[16px]">search</span>
+                        <input
+                          id="login-header-search-input"
+                          class="w-80 h-9 pl-8 pr-3 font-body-sm text-body-sm bg-surface-container-low text-on-surface placeholder:text-outline rounded-l border border-outline-variant focus:outline-none focus:ring-1 focus:ring-primary"
+                          placeholder="Track Sanction / Work ID / Complaint #"
+                          type="text"
+                        />
+                      </div>
+                      <button
+                        class="h-9 px-space-md bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md rounded-r transition-colors flex items-center gap-1 cursor-pointer"
+                        type="submit"
+                      >
+                        <span>Track</span>
+                        <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+                      </button>
+                    </form>
+                    <div class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1">
+                      <span class="material-symbols-outlined text-secondary text-[14px]">support_agent</span>
+                      Toll-Free Helpline: <span class="font-semibold text-primary">1800-11-2026</span>
+                    </div>
+                  </div>
+                  <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
+                    <span class="material-symbols-outlined text-on-primary text-[18px]">person</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Sub-Navigation Bar -->
+              <div class="w-full bg-primary-container text-on-primary">
+                <div class="max-w-7xl mx-auto px-margin lg:px-margin-desktop flex items-center justify-between">
+                  <nav class="flex items-center gap-1 overflow-x-auto">
+                    <a class="px-space-md py-2.5 text-label-md font-label-md text-surface-container hover:text-white transition-colors whitespace-nowrap" href="#/">Home</a>
+                    <a class="px-space-md py-2.5 text-label-md font-label-md text-surface-container hover:text-white transition-colors whitespace-nowrap" href="#/">Compliance Guidelines</a>
+                    <a class="px-space-md py-2.5 text-label-md font-label-md text-surface-container hover:text-white transition-colors whitespace-nowrap" href="#/">Fund Allocation</a>
+                    <a class="px-space-md py-2.5 text-label-md font-label-md text-surface-container hover:text-white transition-colors whitespace-nowrap" href="#/">Duplicate Registry</a>
+                    <a class="px-space-md py-2.5 text-label-md font-label-md text-surface-container hover:text-white transition-colors whitespace-nowrap" href="#/citizen-portal">Citizen Oversight</a>
+                    <a class="px-space-md py-2.5 text-label-md font-label-md text-surface-container hover:text-white transition-colors whitespace-nowrap" href="#/">Public Notices</a>
+                    <a class="px-space-md py-2.5 text-label-md font-label-md text-surface-container hover:text-white transition-colors whitespace-nowrap" href="#/">Contact Helpdesk</a>
+                  </nav>
+                </div>
               </div>
             </header>
-            <main class="setu-login-container">
-              <div class="setu-login-header-section">
-                <div class="setu-login-top-nav">
-                  <a href="#/" class="setu-back-link">← Return to Public Landing Page</a>
+
+            <!-- MAIN CONTENT AREA -->
+            <main class="w-full pt-[132px] bg-background min-h-screen flex-1">
+              <!-- Breadcrumb and Return Banner -->
+              <div class="w-full border-b border-outline-variant bg-surface-container-lowest">
+                <div class="max-w-7xl mx-auto px-margin lg:px-margin-desktop py-space-sm flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs">
+                  <a class="inline-flex items-center gap-1.5 font-label-md text-label-md text-primary hover:underline group cursor-pointer" href="#/">
+                    <span class="material-symbols-outlined text-[16px] group-hover:-translate-x-0.5 transition-transform">arrow_back</span>
+                    <span>Return to Public Landing Page</span>
+                  </a>
+
+                  <div class="flex items-center gap-space-xs font-body-sm text-body-sm text-on-surface-variant">
+                    <span class="text-on-surface-variant">Home</span>
+                    <span class="text-outline">/</span>
+                    <span class="text-on-surface-variant">Authorized Officer Portal</span>
+                    <span class="text-outline">/</span>
+                    <span class="text-primary font-semibold">Select Role</span>
+                  </div>
                 </div>
-                <h1 class="setu-login-title">Select Your Official Role</h1>
-                <p class="setu-login-subtitle">Authorized personnel must select their statutory role to proceed.</p>
               </div>
-              <div class="setu-role-grid">
-                ${roleCardsHtml}
+
+              <div class="max-w-7xl mx-auto px-margin lg:px-margin-desktop py-space-lg w-full flex flex-col gap-space-xl">
+                <!-- Page Header -->
+                <div class="flex flex-col gap-space-xs border-b border-outline-variant pb-space-lg">
+                  <div class="flex items-center gap-space-sm flex-wrap">
+                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 border border-primary text-primary font-label-sm text-label-sm bg-surface-container-low tracking-wide uppercase font-bold">
+                      <span class="material-symbols-outlined text-[13px]">shield_person</span>
+                      OFFICER ACCESS GATEWAY
+                    </span>
+                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 border border-outline-variant text-on-surface-variant font-label-sm text-label-sm bg-surface-container-lowest">
+                      <span class="material-symbols-outlined text-[13px] text-tertiary-container">lock</span>
+                      Secure Login
+                    </span>
+                  </div>
+                  <h1 class="font-headline-xl text-headline-xl text-primary tracking-tight mt-1 font-bold">Select Your Official Role</h1>
+                  <p class="font-body-md text-body-md text-on-surface-variant">Authenticate according to your administrative jurisdiction or oversight mandate.</p>
+                </div>
+
+                <!-- SECTION A: Administrative Hierarchy -->
+                <section class="flex flex-col gap-space-md">
+                  <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-space-xs border-l-4 border-primary pl-space-sm">
+                    <div>
+                      <h2 class="font-headline-lg text-headline-lg text-primary tracking-tight font-bold">Administrative Hierarchy</h2>
+                      <p class="font-body-sm text-body-sm text-on-surface-variant">Tiered escalation &amp; sanction review chain: Constituency → National</p>
+                    </div>
+                    <div class="hidden lg:flex items-center gap-space-xs text-label-sm font-label-sm text-on-surface-variant bg-surface-container px-space-sm py-1 border border-outline-variant">
+                      <span class="material-symbols-outlined text-[14px] text-primary">swap_horiz</span>
+                      Ascending Verification &amp; Clearance Protocol
+                    </div>
+                  </div>
+
+                  <!-- Connecting Stepper Flow Visualization -->
+                  <div class="hidden md:grid grid-cols-4 gap-gutter-desktop px-space-xs -mb-2">
+                    <div class="flex items-center gap-space-xs">
+                      <span class="w-5 h-5 rounded-full bg-primary text-on-primary text-label-sm font-label-sm flex items-center justify-center font-bold">1</span>
+                      <div class="h-0.5 flex-1 bg-outline-variant"></div>
+                    </div>
+                    <div class="flex items-center gap-space-xs">
+                      <span class="w-5 h-5 rounded-full bg-primary text-on-primary text-label-sm font-label-sm flex items-center justify-center font-bold">2</span>
+                      <div class="h-0.5 flex-1 bg-outline-variant"></div>
+                    </div>
+                    <div class="flex items-center gap-space-xs">
+                      <span class="w-5 h-5 rounded-full bg-primary text-on-primary text-label-sm font-label-sm flex items-center justify-center font-bold">3</span>
+                      <div class="h-0.5 flex-1 bg-outline-variant"></div>
+                    </div>
+                    <div class="flex items-center gap-space-xs">
+                      <span class="w-5 h-5 rounded-full bg-primary text-on-primary text-label-sm font-label-sm flex items-center justify-center font-bold">4</span>
+                      <div class="h-0.5 flex-1 bg-outline-variant"></div>
+                    </div>
+                  </div>
+
+                  <!-- 4 Role Cards Grid -->
+                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter-desktop">
+                    <!-- Card 1: MP Office -->
+                    <div class="bg-surface-container-lowest border border-outline-variant p-space-md flex flex-col justify-between hover:border-primary transition-colors h-full shadow-sm rounded">
+                      <div class="flex flex-col gap-space-xs">
+                        <div class="flex items-center justify-between mb-1">
+                          <span class="font-label-sm text-label-sm text-primary font-semibold bg-surface-container px-2 py-0.5 border border-outline-variant">
+                            TIER 1 · CONSTITUENCY
+                          </span>
+                          <span class="material-symbols-outlined text-outline text-[18px]">how_to_vote</span>
+                        </div>
+                        <h3 class="font-headline-md text-headline-md text-primary mt-1 font-bold">MP Office</h3>
+                        <p class="font-body-sm text-body-sm text-on-surface-variant min-h-[32px]">Recommend works and monitor constituency sanctions.</p>
+                        <div class="mt-2 pt-2 border-t border-outline-variant">
+                          <span class="font-label-sm text-label-sm text-outline">e.g., Lok Sabha / Rajya Sabha MP Staff</span>
+                        </div>
+                      </div>
+                      <div class="mt-space-md pt-space-xs">
+                        <button
+                          class="w-full h-9 bg-primary text-on-primary font-label-md text-label-md flex items-center justify-center gap-1 hover:bg-primary-container transition-colors cursor-pointer rounded btn-role-select"
+                          type="button"
+                          data-role-id="mp_office"
+                        >
+                          <span>Proceed to Login</span>
+                          <span class="material-symbols-outlined text-[15px]">arrow_forward</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- Card 2: District Authority -->
+                    <div class="bg-surface-container-lowest border border-outline-variant p-space-md flex flex-col justify-between hover:border-primary transition-colors h-full shadow-sm rounded">
+                      <div class="flex flex-col gap-space-xs">
+                        <div class="flex items-center justify-between mb-1">
+                          <span class="font-label-sm text-label-sm text-primary font-semibold bg-surface-container px-2 py-0.5 border border-outline-variant">
+                            TIER 2 · DISTRICT
+                          </span>
+                          <span class="material-symbols-outlined text-outline text-[18px]">domain</span>
+                        </div>
+                        <h3 class="font-headline-md text-headline-md text-primary mt-1 font-bold">District Authority (DM / DC)</h3>
+                        <p class="font-body-sm text-body-sm text-on-surface-variant min-h-[32px]">Sanction approvals, fund releases, and contractor allocation.</p>
+                        <div class="mt-2 pt-2 border-t border-outline-variant">
+                          <span class="font-label-sm text-label-sm text-outline">e.g., District Collector / DPO</span>
+                        </div>
+                      </div>
+                      <div class="mt-space-md pt-space-xs">
+                        <button
+                          class="w-full h-9 bg-primary text-on-primary font-label-md text-label-md flex items-center justify-center gap-1 hover:bg-primary-container transition-colors cursor-pointer rounded btn-role-select"
+                          type="button"
+                          data-role-id="district_authority"
+                        >
+                          <span>Proceed to Login</span>
+                          <span class="material-symbols-outlined text-[15px]">arrow_forward</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- Card 3: State Nodal Authority -->
+                    <div class="bg-surface-container-lowest border border-outline-variant p-space-md flex flex-col justify-between hover:border-primary transition-colors h-full shadow-sm rounded">
+                      <div class="flex flex-col gap-space-xs">
+                        <div class="flex items-center justify-between mb-1">
+                          <span class="font-label-sm text-label-sm text-primary font-semibold bg-surface-container px-2 py-0.5 border border-outline-variant">
+                            TIER 3 · STATE
+                          </span>
+                          <span class="material-symbols-outlined text-outline text-[18px]">account_balance</span>
+                        </div>
+                        <h3 class="font-headline-md text-headline-md text-primary mt-1 font-bold">State Nodal Authority</h3>
+                        <p class="font-body-sm text-body-sm text-on-surface-variant min-h-[32px]">Inter-district monitoring and state utilization reviews.</p>
+                        <div class="mt-2 pt-2 border-t border-outline-variant">
+                          <span class="font-label-sm text-label-sm text-outline">e.g., State Planning Dept.</span>
+                        </div>
+                      </div>
+                      <div class="mt-space-md pt-space-xs">
+                        <button
+                          class="w-full h-9 bg-primary text-on-primary font-label-md text-label-md flex items-center justify-center gap-1 hover:bg-primary-container transition-colors cursor-pointer rounded btn-role-select"
+                          type="button"
+                          data-role-id="state_nodal"
+                        >
+                          <span>Proceed to Login</span>
+                          <span class="material-symbols-outlined text-[15px]">arrow_forward</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- Card 4: Central Nodal Agency -->
+                    <div class="bg-surface-container-lowest border border-outline-variant p-space-md flex flex-col justify-between hover:border-primary transition-colors h-full shadow-sm rounded">
+                      <div class="flex flex-col gap-space-xs">
+                        <div class="flex items-center justify-between mb-1">
+                          <span class="font-label-sm text-label-sm text-primary font-semibold bg-surface-container px-2 py-0.5 border border-outline-variant">
+                            TIER 4 · NATIONAL
+                          </span>
+                          <span class="material-symbols-outlined text-outline text-[18px]">hub</span>
+                        </div>
+                        <h3 class="font-headline-md text-headline-md text-primary mt-1 font-bold">Central Nodal Agency (MoSPI)</h3>
+                        <p class="font-body-sm text-body-sm text-on-surface-variant min-h-[32px]">National surveillance, anomaly triggers, and policy compliance.</p>
+                        <div class="mt-2 pt-2 border-t border-outline-variant">
+                          <span class="font-label-sm text-label-sm text-outline">e.g., MoSPI Technical Directorate</span>
+                        </div>
+                      </div>
+                      <div class="mt-space-md pt-space-xs">
+                        <button
+                          class="w-full h-9 bg-primary text-on-primary font-label-md text-label-md flex items-center justify-center gap-1 hover:bg-primary-container transition-colors cursor-pointer rounded btn-role-select"
+                          type="button"
+                          data-role-id="mospi_officer"
+                        >
+                          <span>Proceed to Login</span>
+                          <span class="material-symbols-outlined text-[15px]">arrow_forward</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
+                <!-- Visual Structural Separator -->
+                <div class="relative flex py-2 items-center">
+                  <div class="flex-grow border-t border-outline-variant"></div>
+                  <span class="flex-shrink mx-4 font-label-sm text-label-sm uppercase tracking-wider text-outline px-3 py-1 bg-surface-container-low border border-outline-variant font-semibold">
+                    Independent &amp; Functional Entities (Non-Hierarchical)
+                  </span>
+                  <div class="flex-grow border-t border-outline-variant"></div>
+                </div>
+
+                <!-- SECTIONS B & C: Distinct Separated Blocks Side-by-Side -->
+                <section class="grid grid-cols-1 lg:grid-cols-2 gap-gutter-desktop">
+                  <!-- Block 1: Independent Statutory Audit -->
+                  <div class="bg-surface-container-low border border-outline-variant p-space-lg flex flex-col justify-between border-l-4 border-l-secondary rounded shadow-sm">
+                    <div class="flex flex-col gap-space-xs">
+                      <div class="flex items-center justify-between pb-space-xs border-b border-outline-variant">
+                        <div>
+                          <h2 class="font-headline-md text-headline-md text-primary font-bold">Independent Statutory Audit</h2>
+                          <p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">External constitutional oversight and post-disbursement audit.</p>
+                        </div>
+                        <span class="material-symbols-outlined text-secondary text-[26px]">fact_check</span>
+                      </div>
+                      <div class="bg-surface-container-lowest border border-outline-variant p-space-md mt-space-sm rounded">
+                        <div class="flex items-center justify-between mb-1">
+                          <span class="font-label-sm text-label-sm text-secondary font-bold tracking-wide uppercase">
+                            EXTERNAL OVERSIGHT
+                          </span>
+                          <span class="font-label-sm text-label-sm text-outline">Statutory Mandate</span>
+                        </div>
+                        <h3 class="font-headline-md text-headline-md text-on-surface font-bold">Auditor / CAG</h3>
+                        <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Independent, cross-cutting financial and performance audits.</p>
+                        <div class="mt-space-md pt-space-xs border-t border-outline-variant flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs">
+                          <div class="inline-flex items-center gap-1 font-label-sm text-label-sm text-outline">
+                            <span class="material-symbols-outlined text-[14px]">history_edu</span>
+                            Read-only ledger &amp; discrepancy logs
+                          </div>
+                          <button
+                            class="h-9 px-space-md border border-primary text-primary font-label-md text-label-md hover:bg-surface-container transition-colors flex items-center justify-center gap-1 cursor-pointer rounded font-semibold btn-role-select"
+                            type="button"
+                            data-role-id="auditor_cag"
+                          >
+                            <span>Proceed to Audit Login</span>
+                            <span class="material-symbols-outlined text-[15px]">arrow_forward</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="mt-space-md p-space-xs bg-surface-container border border-outline-variant flex items-center gap-space-xs font-label-sm text-label-sm text-on-surface-variant rounded">
+                      <span class="material-symbols-outlined text-[15px] text-outline">policy</span>
+                      Operates independently of the administrative approval chain
+                    </div>
+                  </div>
+
+                  <!-- Block 2: Execution & Field Reporting -->
+                  <div class="bg-surface-container-low border border-outline-variant p-space-lg flex flex-col justify-between border-l-4 border-l-primary rounded shadow-sm">
+                    <div class="flex flex-col gap-space-xs">
+                      <div class="flex items-center justify-between pb-space-xs border-b border-outline-variant">
+                        <div>
+                          <h2 class="font-headline-md text-headline-md text-primary font-bold">Execution &amp; Field Reporting</h2>
+                          <p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">On-ground work execution and milestone telemetry.</p>
+                        </div>
+                        <span class="material-symbols-outlined text-primary text-[26px]">engineering</span>
+                      </div>
+                      <div class="bg-surface-container-lowest border border-outline-variant p-space-md mt-space-sm rounded">
+                        <div class="flex items-center justify-between mb-1">
+                          <span class="font-label-sm text-label-sm text-primary font-bold tracking-wide uppercase">
+                            IMPLEMENTATION AGENCY
+                          </span>
+                          <span class="font-label-sm text-label-sm text-outline">Ground Operations</span>
+                        </div>
+                        <h3 class="font-headline-md text-headline-md text-on-surface font-bold">Implementing Agency</h3>
+                        <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Upload geo-tagged milestones, measurements, and invoices.</p>
+                        <div class="mt-space-md pt-space-xs border-t border-outline-variant flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs">
+                          <div class="inline-flex items-center gap-1 font-label-sm text-label-sm text-outline">
+                            <span class="material-symbols-outlined text-[14px]">corporate_fare</span>
+                            e.g., CPWD, PWD, Municipal Corporations
+                          </div>
+                          <button
+                            class="h-9 px-space-md bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-container transition-colors flex items-center justify-center gap-1 cursor-pointer rounded font-semibold btn-role-select"
+                            type="button"
+                            data-role-id="implementing_agency"
+                          >
+                            <span>Proceed to Vendor / IA Login</span>
+                            <span class="material-symbols-outlined text-[15px]">arrow_forward</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="mt-space-md p-space-xs bg-surface-container border border-outline-variant flex items-center gap-space-xs font-label-sm text-label-sm text-on-surface-variant rounded">
+                      <span class="material-symbols-outlined text-[15px] text-outline">my_location</span>
+                      Subject to automated geographic polygon checks and duplicate cross-audits.
+                    </div>
+                  </div>
+                </section>
+
+                <!-- Help & Security Notice Box -->
+                <section class="border border-outline-variant bg-surface-container-lowest p-space-md flex flex-col md:flex-row items-start md:items-center justify-between gap-space-md rounded shadow-sm">
+                  <div class="flex items-start gap-space-sm max-w-3xl">
+                    <span class="material-symbols-outlined text-primary text-[22px] mt-0.5">contact_support</span>
+                    <div class="flex flex-col">
+                      <span class="font-label-md text-label-md text-primary font-bold">Need credential assistance?</span>
+                      <p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+                        Contact District Nodal Helpdesk or authorized technical liaison. Contact your administrator for login assistance.
+                      </p>
+                    </div>
+                  </div>
+                  <div class="flex items-center gap-space-xs self-stretch md:self-auto">
+                    <button
+                      class="w-full md:w-auto h-9 px-space-md border border-outline-variant font-label-md text-label-md text-primary bg-surface-container-lowest hover:bg-surface-container transition-colors flex items-center justify-center gap-1 cursor-pointer rounded font-semibold"
+                      type="button"
+                    >
+                      <span class="material-symbols-outlined text-[15px]">headset_mic</span>
+                      <span>Nodal Helpdesk</span>
+                    </button>
+                  </div>
+                </section>
               </div>
             </main>
-            <footer class="setu-landing-footer">
-              <span class="setu-landing-footer-text">
-                Official Government Audit Portal • Governed under MoSPI & CAG Audit Oversight Guidelines
-              </span>
+
+            <!-- FOOTER -->
+            <footer class="w-full bg-surface-container-low border-t border-outline-variant text-on-surface">
+              <div class="max-w-7xl mx-auto px-margin lg:px-margin-desktop py-space-xl">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-gutter-desktop mb-space-xl">
+                  <div class="flex flex-col gap-space-sm">
+                    <div class="font-headline-md text-headline-md text-primary font-bold tracking-tight">SETU PORTAL</div>
+                    <p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+                      Systemic Electronic Tracking &amp; Unification framework for transparent monitoring, expenditure verifications, and anomaly surveillance across all parliamentary MPLADS accounts.
+                    </p>
+                    <div class="font-label-sm text-label-sm text-primary font-semibold mt-2">MoSPI Institutional Audit Engine</div>
+                  </div>
+                  <div class="flex flex-col gap-space-sm">
+                    <div class="font-label-lg text-label-lg text-primary uppercase tracking-wide font-bold">Quick Links</div>
+                    <ul class="flex flex-col gap-space-xs font-body-sm text-body-sm text-on-surface-variant">
+                      <li><a class="hover:text-primary transition-colors" href="#/login">National Dashboard Summary</a></li>
+                      <li><a class="hover:text-primary transition-colors" href="#/login">District Sanctions Explorer</a></li>
+                      <li><a class="hover:text-primary transition-colors" href="#/login">High-Risk Works Audit Trail</a></li>
+                      <li><a class="hover:text-primary transition-colors" href="#/">Geotag Verification Protocols</a></li>
+                      <li><a class="hover:text-primary transition-colors" href="#/citizen-portal">Public Grievance Escalations</a></li>
+                    </ul>
+                  </div>
+                  <div class="flex flex-col gap-space-sm">
+                    <div class="font-label-lg text-label-lg text-primary uppercase tracking-wide font-bold">Legal &amp; Directives</div>
+                    <ul class="flex flex-col gap-space-xs font-body-sm text-body-sm text-on-surface-variant">
+                      <li><a class="hover:text-primary transition-colors" href="#/">Revised MPLADS Guidelines 2023</a></li>
+                      <li><a class="hover:text-primary transition-colors" href="#/">Public Audit Standard Regulations</a></li>
+                      <li><a class="hover:text-primary transition-colors" href="#/">RTI &amp; Citizen Disclosure Charter</a></li>
+                      <li><a class="hover:text-primary transition-colors" href="#/">Anti-Duplication Enforcement Rule</a></li>
+                      <li><a class="hover:text-primary transition-colors" href="#/">Terms of Data Verification</a></li>
+                    </ul>
+                  </div>
+                  <div class="flex flex-col gap-space-sm">
+                    <div class="font-label-lg text-label-lg text-primary uppercase tracking-wide font-bold">SIH 2026 Submission</div>
+                    <div class="p-space-sm bg-surface-container-lowest rounded border border-outline-variant flex flex-col gap-1">
+                      <span class="font-label-sm text-label-sm text-secondary font-bold">PROBLEM STATEMENT: SIH26102</span>
+                      <span class="font-body-sm text-body-sm text-on-surface">MoSPI Anomaly Surveillance &amp; Fund Auditing</span>
+                      <span class="font-label-sm text-label-sm text-on-surface-variant">Smart India Hackathon 2026 Innovation Initiative</span>
+                    </div>
+                    <div class="font-body-sm text-body-sm text-on-surface-variant mt-1">
+                      <span class="font-semibold text-on-surface">Nodal Agency:</span> Ministry of Statistics &amp; Programme Implementation (MoSPI)
+                    </div>
+                  </div>
+                </div>
+
+                <div class="p-space-md bg-surface-container-highest rounded border-l-4 border-secondary flex flex-col md:flex-row items-start md:items-center justify-between gap-space-md text-on-surface">
+                  <div class="flex items-center gap-space-sm">
+                    <span class="material-symbols-outlined text-secondary text-[24px]">warning</span>
+                    <div class="font-body-sm text-body-sm">
+                      <span class="font-bold text-on-surface">Academic &amp; Research Prototype:</span> This interface is engineered exclusively for Smart India Hackathon 2026 evaluating MoSPI Problem Statement SIH26102. Not an official Government of India portal.
+                    </div>
+                  </div>
+                  <div class="font-label-sm text-label-sm text-on-surface-variant whitespace-nowrap">SIH26102 · Version 1.0.4 Prototype</div>
+                </div>
+
+                <div class="mt-space-lg pt-space-md border-t border-outline-variant flex flex-col md:flex-row items-center justify-between gap-space-sm font-label-sm text-label-sm text-on-surface-variant">
+                  <div>© 2026 SETU MoSPI Surveillance Platform · SIH 2026 Research Initiative</div>
+                </div>
+              </div>
             </footer>
           </div>
         `;
 
-        // Wire click handlers on role cards
-        appEl.querySelectorAll('.setu-role-card').forEach((card) => {
-          card.addEventListener('click', () => {
-            const roleId = card.getAttribute('data-role-id');
+        // Wire click handlers on role select buttons
+        appEl.querySelectorAll('.btn-role-select').forEach((btn) => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const roleId = btn.getAttribute('data-role-id');
             currentLoginRole = officialRoles.find((r) => r.id === roleId);
             loginErrorMessage = '';
             renderLoginPage();
           });
         });
       } else {
-        // STEP 2: Credential Form
+        // STEP 2: Real Credential Authentication Form
         const errorHtml = loginErrorMessage
-          ? `<div class="setu-form-error">${loginErrorMessage}</div>`
+          ? `<div class="p-space-sm bg-error-container text-on-error-container border border-error text-body-sm rounded font-medium">${loginErrorMessage}</div>`
           : '';
 
         appEl.innerHTML = `
-          <div class="setu-login-page">
-            <div class="setu-masthead">
-              <span class="setu-masthead-gov">SMART INDIA HACKATHON 2026 • PROTOTYPE FOR MoSPI PROBLEM STATEMENT SIH26102</span>
-              <span class="setu-masthead-locale">Official Authentication Portal</span>
-            </div>
-            <header class="setu-landing-header">
-              <div class="setu-landing-header-inner">
-                <div class="setu-landing-logo-badge">GOV</div>
-                <span class="setu-landing-title">SETU</span>
-                <span class="setu-landing-tagline">National Public Audit & Monitoring Platform</span>
+          <div class="bg-background font-body-md text-body-md text-on-surface antialiased min-h-screen flex flex-col">
+            <!-- FIXED TOP HEADER -->
+            <header class="fixed top-0 w-full z-50 bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
+              <!-- Top Masthead Utility Bar -->
+              <div class="w-full bg-primary text-on-primary">
+                <div class="max-w-7xl mx-auto px-margin lg:px-margin-desktop h-7 flex items-center justify-between text-label-sm font-label-sm">
+                  <div class="flex items-center gap-space-xs truncate">
+                    <span class="material-symbols-outlined text-[14px]">school</span>
+                    <span class="truncate font-medium">SMART INDIA HACKATHON 2026 · PROTOTYPE FOR MoSPI PROBLEM STATEMENT SIH26102</span>
+                  </div>
+                  <div class="flex items-center gap-space-md">
+                    <div class="flex items-center gap-space-xs">
+                      <button class="hover:text-primary-fixed transition-colors px-1" type="button" onclick="document.body.style.fontSize='12px'">A-</button>
+                      <button class="hover:text-primary-fixed transition-colors px-1 font-bold" type="button" onclick="document.body.style.fontSize='14px'">A</button>
+                      <button class="hover:text-primary-fixed transition-colors px-1" type="button" onclick="document.body.style.fontSize='16px'">A+</button>
+                    </div>
+                    <span class="text-outline">|</span>
+                    <button class="flex items-center gap-1 hover:text-primary-fixed transition-colors" type="button">
+                      <span class="material-symbols-outlined text-[13px]">record_voice_over</span>
+                      Screen Reader
+                    </button>
+                    <span class="text-outline">|</span>
+                    <div class="flex items-center gap-1">
+                      <span class="text-on-primary font-semibold">English</span>
+                      <span class="text-outline">/</span>
+                      <button class="hover:text-primary-fixed transition-colors" type="button">हिन्दी</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Main Branding Header -->
+              <div class="max-w-7xl mx-auto px-margin lg:px-margin-desktop py-space-sm flex items-center justify-between gap-space-lg">
+                <a href="#/" class="flex items-center gap-space-md no-underline text-inherit">
+                  <div class="flex items-center justify-center w-9 h-9 rounded bg-primary text-on-primary font-bold text-sm tracking-wider shadow-sm">
+                    SETU
+                  </div>
+                  <div class="flex flex-col">
+                    <div class="font-headline-md text-headline-md text-primary tracking-tight font-bold">SETU: National Public Audit &amp; Monitoring Platform</div>
+                    <div class="font-body-sm text-body-sm text-on-surface-variant font-medium">MPLADS Fund Oversight &amp; Anomaly Surveillance</div>
+                  </div>
+                </a>
+
+                <div class="hidden md:flex items-center gap-space-lg">
+                  <div class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1">
+                    <span class="material-symbols-outlined text-secondary text-[14px]">support_agent</span>
+                    Toll-Free Helpline: <span class="font-semibold text-primary">1800-11-2026</span>
+                  </div>
+                  <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
+                    <span class="material-symbols-outlined text-on-primary text-[18px]">person</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Sub-Navigation Bar -->
+              <div class="w-full bg-primary-container text-on-primary">
+                <div class="max-w-7xl mx-auto px-margin lg:px-margin-desktop flex items-center justify-between">
+                  <nav class="flex items-center gap-1 overflow-x-auto">
+                    <a class="px-space-md py-2.5 text-label-md font-label-md text-surface-container hover:text-white transition-colors whitespace-nowrap" href="#/">Home</a>
+                    <a class="px-space-md py-2.5 text-label-md font-label-md text-surface-container hover:text-white transition-colors whitespace-nowrap" href="#/">Compliance Guidelines</a>
+                    <a class="px-space-md py-2.5 text-label-md font-label-md text-surface-container hover:text-white transition-colors whitespace-nowrap" href="#/">Fund Allocation</a>
+                    <a class="px-space-md py-2.5 text-label-md font-label-md text-surface-container hover:text-white transition-colors whitespace-nowrap" href="#/">Duplicate Registry</a>
+                    <a class="px-space-md py-2.5 text-label-md font-label-md text-surface-container hover:text-white transition-colors whitespace-nowrap" href="#/citizen-portal">Citizen Oversight</a>
+                    <a class="px-space-md py-2.5 text-label-md font-label-md text-surface-container hover:text-white transition-colors whitespace-nowrap" href="#/">Public Notices</a>
+                    <a class="px-space-md py-2.5 text-label-md font-label-md text-surface-container hover:text-white transition-colors whitespace-nowrap" href="#/">Contact Helpdesk</a>
+                  </nav>
+                </div>
               </div>
             </header>
-            <main class="setu-login-container">
-              <div class="setu-login-header-section">
-                <div class="setu-login-top-nav">
-                  <a href="#/" class="setu-back-link">← Return to Public Landing Page</a>
-                  <button type="button" class="setu-back-link" id="btn-back-to-roles">← Back to Role Selection</button>
-                </div>
-                <h1 class="setu-login-title">Official Authentication: ${currentLoginRole.name}</h1>
-                <p class="setu-login-subtitle">Enter your assigned institutional credentials for ${currentLoginRole.jurisdiction}.</p>
-              </div>
 
-              <div class="setu-form-wrapper">
-                <form class="setu-auth-card" id="official-login-form">
-                  <div class="setu-auth-role-banner">
-                    <span class="setu-auth-role-title">Selected: ${currentLoginRole.name}</span>
-                    <span class="setu-role-level-tag">${currentLoginRole.level}</span>
-                  </div>
-
-                  ${errorHtml}
-
-                  <div class="setu-form-group">
-                    <label class="setu-form-label" for="official-id">Official ID / Username</label>
-                    <input id="official-id" type="text" class="setu-form-input" value="${currentLoginRole.demoId}" placeholder="e.g. ${currentLoginRole.demoId}" required />
-                  </div>
-
-                  <div class="setu-form-group">
-                    <label class="setu-form-label" for="official-password">Password</label>
-                    <input id="official-password" type="password" class="setu-form-input" value="${currentLoginRole.demoPassword}" placeholder="Enter password" required />
-                  </div>
-
-                  <button type="submit" class="setu-btn-primary" id="btn-submit-auth" style="width: 100%; margin-top: var(--setu-space-2);">
-                    Authenticate & Access Portal
-                  </button>
-
-                  <div class="setu-demo-box">
-                    <div class="setu-demo-header">
-                      <span class="setu-card-label">Demo Credentials</span>
-                      <span class="setu-demo-badge">Simulated</span>
-                    </div>
-                    <div class="setu-demo-credentials">
-                      <span>Demo ID: <strong>${currentLoginRole.demoId}</strong></span>
-                      <span>Password: <strong>${currentLoginRole.demoPassword}</strong></span>
-                      <span style="font-size: var(--setu-font-size-caption); color: var(--setu-color-text-muted);">
-                        Jurisdiction: ${currentLoginRole.jurisdiction}
-                      </span>
-                    </div>
-                    <button type="button" class="setu-autofill-btn" id="btn-autofill">
-                      Auto-fill Demo Credentials
+            <!-- MAIN CONTENT AREA -->
+            <main class="w-full pt-[132px] bg-background min-h-screen flex-1">
+              <!-- Breadcrumb and Return Banner -->
+              <div class="w-full border-b border-outline-variant bg-surface-container-lowest">
+                <div class="max-w-7xl mx-auto px-margin lg:px-margin-desktop py-space-sm flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs">
+                  <div class="flex items-center gap-space-md">
+                    <a class="inline-flex items-center gap-1.5 font-label-md text-label-md text-primary hover:underline group cursor-pointer" href="#/">
+                      <span class="material-symbols-outlined text-[16px] group-hover:-translate-x-0.5 transition-transform">arrow_back</span>
+                      <span>Return to Public Landing Page</span>
+                    </a>
+                    <button type="button" class="inline-flex items-center gap-1 font-label-md text-label-md text-primary hover:underline cursor-pointer bg-transparent border-none p-0" id="btn-back-to-roles">
+                      <span>• Back to Role Selection</span>
                     </button>
                   </div>
-                </form>
+
+                  <div class="flex items-center gap-space-xs font-body-sm text-body-sm text-on-surface-variant">
+                    <span class="text-on-surface-variant">Home</span>
+                    <span class="text-outline">/</span>
+                    <span class="text-on-surface-variant">Authorized Officer Portal</span>
+                    <span class="text-outline">/</span>
+                    <span class="text-primary font-semibold">${currentLoginRole.name}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="max-w-7xl mx-auto px-margin lg:px-margin-desktop py-space-lg w-full flex flex-col gap-space-xl">
+                <div class="max-w-xl mx-auto w-full py-space-md">
+                  <div class="bg-surface-container-lowest border border-outline-variant p-space-lg shadow-sm rounded flex flex-col gap-space-md">
+                    <div class="flex items-center justify-between pb-space-sm border-b border-outline-variant">
+                      <div class="flex items-center gap-space-xs">
+                        <span class="material-symbols-outlined text-primary text-[22px]">badge</span>
+                        <div>
+                          <h2 class="font-headline-md text-headline-md text-primary font-bold">
+                            Official Authentication: ${currentLoginRole.name}
+                          </h2>
+                          <span class="font-label-sm text-label-sm text-outline uppercase font-semibold">
+                            ${currentLoginRole.level}
+                          </span>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        class="px-2.5 py-1 text-label-sm font-label-sm text-primary hover:bg-surface-container border border-outline-variant rounded transition-colors"
+                        id="btn-back-to-roles-badge"
+                      >
+                        ← Change Role
+                      </button>
+                    </div>
+
+                    <p class="font-body-sm text-body-sm text-on-surface-variant">
+                      Enter your assigned institutional credentials for <strong>${currentLoginRole.jurisdiction}</strong>.
+                    </p>
+
+                    ${errorHtml}
+
+                    <form class="flex flex-col gap-space-md" id="official-login-form">
+                      <div class="flex flex-col gap-1">
+                        <label class="font-label-md text-label-md text-on-surface font-semibold" for="official-id">
+                          Official ID / Username <span class="text-error">*</span>
+                        </label>
+                        <input
+                          id="official-id"
+                          type="text"
+                          class="w-full h-10 px-3 border border-outline-variant font-body-sm bg-surface-container-lowest focus:outline-none focus:border-primary text-on-surface rounded"
+                          value="${currentLoginRole.demoId}"
+                          placeholder="e.g. ${currentLoginRole.demoId}"
+                          required
+                        />
+                      </div>
+
+                      <div class="flex flex-col gap-1">
+                        <label class="font-label-md text-label-md text-on-surface font-semibold" for="official-password">
+                          Password <span class="text-error">*</span>
+                        </label>
+                        <input
+                          id="official-password"
+                          type="password"
+                          class="w-full h-10 px-3 border border-outline-variant font-body-sm bg-surface-container-lowest focus:outline-none focus:border-primary text-on-surface rounded"
+                          value="${currentLoginRole.demoPassword}"
+                          placeholder="Enter password"
+                          required
+                        />
+                      </div>
+
+                      <button
+                        type="submit"
+                        class="w-full h-10 bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-container transition-colors font-bold rounded cursor-pointer shadow-sm mt-1"
+                        id="btn-submit-auth"
+                      >
+                        Authenticate & Access Portal
+                      </button>
+                    </form>
+
+                    <!-- Demo Credentials Box -->
+                    <div class="p-space-md bg-surface-container-low border border-outline-variant border-dashed rounded flex flex-col gap-space-xs mt-1">
+                      <div class="flex items-center justify-between">
+                        <span class="font-label-sm text-label-sm text-primary font-bold uppercase">Demo Credentials</span>
+                        <span class="inline-flex items-center px-1.5 py-0.5 bg-surface-container-high text-primary font-label-sm text-[10px] font-bold uppercase rounded">Simulated</span>
+                      </div>
+
+                      ${currentLoginRole.id === 'mp_office' ? `
+                        <div class="pb-2 border-b border-outline-variant/60 font-body-sm text-body-sm text-on-surface-variant flex flex-col gap-0.5">
+                          <div class="font-semibold text-on-surface">1. Elected Constituency MP:</div>
+                          <div>ID: <strong>${currentLoginRole.demoId}</strong> • Pass: <strong>${currentLoginRole.demoPassword}</strong></div>
+                          <div class="text-[11px] text-outline">Constituency: Chennai Central (Tamil Nadu)</div>
+                          <button
+                            type="button"
+                            class="mt-1 self-start px-2 py-0.5 bg-primary text-on-primary text-[11px] font-semibold rounded cursor-pointer hover:bg-primary-container"
+                            id="btn-autofill"
+                          >
+                            Auto-fill Constituency MP
+                          </button>
+                        </div>
+
+                        <div class="pt-2 font-body-sm text-body-sm text-on-surface-variant flex flex-col gap-0.5">
+                          <div class="font-semibold text-on-surface">2. Nominated Rajya Sabha MP:</div>
+                          <div>ID: <strong>${currentLoginRole.demoIdNominated || 'ADM-MP-NOM-IND-022'}</strong> • Pass: <strong>${currentLoginRole.demoPasswordNominated || 'MPOffice#Pass2026'}</strong></div>
+                          <div class="text-[11px] text-outline">Multi-State Portfolio: Chennai, Bengaluru Urban, Pune</div>
+                          <button
+                            type="button"
+                            class="mt-1 self-start px-2 py-0.5 bg-secondary text-on-secondary text-[11px] font-semibold rounded cursor-pointer hover:bg-secondary/90"
+                            id="btn-autofill-nominated"
+                          >
+                            Auto-fill Nominated MP
+                          </button>
+                        </div>
+                      ` : `
+                        <div class="font-body-sm text-body-sm text-on-surface-variant flex flex-col gap-0.5">
+                          <div>Official ID: <strong>${currentLoginRole.demoId}</strong> • Pass: <strong>${currentLoginRole.demoPassword}</strong></div>
+                          <div class="text-[11px] text-outline">Scope: ${currentLoginRole.jurisdiction}</div>
+                          <button
+                            type="button"
+                            class="mt-1 self-start px-2 py-0.5 bg-primary text-on-primary text-[11px] font-semibold rounded cursor-pointer hover:bg-primary-container"
+                            id="btn-autofill"
+                          >
+                            Auto-fill Demo Credentials
+                          </button>
+                        </div>
+                      `}
+                    </div>
+                  </div>
+                </div>
               </div>
             </main>
-            <footer class="setu-landing-footer">
-              <span class="setu-landing-footer-text">
-                Official Government Audit Portal • Governed under MoSPI & CAG Audit Oversight Guidelines
-              </span>
+
+            <!-- FOOTER -->
+            <footer class="w-full bg-surface-container-low border-t border-outline-variant text-on-surface">
+              <div class="max-w-7xl mx-auto px-margin lg:px-margin-desktop py-space-xl">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-gutter-desktop mb-space-xl">
+                  <div class="flex flex-col gap-space-sm">
+                    <div class="font-headline-md text-headline-md text-primary font-bold tracking-tight">SETU PORTAL</div>
+                    <p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+                      Systemic Electronic Tracking &amp; Unification framework for transparent monitoring, expenditure verifications, and anomaly surveillance across all parliamentary MPLADS accounts.
+                    </p>
+                    <div class="font-label-sm text-label-sm text-primary font-semibold mt-2">MoSPI Institutional Audit Engine</div>
+                  </div>
+                  <div class="flex flex-col gap-space-sm">
+                    <div class="font-label-lg text-label-lg text-primary uppercase tracking-wide font-bold">Quick Links</div>
+                    <ul class="flex flex-col gap-space-xs font-body-sm text-body-sm text-on-surface-variant">
+                      <li><a class="hover:text-primary transition-colors" href="#/login">National Dashboard Summary</a></li>
+                      <li><a class="hover:text-primary transition-colors" href="#/login">District Sanctions Explorer</a></li>
+                      <li><a class="hover:text-primary transition-colors" href="#/login">High-Risk Works Audit Trail</a></li>
+                      <li><a class="hover:text-primary transition-colors" href="#/">Geotag Verification Protocols</a></li>
+                      <li><a class="hover:text-primary transition-colors" href="#/citizen-portal">Public Grievance Escalations</a></li>
+                    </ul>
+                  </div>
+                  <div class="flex flex-col gap-space-sm">
+                    <div class="font-label-lg text-label-lg text-primary uppercase tracking-wide font-bold">Legal &amp; Directives</div>
+                    <ul class="flex flex-col gap-space-xs font-body-sm text-body-sm text-on-surface-variant">
+                      <li><a class="hover:text-primary transition-colors" href="#/">Revised MPLADS Guidelines 2023</a></li>
+                      <li><a class="hover:text-primary transition-colors" href="#/">Public Audit Standard Regulations</a></li>
+                      <li><a class="hover:text-primary transition-colors" href="#/">RTI &amp; Citizen Disclosure Charter</a></li>
+                      <li><a class="hover:text-primary transition-colors" href="#/">Anti-Duplication Enforcement Rule</a></li>
+                      <li><a class="hover:text-primary transition-colors" href="#/">Terms of Data Verification</a></li>
+                    </ul>
+                  </div>
+                  <div class="flex flex-col gap-space-sm">
+                    <div class="font-label-lg text-label-lg text-primary uppercase tracking-wide font-bold">SIH 2026 Submission</div>
+                    <div class="p-space-sm bg-surface-container-lowest rounded border border-outline-variant flex flex-col gap-1">
+                      <span class="font-label-sm text-label-sm text-secondary font-bold">PROBLEM STATEMENT: SIH26102</span>
+                      <span class="font-body-sm text-body-sm text-on-surface">MoSPI Anomaly Surveillance &amp; Fund Auditing</span>
+                      <span class="font-label-sm text-label-sm text-on-surface-variant">Smart India Hackathon 2026 Innovation Initiative</span>
+                    </div>
+                    <div class="font-body-sm text-body-sm text-on-surface-variant mt-1">
+                      <span class="font-semibold text-on-surface">Nodal Agency:</span> Ministry of Statistics &amp; Programme Implementation (MoSPI)
+                    </div>
+                  </div>
+                </div>
+
+                <div class="p-space-md bg-surface-container-highest rounded border-l-4 border-secondary flex flex-col md:flex-row items-start md:items-center justify-between gap-space-md text-on-surface">
+                  <div class="flex items-center gap-space-sm">
+                    <span class="material-symbols-outlined text-secondary text-[24px]">warning</span>
+                    <div class="font-body-sm text-body-sm">
+                      <span class="font-bold text-on-surface">Academic &amp; Research Prototype:</span> This interface is engineered exclusively for Smart India Hackathon 2026 evaluating MoSPI Problem Statement SIH26102. Not an official Government of India portal.
+                    </div>
+                  </div>
+                  <div class="font-label-sm text-label-sm text-on-surface-variant whitespace-nowrap">SIH26102 · Version 1.0.4 Prototype</div>
+                </div>
+
+                <div class="mt-space-lg pt-space-md border-t border-outline-variant flex flex-col md:flex-row items-center justify-between gap-space-sm font-label-sm text-label-sm text-on-surface-variant">
+                  <div>© 2026 SETU MoSPI Surveillance Platform · SIH 2026 Research Initiative</div>
+                </div>
+              </div>
             </footer>
           </div>
         `;
 
-        // Back to roles handler
-        appEl.querySelector('#btn-back-to-roles').addEventListener('click', () => {
-          currentLoginRole = null;
-          loginErrorMessage = '';
-          renderLoginPage();
-        });
+        // Back to roles handlers
+        const backBtn = appEl.querySelector('#btn-back-to-roles');
+        if (backBtn) {
+          backBtn.addEventListener('click', () => {
+            currentLoginRole = null;
+            loginErrorMessage = '';
+            renderLoginPage();
+          });
+        }
+        const backBadgeBtn = appEl.querySelector('#btn-back-to-roles-badge');
+        if (backBadgeBtn) {
+          backBadgeBtn.addEventListener('click', () => {
+            currentLoginRole = null;
+            loginErrorMessage = '';
+            renderLoginPage();
+          });
+        }
 
-        // Autofill handler
-        appEl.querySelector('#btn-autofill').addEventListener('click', () => {
-          appEl.querySelector('#official-id').value = currentLoginRole.demoId;
-          appEl.querySelector('#official-password').value = currentLoginRole.demoPassword;
-        });
+        // Autofill handlers
+        const autofillBtn = appEl.querySelector('#btn-autofill');
+        if (autofillBtn) {
+          autofillBtn.addEventListener('click', () => {
+            appEl.querySelector('#official-id').value = currentLoginRole.demoId;
+            appEl.querySelector('#official-password').value = currentLoginRole.demoPassword;
+          });
+        }
+
+        const autofillNomBtn = appEl.querySelector('#btn-autofill-nominated');
+        if (autofillNomBtn) {
+          autofillNomBtn.addEventListener('click', () => {
+            appEl.querySelector('#official-id').value = currentLoginRole.demoIdNominated || 'ADM-MP-NOM-IND-022';
+            appEl.querySelector('#official-password').value = currentLoginRole.demoPasswordNominated || 'MPOffice#Pass2026';
+          });
+        }
 
         // Form submission handler calling authenticateOfficial
         appEl.querySelector('#official-login-form').addEventListener('submit', async (e) => {
@@ -207,6 +950,11 @@
       }
     }
 
+    function getEffectiveRole() {
+      const explicit = currentLoginRole ? currentLoginRole.name : null;
+      return resolveSessionRole(explicit);
+    }
+
     async function renderRoute() {
       const hash = window.location.hash || '#/';
       const token = sessionStorage.getItem('setu_auth_token');
@@ -226,7 +974,7 @@
         // 2. SERVER-SIDE SCOPING: Fetch projects scoped by caller's JWT token
         await fetchScopedProjects();
 
-        const savedRole = sessionStorage.getItem('setu_auth_role') || (currentLoginRole ? currentLoginRole.name : 'District Authority');
+        const savedRole = getEffectiveRole();
         mountLayout(appEl, {
           projectName: 'SETU',
           subtitle: 'PM-GatiShakti & MPLADS Audit System',
@@ -242,7 +990,7 @@
         });
       } else if (hash.startsWith('#/project/')) {
         const projectId = hash.replace('#/project/', '').split('?')[0].split('/')[0];
-        const savedRole = sessionStorage.getItem('setu_auth_role') || (currentLoginRole ? currentLoginRole.name : 'District Authority');
+        const savedRole = getEffectiveRole();
 
         // 3. SERVER-SIDE JURISDICTION CHECK: Verify project access against ROLES.md
         let accessDeniedError = null;
@@ -320,6 +1068,9 @@
               window.location.hash = '#/';
             }
           });
+
+          // Wire modal triggers for Implementing Agency operations
+          wireAgencyModals(appEl);
 
           // Attach tab switching handlers
           const tabNav = appEl.querySelector('#setu-detail-tab-nav');

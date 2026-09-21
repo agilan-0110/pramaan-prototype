@@ -70,8 +70,8 @@ export const officialRoles = [
   {
     id: 'mp_office',
     name: 'MP Office',
-    level: 'Constituency Level',
-    description: 'Constituency project tracking and proposal submission for Chennai Central.',
+    level: 'Constituency / Nominated Level',
+    description: 'Constituency project tracking and proposal submission (Elected Constituency MP & Nominated MP).',
     demoId: 'ADM-MP-TN-CHN-021',
     demoPassword: 'MPOffice#Pass2026',
     jurisdiction: 'Chennai Central Parliamentary Constituency (Tamil Nadu)',
@@ -79,7 +79,11 @@ export const officialRoles = [
     constituency: 'Chennai Central',
     district: 'Chennai',
     state: 'Tamil Nadu',
+    demoIdNominated: 'ADM-MP-NOM-IND-022',
+    demoPasswordNominated: 'MPOffice#Pass2026',
+    jurisdictionNominated: 'Nominated Rajya Sabha MP (Districts: Chennai, Bengaluru Urban, Pune)',
   },
+
 ];
 
 /**

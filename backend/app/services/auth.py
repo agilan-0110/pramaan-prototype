@@ -7,6 +7,7 @@ and jurisdictional scoping logic as defined in ROLES.md.
 
 import json
 import logging
+import re
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -89,6 +90,9 @@ def create_access_token(user: Dict[str, Any], expires_delta: Optional[timedelta]
         "state": user.get("state"),
         "district": user.get("district"),
         "constituency": user.get("constituency"),
+        "mpType": user.get("mpType"),
+        "mpId": user.get("mpId"),
+        "chosenDistricts": user.get("chosenDistricts"),
         "agency": user.get("agency"),
         "jurisdiction": user.get("jurisdiction"),
         "iat": int(now.timestamp()),
@@ -255,18 +259,33 @@ def filter_projects_by_user_scope(
 
         return filtered_agency_projects
 
-    # 5. MP Office: Restrict strictly to assigned constituency
-    if scope == "constituency_only" or role_id == "mp_office" or "mp" in role_name:
+    # 5. MP Office: Restrict per mpType (CONSTITUENCY_MP: constituency only; NOMINATED_MP: chosen districts)
+    if scope in ["constituency_only", "nominated_mp_districts"] or role_id == "mp_office" or bool(re.search(r"\bmp\b", role_name)):
+        mp_type = user.get("mpType")
+        chosen_districts = [d.strip().lower() for d in (user.get("chosenDistricts") or [])]
+        user_mp_id = user.get("mpId")
+
+        # Case A: NOMINATED_MP (multi-state chosen districts)
+        if mp_type == "NOMINATED_MP" or chosen_districts or scope == "nominated_mp_districts":
+            if chosen_districts:
+                return [
+                    p for p in projects
+                    if (p.get("district") or "").strip().lower() in chosen_districts
+                    or (user_mp_id and p.get("mpId") == user_mp_id)
+                ]
+            if user_mp_id:
+                return [p for p in projects if p.get("mpId") == user_mp_id]
+            return []
+
+        # Case B: CONSTITUENCY_MP (own constituency only)
         user_const = (user.get("constituency") or "").strip().lower()
         if user_const:
-            matched = [p for p in projects if p.get("constituency", "").strip().lower() == user_const]
-            if matched:
-                return matched
-        # Fallback to district if constituency is not matched
-        user_dist = (user.get("district") or "").strip().lower()
-        if user_dist:
-            return [p for p in projects if p.get("district", "").strip().lower() == user_dist]
-        return projects
+            return [
+                p for p in projects
+                if (p.get("constituency") or "").strip().lower() == user_const
+                or (user_mp_id and p.get("mpId") == user_mp_id)
+            ]
+        return []
 
     return projects
 
@@ -372,14 +391,106 @@ def check_project_access(project: Dict[str, Any], user: Dict[str, Any]) -> None:
                 detail=f"Access denied: Project '{proj_id}' is assigned to '{proj_agency}', not your agency ({user.get('agency') or 'assigned agency'}).",
             )
 
-    # MP Office check
-    elif scope == "constituency_only" or role_id == "mp_office" or "mp" in role_name:
-        user_const = (user.get("constituency") or "").strip()
-        if user_const and proj_constituency.strip().lower() != user_const.lower():
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail=(
-                    f"Access denied: Project '{proj_id}' belongs to {proj_constituency} constituency, "
-                    f"outside your parliamentary constituency ({user_const})."
-                ),
-            )
+    # MP Office check (Constituency MP vs Nominated MP)
+    elif scope in ["constituency_only", "nominated_mp_districts"] or role_id == "mp_office" or bool(re.search(r"\bmp\b", role_name)):
+        mp_type = user.get("mpType")
+        chosen_districts = [d.strip().lower() for d in (user.get("chosenDistricts") or [])]
+        user_mp_id = user.get("mpId")
+
+        if mp_type == "NOMINATED_MP" or chosen_districts or scope == "nominated_mp_districts":
+            proj_dist = proj_district.strip().lower()
+            if chosen_districts and proj_dist not in chosen_districts and (not user_mp_id or project.get("mpId") != user_mp_id):
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail=(
+                        f"Access denied: Project '{proj_id}' is located in {proj_district}, "
+                        f"outside your chosen nominated districts ({', '.join(user.get('chosenDistricts', []))})."
+                    ),
+                )
+        else:
+            user_const = (user.get("constituency") or "").strip()
+            if user_const and proj_constituency.strip().lower() != user_const.lower() and (not user_mp_id or project.get("mpId") != user_mp_id):
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail=(
+                        f"Access denied: Project '{proj_id}' belongs to {proj_constituency} constituency, "
+                        f"outside your parliamentary constituency ({user_const})."
+                    ),
+                )
+
+
+def sanitize_project_for_user(project: Dict[str, Any], user: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    """
+    Sanitizes project records based on caller role.
+    Implementing Agency cannot see:
+    - risk scores, risk levels, SHAP explanations
+    - compliance violations, payment mismatch flags
+    - duplicate detection flags and matches
+    - citizen contradiction reports
+    - alerts
+    """
+    if not user:
+        return project
+
+    role_id = user.get("roleId", "")
+    role_name = (user.get("role") or "").lower()
+    scope = user.get("accessScope", "")
+
+    if scope == "agency_assigned_only" or "implementing" in role_id or "implementing" in role_name:
+        p_copy = dict(project)
+        # Redact risk engine fields
+        p_copy.pop("riskScore", None)
+        p_copy.pop("riskLevel", None)
+        p_copy.pop("plainLanguageExplanation", None)
+        p_copy.pop("shapValues", None)
+        # Redact compliance engine fields
+        p_copy.pop("complianceFlags", None)
+        p_copy.pop("costOverrun", None)
+        p_copy.pop("paymentProgressMismatch", None)
+        # Redact duplicate detection fields
+        p_copy.pop("duplicateRisk", None)
+        p_copy.pop("duplicateMatchedProjectId", None)
+        # Redact citizen contradiction fields
+        p_copy.pop("hasCitizenReport", None)
+        p_copy.pop("citizenReportSummary", None)
+        p_copy.pop("citizenReports", None)
+        # Redact trend/alert fields
+        p_copy.pop("fundDumpingFlag", None)
+        p_copy.pop("alerts", None)
+        return p_copy
+
+    if scope in ["constituency_only", "nominated_mp_districts"] or role_id == "mp_office" or bool(re.search(r"\bmp\b", role_name)):
+        p_copy = dict(project)
+        # MP Office sees: riskScore (read-only), riskLevel, plainLanguageExplanation
+        # MP Office DOES NOT see: raw SHAP detail
+        p_copy.pop("shapValues", None)
+
+        # Passive Flag Badge computation (zero detail text - no titles, descriptions, severities, or action recommendations)
+        has_flags = bool(
+            p_copy.get("complianceFlags")
+            or p_copy.get("costOverrun")
+            or p_copy.get("duplicateRisk")
+            or p_copy.get("paymentProgressMismatch")
+            or p_copy.get("hasCitizenReport")
+            or (p_copy.get("riskScore") and p_copy.get("riskScore") >= 60)
+        )
+        p_copy["flagPresent"] = has_flags
+        p_copy["hasOpenFlags"] = has_flags
+        p_copy["flagStatus"] = "Flag Present" if has_flags else "Clear"
+
+        # Redact detailed oversight breakdown
+        p_copy.pop("complianceFlags", None)
+        p_copy.pop("costOverrun", None)
+        p_copy.pop("paymentProgressMismatch", None)
+        p_copy.pop("duplicateRisk", None)
+        p_copy.pop("duplicateMatchedProjectId", None)
+        p_copy.pop("hasCitizenReport", None)
+        p_copy.pop("citizenReports", None)
+        p_copy.pop("citizenReportSummary", None)
+        p_copy.pop("fundDumpingFlag", None)
+        p_copy.pop("alerts", None)
+
+        # Preserve rejectionReason for MP tracking
+        return p_copy
+
+    return project

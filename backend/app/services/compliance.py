@@ -22,6 +22,8 @@ PROJECTS_FILE = DATA_DIR / "mockProjects.json"
 # Statutory category expenditure ceilings in INR
 CATEGORY_CEILINGS: Dict[str, int] = {
     "Road": 12_000_000,       # ₹1.20 Crore
+    "Building": 25_000_000,   # ₹2.50 Crore
+    "Bridge": 20_000_000,     # ₹2.00 Crore
     "Health": 12_000_000,     # ₹1.20 Crore
     "Education": 10_000_000,  # ₹1.00 Crore
     "Water": 12_000_000,      # ₹1.20 Crore
@@ -33,9 +35,23 @@ DEFAULT_CATEGORY_CEILING = 10_000_000  # ₹1.00 Crore default
 STATUTORY_DEADLINE_DAYS = 548
 BASELINE_SCHEDULED_DAYS = 365
 
-# Standard institutional mapping for category to implementing agencies
+# Standard institutional mapping for category to permitted implementing agencies
 STANDARD_AGENCY_MAPPINGS: Dict[str, List[str]] = {
     "Road": [
+        "Public Works Department (PWD)",
+        "PWD",
+        "Roads & Bridges",
+        "Highways Department",
+        "State PWD",
+    ],
+    "Building": [
+        "Public Works Department (PWD)",
+        "PWD",
+        "Public Works Department (Buildings)",
+        "Buildings & Roads",
+        "State PWD",
+    ],
+    "Bridge": [
         "Public Works Department (PWD)",
         "PWD",
         "Roads & Bridges",
@@ -70,6 +86,66 @@ STANDARD_AGENCY_MAPPINGS: Dict[str, List[str]] = {
         "Municipality",
     ],
 }
+
+# Canonical primary executing authorities for concise, professional alert messages
+CANONICAL_STANDARD_AGENCIES: Dict[str, str] = {
+    "Road": "Public Works Department (PWD)",
+    "Building": "Public Works Department (PWD)",
+    "Bridge": "Public Works Department (PWD)",
+    "Health": "District Health Mission / Health Department",
+    "Education": "Department of Public Instruction / Education Department",
+    "Water": "Rural Water Supply & Sanitation Board",
+    "Civic": "Municipal Corporation & Urban Development Authority",
+}
+
+
+def get_standard_agency_for_category(category: str) -> str:
+    """Returns the primary canonical standard executing authority name for a given category."""
+    cat_clean = (category or "").strip()
+    if not cat_clean:
+        return "Designated Institutional Line Department"
+    if cat_clean in CANONICAL_STANDARD_AGENCIES:
+        return CANONICAL_STANDARD_AGENCIES[cat_clean]
+    for k, v in CANONICAL_STANDARD_AGENCIES.items():
+        if k.lower() == cat_clean.lower():
+            return v
+    for k, v in STANDARD_AGENCY_MAPPINGS.items():
+        if k.lower() == cat_clean.lower() and v:
+            return v[0]
+    cat_lower = cat_clean.lower()
+    if any(term in cat_lower for term in ("road", "bridge", "building", "infra", "civil", "structure")):
+        return CANONICAL_STANDARD_AGENCIES["Road"]
+    if any(term in cat_lower for term in ("health", "hospital", "clinic", "medical")):
+        return CANONICAL_STANDARD_AGENCIES["Health"]
+    if any(term in cat_lower for term in ("edu", "school", "college", "instruction")):
+        return CANONICAL_STANDARD_AGENCIES["Education"]
+    if any(term in cat_lower for term in ("water", "drain", "sanitation", "jal")):
+        return CANONICAL_STANDARD_AGENCIES["Water"]
+    if any(term in cat_lower for term in ("civic", "urban", "municipal", "panchayat")):
+        return CANONICAL_STANDARD_AGENCIES["Civic"]
+    return "Designated Institutional Line Department"
+
+
+def get_expected_agencies_for_category(category: str) -> List[str]:
+    """Returns permitted implementing agency keywords/patterns for a category."""
+    cat_clean = (category or "").strip()
+    if cat_clean in STANDARD_AGENCY_MAPPINGS:
+        return STANDARD_AGENCY_MAPPINGS[cat_clean]
+    for k, v in STANDARD_AGENCY_MAPPINGS.items():
+        if k.lower() == cat_clean.lower():
+            return v
+    cat_lower = cat_clean.lower()
+    if any(term in cat_lower for term in ("road", "bridge", "building", "infra", "civil")):
+        return STANDARD_AGENCY_MAPPINGS["Road"]
+    if any(term in cat_lower for term in ("health", "hospital", "clinic")):
+        return STANDARD_AGENCY_MAPPINGS["Health"]
+    if any(term in cat_lower for term in ("edu", "school", "instruction")):
+        return STANDARD_AGENCY_MAPPINGS["Education"]
+    if any(term in cat_lower for term in ("water", "sanitation", "jal")):
+        return STANDARD_AGENCY_MAPPINGS["Water"]
+    if any(term in cat_lower for term in ("civic", "urban", "municipal")):
+        return STANDARD_AGENCY_MAPPINGS["Civic"]
+    return ["Public Works Department (PWD)"]
 
 # Statutory open tender / single administrative approval ceiling in INR
 SINGLE_APPROVAL_THRESHOLD = 10_000_000  # ₹1.00 Crore
@@ -192,10 +268,11 @@ def evaluate_category_mismatch(project: Dict[str, Any]) -> Dict[str, Any]:
     Rule 3: Category Mismatch
     Flags if category and implementingAgency do not align per the standard mapping.
     """
-    category = project.get("category", "")
-    agency = project.get("implementingAgency", "")
+    category = (project.get("category") or "").strip()
+    agency = (project.get("implementingAgency") or "").strip()
 
-    expected_agencies = STANDARD_AGENCY_MAPPINGS.get(category, [])
+    expected_agencies = get_expected_agencies_for_category(category)
+    standard_agency_name = get_standard_agency_for_category(category)
 
     # Check if any valid agency identifier or keyword matches the assigned agency
     is_aligned = any(
@@ -207,10 +284,9 @@ def evaluate_category_mismatch(project: Dict[str, Any]) -> Dict[str, Any]:
     severity = "CRITICAL" if is_mismatched else "NONE"
 
     if is_mismatched:
-        expected_str = ", ".join(expected_agencies[:2])
         message = (
             f"Implementing agency '{agency}' does not conform to institutional jurisdiction for "
-            f"category '{category}' (standard executing authority: {expected_str})."
+            f"category '{category}' (standard executing authority: {standard_agency_name})."
         )
     else:
         message = (
@@ -224,11 +300,12 @@ def evaluate_category_mismatch(project: Dict[str, Any]) -> Dict[str, Any]:
         "status": "FLAGGED" if is_mismatched else "PASSED",
         "severity": severity,
         "message": message,
-        "expectedAgency": expected_agencies[0] if expected_agencies else None,
+        "expectedAgency": standard_agency_name,
         "actualAgency": agency,
         "details": {
             "category": category,
             "assignedAgency": agency,
+            "standardExecutingAuthority": standard_agency_name,
             "permittedAgencyTypes": expected_agencies,
         },
     }

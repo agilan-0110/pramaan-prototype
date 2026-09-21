@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { resolveSessionRole } from './Layout.js';
 import './Layout.css';
 
 /**
@@ -8,12 +9,20 @@ export default function Layout({
   children,
   projectName = 'SETU',
   subtitle = 'PM-GatiShakti & MPLADS Audit Platform',
-  role = 'District Authority',
+  role = null,
   onLogout,
 }) {
   const [activeNav, setActiveNav] = useState('projects');
 
-  const navItems = [
+  const displayRole = resolveSessionRole(role);
+  const roleClean = displayRole.toLowerCase();
+  const isMpRole = !roleClean.includes('implementing') && (/\bmp\b/i.test(roleClean) || roleClean.includes('member of parliament'));
+  const groupTitle = isMpRole ? 'CONSTITUENCY MODULES' : 'AUDIT MODULES';
+
+  const navItems = isMpRole ? [
+    { label: 'My Projects', id: 'projects' },
+    { label: 'Submit Proposal', id: 'submit-proposal' },
+  ] : [
     { label: 'Projects Audit', id: 'projects' },
     { label: 'Risk Assessment & SHAP', id: 'risk' },
     { label: 'Compliance Flags', id: 'compliance' },
@@ -35,7 +44,7 @@ export default function Layout({
         <div className="setu-header-actions">
           <div className="setu-role-badge">
             <span className="setu-role-label">Role:</span>
-            <span className="setu-role-name">{role}</span>
+            <span className="setu-role-name">{displayRole}</span>
           </div>
           <button type="button" className="setu-logout-btn" onClick={onLogout}>
             Logout
@@ -46,7 +55,7 @@ export default function Layout({
       {/* Workspace: Sidebar + Main Content */}
       <div className="setu-workspace">
         <aside className="setu-sidebar">
-          <div className="setu-nav-group-title">AUDIT MODULES</div>
+          <div className="setu-nav-group-title">{groupTitle}</div>
           <nav>
             <ul className="setu-nav-list">
               {navItems.map((item) => (

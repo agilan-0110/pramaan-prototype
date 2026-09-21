@@ -16,6 +16,7 @@ from app.routers.alerts import router as alerts_router
 from app.routers.citizen_nlp import router as citizen_nlp_router
 from app.routers.auth import router as auth_router
 from app.routers.projects import router as projects_router
+from app.routers.audit import router as audit_router
 
 app = FastAPI(
     title="SETU Compliance & Contradiction Detection Platform API",
@@ -44,6 +45,7 @@ app.include_router(predictive_router)
 app.include_router(alerts_router)
 app.include_router(citizen_nlp_router)
 app.include_router(projects_router)
+app.include_router(audit_router)
 
 
 @app.get("/", tags=["General"])

@@ -12,16 +12,19 @@ March Rush fund-dumping monitoring:
 """
 
 from typing import Any, Dict, List, Optional
-from fastapi import APIRouter, HTTPException, Path, Query
+from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from pydantic import BaseModel, Field
 
+from app.services.auth import get_optional_current_user
 from app.services.trend import (
+    get_chronic_non_utilization_report,
     get_expenditure_by_district,
     get_expenditure_by_state,
     get_expenditure_by_year,
     get_project_spending_trend,
     get_quarterly_trend,
     get_seasonal_fund_dumping_report,
+    load_projects,
 )
 
 router = APIRouter(
@@ -31,12 +34,29 @@ router = APIRouter(
 
 
 @router.get(
+    "/chronic-non-utilization",
+    summary="Get Chronic Non-Utilization Multi-Year Report",
+    description="Identifies multi-year carried-forward unspent fund balances skipping District Authority per ROLES.md.",
+)
+def get_chronic_non_utilization(
+    state: Optional[str] = Query(None, description="Optional state filter (e.g. 'Tamil Nadu')"),
+    current_user: Optional[Dict[str, Any]] = Depends(get_optional_current_user),
+) -> Dict[str, Any]:
+    effective_state = state or (current_user.get("state") if current_user and current_user.get("accessScope") == "state_rollup" else None)
+    all_projects = load_projects()
+    if effective_state:
+        all_projects = [p for p in all_projects if (p.get("state") or "").strip().lower() == effective_state.strip().lower()]
+    return get_chronic_non_utilization_report(state=effective_state, all_projects=all_projects)
+
+
+@router.get(
     "/expenditure/yearly",
     summary="Get Yearly Expenditure Rollup",
     description="Aggregates sanctioned funds, actual expenditure, utilization rate, and project completion metrics by fiscal year.",
 )
 def get_yearly_rollup() -> List[Dict[str, Any]]:
     return get_expenditure_by_year()
+
 
 
 @router.get(
@@ -68,9 +88,15 @@ def get_district_trends(
     description="Time-series breakdown across fiscal quarters (Q1-Q4) highlighting the final 6 weeks spending concentration.",
 )
 def get_quarterly_pacing(
-    year: Optional[str] = Query(None, description="Optional fiscal year filter (e.g. '2025-26')")
+    year: Optional[str] = Query(None, description="Optional fiscal year filter (e.g. '2025-26')"),
+    state: Optional[str] = Query(None, description="Optional state filter (e.g. 'Tamil Nadu')"),
+    current_user: Optional[Dict[str, Any]] = Depends(get_optional_current_user),
 ) -> Dict[str, Any]:
-    return get_quarterly_trend(year)
+    effective_state = state or (current_user.get("state") if current_user and current_user.get("accessScope") == "state_rollup" else None)
+    all_projects = load_projects()
+    if effective_state:
+        all_projects = [p for p in all_projects if (p.get("state") or "").strip().lower() == effective_state.strip().lower()]
+    return get_quarterly_trend(year, all_projects=all_projects)
 
 
 @router.get(
@@ -78,8 +104,15 @@ def get_quarterly_pacing(
     summary="Get Seasonal Fund-Dumping Report",
     description="Identifies all projects where disbursements cluster heavily in the final 6 weeks of the fiscal year (Feb 15 - Mar 31).",
 )
-def get_fund_dumping() -> Dict[str, Any]:
-    return get_seasonal_fund_dumping_report()
+def get_fund_dumping(
+    state: Optional[str] = Query(None, description="Optional state filter (e.g. 'Tamil Nadu')"),
+    current_user: Optional[Dict[str, Any]] = Depends(get_optional_current_user),
+) -> Dict[str, Any]:
+    effective_state = state or (current_user.get("state") if current_user and current_user.get("accessScope") == "state_rollup" else None)
+    all_projects = load_projects()
+    if effective_state:
+        all_projects = [p for p in all_projects if (p.get("state") or "").strip().lower() == effective_state.strip().lower()]
+    return get_seasonal_fund_dumping_report(all_projects=all_projects)
 
 
 @router.get(

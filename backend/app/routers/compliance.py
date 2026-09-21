@@ -5,12 +5,15 @@ Exposes endpoints for auditing statutory MPLADS compliance rules:
 - GET /projects/{id}/compliance
 - GET /projects/compliance/summary
 - GET /projects/compliance/violations
+
+Enforces strict RBAC: Implementing Agency cannot access compliance audit evaluations per ROLES.md.
 """
 
 from typing import Any, Dict, List, Optional
-from fastapi import APIRouter, HTTPException, Path, Query
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, status
 from pydantic import BaseModel, Field
 
+from app.services.auth import get_optional_current_user
 from app.services.compliance import (
     evaluate_project_compliance,
     get_all_compliance_evaluations,
@@ -21,6 +24,27 @@ router = APIRouter(
     prefix="/projects",
     tags=["Compliance"],
 )
+
+
+def enforce_compliance_access(current_user: Optional[Dict[str, Any]]) -> None:
+    """Blocks Implementing Agency and MP Office from accessing statutory compliance audits per ROLES.md."""
+    if not current_user:
+        return
+    import re
+    role_id = current_user.get("roleId", "")
+    role_name = (current_user.get("role") or "").lower()
+    scope = current_user.get("accessScope", "")
+    if scope == "agency_assigned_only" or "implementing" in role_id or "implementing" in role_name:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied: Compliance breach evaluations and statutory audit queues are restricted to oversight authorities per ROLES.md.",
+        )
+    if scope in ["constituency_only", "nominated_mp_districts"] or role_id == "mp_office" or bool(re.search(r"\bmp\b", role_name)):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied: Detailed compliance audit violations and anomaly queues are restricted to oversight authorities per ROLES.md.",
+        )
+
 
 
 class ComplianceFlag(BaseModel):
@@ -77,7 +101,10 @@ class ComplianceSummaryResponse(BaseModel):
     summary="Get Portfolio-wide Compliance Summary",
     description="Returns aggregate compliance statistics across all monitored MPLADS projects.",
 )
-def get_summary() -> ComplianceSummaryResponse:
+def get_summary(
+    current_user: Optional[Dict[str, Any]] = Depends(get_optional_current_user)
+) -> ComplianceSummaryResponse:
+    enforce_compliance_access(current_user)
     return ComplianceSummaryResponse(**get_compliance_summary())
 
 
@@ -88,8 +115,10 @@ def get_summary() -> ComplianceSummaryResponse:
     description="Returns all projects currently flagged for one or more statutory compliance breaches.",
 )
 def list_flagged_projects(
-    min_violations: int = Query(1, ge=1, description="Minimum number of violations to filter by")
+    min_violations: int = Query(1, ge=1, description="Minimum number of violations to filter by"),
+    current_user: Optional[Dict[str, Any]] = Depends(get_optional_current_user),
 ) -> List[ProjectComplianceResponse]:
+    enforce_compliance_access(current_user)
     all_evals = get_all_compliance_evaluations()
     flagged = [e for e in all_evals if e["totalViolations"] >= min_violations]
     return [ProjectComplianceResponse(**e) for e in flagged]
@@ -102,8 +131,10 @@ def list_flagged_projects(
     description="Evaluates all 4 statutory compliance rules (Ceiling, Deadline, Category Mismatch, Fund Splitting) for a given project ID.",
 )
 def get_project_compliance(
-    id: str = Path(..., description="The unique project ID (e.g. PRJ-IND-2001)", examples=["PRJ-IND-2001"])
+    id: str = Path(..., description="The unique project ID (e.g. PRJ-IND-2001)", examples=["PRJ-IND-2001"]),
+    current_user: Optional[Dict[str, Any]] = Depends(get_optional_current_user),
 ) -> ProjectComplianceResponse:
+    enforce_compliance_access(current_user)
     result = evaluate_project_compliance(id)
     if not result:
         raise HTTPException(

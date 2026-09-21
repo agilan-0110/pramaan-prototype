@@ -1,0 +1,1981 @@
+"""
+Generate & Extend National Mock Dataset with Tiered Depth across India.
+
+Tier 1: Tamil Nadu (23 projects across Chennai, Coimbatore, Madurai, Thanjavur)
+Tier 2: Karnataka (12), Maharashtra (13), Uttar Pradesh (14) - each with CRITICAL, Compliance, Duplicate, Citizen Contradiction
+        Includes Cross-State Duplicate pair: Karnataka (Bengaluru) vs Maharashtra (Pune)
+        Includes Nominated MP (Rajya Sabha) spanning Tamil Nadu, Karnataka, Maharashtra
+Tier 3: 14+ remaining States/UTs with 3-5 projects each for national realism
+
+Strict rules:
+- Fictional MP names only
+- Fictional Vendor names only
+- Real Indian states & districts
+- Bcrypt hashed credentials
+"""
+
+import json
+import random
+from pathlib import Path
+from datetime import datetime, timezone
+import bcrypt
+
+DATA_DIR = Path(__file__).resolve().parent
+
+# Bcrypt password hasher
+def hash_pw(plain: str) -> str:
+    return bcrypt.hashpw(plain.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+def build_dataset():
+    # Load existing Tamil Nadu projects to preserve them 100%
+    existing_projects = json.load(open(DATA_DIR / "mockProjects.json", "r", encoding="utf-8"))
+    tn_projects = [p for p in existing_projects if p.get("state") == "Tamil Nadu"]
+    print(f"Preserving {len(tn_projects)} Tamil Nadu Tier 1 projects.")
+
+    all_projects = list(tn_projects)
+    all_mps = []
+
+    # 1. MP Registry - Fictional MPs
+    # Tamil Nadu MPs
+    tn_mps = [
+        {
+            "id": "MP-LS-TN-001",
+            "name": "Dr. K. Jayachandran (Fictional)",
+            "state": "Tamil Nadu",
+            "constituency": "Chennai Central",
+            "house": "Lok Sabha",
+            "term": "18th Lok Sabha (2024-2029)",
+            "mpType": "ELECTED_LOK_SABHA",
+            "totalSanctionedWorks": 9,
+            "totalSanctionedAmount": 45000000,
+            "totalExpenditure": 26890000,
+            "utilizationPercentage": 59.8,
+            "highRiskProjectsCount": 4
+        },
+        {
+            "id": "MP-LS-TN-002",
+            "name": "Thiru S. Murugavel (Fictional)",
+            "state": "Tamil Nadu",
+            "constituency": "Coimbatore",
+            "house": "Lok Sabha",
+            "term": "18th Lok Sabha (2024-2029)",
+            "mpType": "ELECTED_LOK_SABHA",
+            "totalSanctionedWorks": 6,
+            "totalSanctionedAmount": 32000000,
+            "totalExpenditure": 24416000,
+            "utilizationPercentage": 76.3,
+            "highRiskProjectsCount": 2
+        },
+        {
+            "id": "MP-LS-TN-003",
+            "name": "Prof. V. Sivakumar (Fictional)",
+            "state": "Tamil Nadu",
+            "constituency": "Madurai",
+            "house": "Lok Sabha",
+            "term": "18th Lok Sabha (2024-2029)",
+            "mpType": "ELECTED_LOK_SABHA",
+            "totalSanctionedWorks": 6,
+            "totalSanctionedAmount": 30500000,
+            "totalExpenditure": 20282500,
+            "utilizationPercentage": 66.5,
+            "highRiskProjectsCount": 2
+        },
+        {
+            "id": "MP-RS-TN-004",
+            "name": "Smt. Manimegalai R. (Fictional)",
+            "state": "Tamil Nadu",
+            "constituency": "Tamil Nadu (Rajya Sabha)",
+            "house": "Rajya Sabha",
+            "term": "Rajya Sabha (2022-2028)",
+            "mpType": "ELECTED_RAJYA_SABHA",
+            "chosenDistricts": ["Thanjavur", "Chennai"],
+            "totalSanctionedWorks": 2,
+            "totalSanctionedAmount": 10000000,
+            "totalExpenditure": 7300000,
+            "utilizationPercentage": 73.0,
+            "highRiskProjectsCount": 0
+        }
+    ]
+    all_mps.extend(tn_mps)
+
+    # Nominated MP (Rajya Sabha) spanning Tamil Nadu, Karnataka, Maharashtra
+    nominated_mp = {
+        "id": "MP-NOM-IND-001",
+        "name": "Dr. Anandita Swaminathan (Fictional)",
+        "state": "All India (Nominated)",
+        "constituency": "Nominated (Rajya Sabha)",
+        "house": "Rajya Sabha",
+        "term": "Nominated (2024-2030)",
+        "mpType": "NOMINATED_MP",
+        "chosenDistricts": ["Chennai", "Bengaluru Urban", "Pune"],
+        "totalSanctionedWorks": 3,
+        "totalSanctionedAmount": 15000000,
+        "totalExpenditure": 9800000,
+        "utilizationPercentage": 65.3,
+        "highRiskProjectsCount": 1
+    }
+    all_mps.append(nominated_mp)
+
+    # -------------------------------------------------------------
+    # TIER 2 STATES: Karnataka, Maharashtra, Uttar Pradesh
+    # -------------------------------------------------------------
+
+    # TIER 2: KARNATAKA (12 Projects: Bengaluru Urban 7, Mysuru 5)
+    ka_mps = [
+        {
+            "id": "MP-LS-KA-001",
+            "name": "Shri Raghavendra Rao (Fictional)",
+            "state": "Karnataka",
+            "constituency": "Bengaluru South",
+            "house": "Lok Sabha",
+            "term": "18th Lok Sabha (2024-2029)",
+            "mpType": "ELECTED_LOK_SABHA",
+            "totalSanctionedWorks": 7,
+            "totalSanctionedAmount": 42000000,
+            "totalExpenditure": 28500000,
+            "utilizationPercentage": 67.8,
+            "highRiskProjectsCount": 3
+        },
+        {
+            "id": "MP-LS-KA-002",
+            "name": "Smt. Prema Hegde (Fictional)",
+            "state": "Karnataka",
+            "constituency": "Mysuru",
+            "house": "Lok Sabha",
+            "term": "18th Lok Sabha (2024-2029)",
+            "mpType": "ELECTED_LOK_SABHA",
+            "totalSanctionedWorks": 5,
+            "totalSanctionedAmount": 26000000,
+            "totalExpenditure": 16900000,
+            "utilizationPercentage": 65.0,
+            "highRiskProjectsCount": 1
+        }
+    ]
+    all_mps.extend(ka_mps)
+
+    ka_projects = [
+        # KA-1: CRITICAL Risk Flag (SHAP Pacing Mismatch)
+        {
+            "id": "PRJ-IND-KA-001",
+            "name": "Construction of High-Throughput Dialysis Center & Medical Store, Bengaluru",
+            "state": "Karnataka",
+            "district": "Bengaluru Urban",
+            "constituency": "Bengaluru South",
+            "mpName": "Shri Raghavendra Rao (Fictional)",
+            "mpId": "MP-LS-KA-001",
+            "category": "Health",
+            "implementingAgency": "Karnataka Public Health Infrastructure Division (Fictional)",
+            "vendorName": "Vijayanagar MedTech Solutions (Fictional)",
+            "vendorId": "VND-KA-001",
+            "sanctionedAmount": 9500000,
+            "expenditure": 8740000,
+            "physicalProgress": 22,
+            "financialProgress": 92.0,
+            "status": "In Progress",
+            "riskScore": 93,
+            "riskLevel": "CRITICAL",
+            "daysDelayed": 180,
+            "costOverrun": False,
+            "duplicateRisk": False,
+            "paymentProgressMismatch": True,
+            "financialYear": "2024-25",
+            "dateSpent": "2025-02-14",
+            "quarterSpent": "Q4",
+            "fundDumpingFlag": True,
+            "disbursements": [
+                {"tranche": "T1", "amount": 2850000, "date": "2024-05-10", "quarter": "Q1", "percentage": 30.0},
+                {"tranche": "T2", "amount": 5890000, "date": "2025-02-14", "quarter": "Q4", "percentage": 62.0, "isFinalSixWeeks": True}
+            ],
+            "siteCoordinates": {"latitude": 12.9352, "longitude": 77.6245},
+            "latitude": 12.9352,
+            "longitude": 77.6245
+        },
+        # KA-2: Compliance Violation (Single-Approval Split Tender)
+        {
+            "id": "PRJ-IND-KA-002",
+            "name": "Laying of Asphalt Road & Surface Drains Block-A, Jayanagar, Bengaluru",
+            "state": "Karnataka",
+            "district": "Bengaluru Urban",
+            "constituency": "Bengaluru South",
+            "mpName": "Shri Raghavendra Rao (Fictional)",
+            "mpId": "MP-LS-KA-001",
+            "category": "Road",
+            "implementingAgency": "Public Works Department (PWD) — Bengaluru Urban",
+            "vendorName": "Deccan Apex Infrastructure Ltd (Fictional)",
+            "vendorId": "VND-NAT-002",
+            "sanctionedAmount": 4850000,
+            "expenditure": 3880000,
+            "physicalProgress": 65,
+            "financialProgress": 80.0,
+            "status": "In Progress",
+            "riskScore": 76,
+            "riskLevel": "HIGH",
+            "daysDelayed": 0,
+            "costOverrun": False,
+            "duplicateRisk": False,
+            "paymentProgressMismatch": False,
+            "financialYear": "2024-25",
+            "dateSpent": "2024-11-20",
+            "quarterSpent": "Q3",
+            "fundDumpingFlag": False,
+            "disbursements": [
+                {"tranche": "T1", "amount": 1940000, "date": "2024-07-15", "quarter": "Q2", "percentage": 40.0},
+                {"tranche": "T2", "amount": 1940000, "date": "2024-11-20", "quarter": "Q3", "percentage": 40.0}
+            ],
+            "siteCoordinates": {"latitude": 12.9250, "longitude": 77.5938},
+            "latitude": 12.9250,
+            "longitude": 77.5938
+        },
+        # KA-3: Cross-State Duplicate Scheme Match with Maharashtra (PRJ-IND-MH-003)
+        {
+            "id": "PRJ-IND-KA-003",
+            "name": "Construction of Precast Reinforced Concrete Stormwater Box Culvert System, Bengaluru Urban",
+            "state": "Karnataka",
+            "district": "Bengaluru Urban",
+            "constituency": "Bengaluru South",
+            "mpName": "Shri Raghavendra Rao (Fictional)",
+            "mpId": "MP-LS-KA-001",
+            "category": "Civic",
+            "implementingAgency": "Greater Bengaluru Urban Municipal Works (Fictional)",
+            "vendorName": "Deccan Apex Infrastructure Ltd (Fictional)",
+            "vendorId": "VND-NAT-002",
+            "sanctionedAmount": 7800000,
+            "expenditure": 5460000,
+            "physicalProgress": 70,
+            "financialProgress": 70.0,
+            "status": "In Progress",
+            "riskScore": 82,
+            "riskLevel": "HIGH",
+            "daysDelayed": 45,
+            "costOverrun": False,
+            "duplicateRisk": True,
+            "duplicateMatchedProjectId": "PRJ-IND-MH-003",
+            "paymentProgressMismatch": False,
+            "financialYear": "2024-25",
+            "dateSpent": "2024-10-12",
+            "quarterSpent": "Q3",
+            "fundDumpingFlag": False,
+            "disbursements": [
+                {"tranche": "T1", "amount": 2730000, "date": "2024-06-20", "quarter": "Q1", "percentage": 35.0},
+                {"tranche": "T2", "amount": 2730000, "date": "2024-10-12", "quarter": "Q3", "percentage": 35.0}
+            ],
+            "siteCoordinates": {"latitude": 12.9100, "longitude": 77.6000},
+            "latitude": 12.9100,
+            "longitude": 77.6000
+        },
+        # KA-4: Citizen Contradiction Flag
+        {
+            "id": "PRJ-IND-KA-004",
+            "name": "Establishment of Advanced Computer Laboratory & Smart Classrooms, Mysuru",
+            "state": "Karnataka",
+            "district": "Mysuru",
+            "constituency": "Mysuru",
+            "mpName": "Smt. Prema Hegde (Fictional)",
+            "mpId": "MP-LS-KA-002",
+            "category": "Education",
+            "implementingAgency": "Karnataka State Educational Infrastructure Agency (Fictional)",
+            "vendorName": "Chamundi Digital Education Systems (Fictional)",
+            "vendorId": "VND-KA-004",
+            "sanctionedAmount": 5200000,
+            "expenditure": 4680000,
+            "physicalProgress": 90,
+            "financialProgress": 90.0,
+            "status": "In Progress",
+            "riskScore": 86,
+            "riskLevel": "CRITICAL",
+            "daysDelayed": 30,
+            "costOverrun": False,
+            "duplicateRisk": False,
+            "paymentProgressMismatch": False,
+            "hasCitizenReport": True,
+            "citizenReportSummary": "Official claim: 100% smart classroom screens and 30 desktop workstations commissioned. Citizen audit: Computer room is padlocked, no desktop terminals installed, wiring hanging from ceiling.",
+            "financialYear": "2025-26",
+            "dateSpent": "2025-08-18",
+            "quarterSpent": "Q2",
+            "fundDumpingFlag": False,
+            "disbursements": [
+                {"tranche": "T1", "amount": 2340000, "date": "2025-05-10", "quarter": "Q1", "percentage": 45.0},
+                {"tranche": "T2", "amount": 2340000, "date": "2025-08-18", "quarter": "Q2", "percentage": 45.0}
+            ],
+            "siteCoordinates": {"latitude": 12.2958, "longitude": 76.6394},
+            "latitude": 12.2958,
+            "longitude": 76.6394
+        },
+        # KA-5: Allocated by Nominated MP (Dr. Anandita Swaminathan)
+        {
+            "id": "PRJ-IND-KA-005",
+            "name": "Installation of Rooftop Solar Array & Battery Storage for District Civil Hospital, Bengaluru",
+            "state": "Karnataka",
+            "district": "Bengaluru Urban",
+            "constituency": "Nominated (Rajya Sabha)",
+            "mpName": "Dr. Anandita Swaminathan (Fictional)",
+            "mpId": "MP-NOM-IND-001",
+            "category": "Health",
+            "implementingAgency": "Karnataka Renewable Energy Development Board (Fictional)",
+            "vendorName": "Silicon City Green Energies Ltd (Fictional)",
+            "vendorId": "VND-KA-005",
+            "sanctionedAmount": 5000000,
+            "expenditure": 3500000,
+            "physicalProgress": 70,
+            "financialProgress": 70.0,
+            "status": "In Progress",
+            "riskScore": 38,
+            "riskLevel": "LOW",
+            "daysDelayed": 0,
+            "costOverrun": False,
+            "duplicateRisk": False,
+            "paymentProgressMismatch": False,
+            "financialYear": "2025-26",
+            "dateSpent": "2025-09-12",
+            "quarterSpent": "Q2",
+            "fundDumpingFlag": False,
+            "disbursements": [
+                {"tranche": "T1", "amount": 3500000, "date": "2025-09-12", "quarter": "Q2", "percentage": 70.0}
+            ],
+            "siteCoordinates": {"latitude": 12.9716, "longitude": 77.5946},
+            "latitude": 12.9716,
+            "longitude": 77.5946
+        },
+        # Additional Bengaluru & Mysuru projects for realistic depth (Total 12)
+        {
+            "id": "PRJ-IND-KA-006",
+            "name": "Borewell Deepening & Automated RO Water Purification Kiosk, K.R. Market, Bengaluru",
+            "state": "Karnataka",
+            "district": "Bengaluru Urban",
+            "constituency": "Bengaluru South",
+            "mpName": "Shri Raghavendra Rao (Fictional)",
+            "mpId": "MP-LS-KA-001",
+            "category": "Water",
+            "implementingAgency": "Bangalore Water Supply and Sewerage Board (BWSSB - Fictional)",
+            "vendorName": "Cauvery Hydro Engineering (Fictional)",
+            "vendorId": "VND-KA-006",
+            "sanctionedAmount": 3200000,
+            "expenditure": 2880000,
+            "physicalProgress": 100,
+            "financialProgress": 90.0,
+            "status": "Completed",
+            "riskScore": 22,
+            "riskLevel": "LOW",
+            "daysDelayed": 0,
+            "costOverrun": False,
+            "duplicateRisk": False,
+            "paymentProgressMismatch": False,
+            "financialYear": "2024-25",
+            "dateSpent": "2024-08-15",
+            "quarterSpent": "Q2",
+            "fundDumpingFlag": False,
+            "disbursements": [{"tranche": "T1", "amount": 2880000, "date": "2024-08-15", "quarter": "Q2", "percentage": 90.0}],
+            "siteCoordinates": {"latitude": 12.9600, "longitude": 77.5750},
+            "latitude": 12.9600,
+            "longitude": 77.5750
+        },
+        {
+            "id": "PRJ-IND-KA-007",
+            "name": "Construction of Modern Community Sports Complex & Gymnasium, Malleshwaram, Bengaluru",
+            "state": "Karnataka",
+            "district": "Bengaluru Urban",
+            "constituency": "Bengaluru South",
+            "mpName": "Shri Raghavendra Rao (Fictional)",
+            "mpId": "MP-LS-KA-001",
+            "category": "Civic",
+            "implementingAgency": "Public Works Department (PWD) — Bengaluru Urban",
+            "vendorName": "Karnataka Urban Structures (Fictional)",
+            "vendorId": "VND-KA-007",
+            "sanctionedAmount": 6500000,
+            "expenditure": 3900000,
+            "physicalProgress": 60,
+            "financialProgress": 60.0,
+            "status": "In Progress",
+            "riskScore": 45,
+            "riskLevel": "MEDIUM",
+            "daysDelayed": 15,
+            "costOverrun": False,
+            "duplicateRisk": False,
+            "paymentProgressMismatch": False,
+            "financialYear": "2025-26",
+            "dateSpent": "2025-07-22",
+            "quarterSpent": "Q2",
+            "fundDumpingFlag": False,
+            "disbursements": [{"tranche": "T1", "amount": 3900000, "date": "2025-07-22", "quarter": "Q2", "percentage": 60.0}],
+            "siteCoordinates": {"latitude": 13.0031, "longitude": 77.5645},
+            "latitude": 13.0031,
+            "longitude": 77.5645
+        },
+        {
+            "id": "PRJ-IND-KA-008",
+            "name": "Widening and Concrete Paving of Outer Feeder Road, Hebbal, Bengaluru",
+            "state": "Karnataka",
+            "district": "Bengaluru Urban",
+            "constituency": "Bengaluru South",
+            "mpName": "Shri Raghavendra Rao (Fictional)",
+            "mpId": "MP-LS-KA-001",
+            "category": "Road",
+            "implementingAgency": "Public Works Department (PWD) — Bengaluru Urban",
+            "vendorName": "Deccan Apex Infrastructure Ltd (Fictional)",
+            "vendorId": "VND-NAT-002",
+            "sanctionedAmount": 5500000,
+            "expenditure": 3300000,
+            "physicalProgress": 55,
+            "financialProgress": 60.0,
+            "status": "In Progress",
+            "riskScore": 52,
+            "riskLevel": "MEDIUM",
+            "daysDelayed": 0,
+            "costOverrun": False,
+            "duplicateRisk": False,
+            "paymentProgressMismatch": False,
+            "financialYear": "2025-26",
+            "dateSpent": "2025-06-11",
+            "quarterSpent": "Q1",
+            "fundDumpingFlag": False,
+            "disbursements": [{"tranche": "T1", "amount": 3300000, "date": "2025-06-11", "quarter": "Q1", "percentage": 60.0}],
+            "siteCoordinates": {"latitude": 13.0358, "longitude": 77.5970},
+            "latitude": 13.0358,
+            "longitude": 77.5970
+        },
+        {
+            "id": "PRJ-IND-KA-009",
+            "name": "Heritage Zone Street Lighting & Pedestrian Pathway Renovation, Mysuru Palace Environs",
+            "state": "Karnataka",
+            "district": "Mysuru",
+            "constituency": "Mysuru",
+            "mpName": "Smt. Prema Hegde (Fictional)",
+            "mpId": "MP-LS-KA-002",
+            "category": "Civic",
+            "implementingAgency": "Mysuru Urban Development Authority (MUDA - Fictional)",
+            "vendorName": "Heritage City Infra Projects (Fictional)",
+            "vendorId": "VND-KA-009",
+            "sanctionedAmount": 4800000,
+            "expenditure": 4320000,
+            "physicalProgress": 95,
+            "financialProgress": 90.0,
+            "status": "In Progress",
+            "riskScore": 28,
+            "riskLevel": "LOW",
+            "daysDelayed": 0,
+            "costOverrun": False,
+            "duplicateRisk": False,
+            "paymentProgressMismatch": False,
+            "financialYear": "2024-25",
+            "dateSpent": "2024-12-05",
+            "quarterSpent": "Q3",
+            "fundDumpingFlag": False,
+            "disbursements": [{"tranche": "T1", "amount": 4320000, "date": "2024-12-05", "quarter": "Q3", "percentage": 90.0}],
+            "siteCoordinates": {"latitude": 12.3051, "longitude": 76.6551},
+            "latitude": 12.3051,
+            "longitude": 76.6551
+        },
+        {
+            "id": "PRJ-IND-KA-010",
+            "name": "Construction of Rural Water Testing & De-fluoridation Facility, Nanjangud, Mysuru",
+            "state": "Karnataka",
+            "district": "Mysuru",
+            "constituency": "Mysuru",
+            "mpName": "Smt. Prema Hegde (Fictional)",
+            "mpId": "MP-LS-KA-002",
+            "category": "Water",
+            "implementingAgency": "Karnataka Rural Water Supply & Sanitation Agency (Fictional)",
+            "vendorName": "Mysuru Pure Water Systems (Fictional)",
+            "vendorId": "VND-KA-010",
+            "sanctionedAmount": 4200000,
+            "expenditure": 2100000,
+            "physicalProgress": 50,
+            "financialProgress": 50.0,
+            "status": "In Progress",
+            "riskScore": 35,
+            "riskLevel": "LOW",
+            "daysDelayed": 0,
+            "costOverrun": False,
+            "duplicateRisk": False,
+            "paymentProgressMismatch": False,
+            "financialYear": "2025-26",
+            "dateSpent": "2025-05-18",
+            "quarterSpent": "Q1",
+            "fundDumpingFlag": False,
+            "disbursements": [{"tranche": "T1", "amount": 2100000, "date": "2025-05-18", "quarter": "Q1", "percentage": 50.0}],
+            "siteCoordinates": {"latitude": 12.1186, "longitude": 76.6800},
+            "latitude": 12.1186,
+            "longitude": 76.6800
+        },
+        {
+            "id": "PRJ-IND-KA-011",
+            "name": "Upgradation of Government Higher Secondary Science Block, Hunsur, Mysuru",
+            "state": "Karnataka",
+            "district": "Mysuru",
+            "constituency": "Mysuru",
+            "mpName": "Smt. Prema Hegde (Fictional)",
+            "mpId": "MP-LS-KA-002",
+            "category": "Education",
+            "implementingAgency": "Karnataka State Educational Infrastructure Agency (Fictional)",
+            "vendorName": "Chamundi Digital Education Systems (Fictional)",
+            "vendorId": "VND-KA-004",
+            "sanctionedAmount": 4000000,
+            "expenditure": 3200000,
+            "physicalProgress": 80,
+            "financialProgress": 80.0,
+            "status": "In Progress",
+            "riskScore": 31,
+            "riskLevel": "LOW",
+            "daysDelayed": 0,
+            "costOverrun": False,
+            "duplicateRisk": False,
+            "paymentProgressMismatch": False,
+            "financialYear": "2024-25",
+            "dateSpent": "2024-09-14",
+            "quarterSpent": "Q2",
+            "fundDumpingFlag": False,
+            "disbursements": [{"tranche": "T1", "amount": 3200000, "date": "2024-09-14", "quarter": "Q2", "percentage": 80.0}],
+            "siteCoordinates": {"latitude": 12.3080, "longitude": 76.2920},
+            "latitude": 12.3080,
+            "longitude": 76.2920
+        },
+        {
+            "id": "PRJ-IND-KA-012",
+            "name": "Installation of Solar-Powered Community Micro-Cold Storage for Horticulture, Mysuru",
+            "state": "Karnataka",
+            "district": "Mysuru",
+            "constituency": "Mysuru",
+            "mpName": "Smt. Prema Hegde (Fictional)",
+            "mpId": "MP-LS-KA-002",
+            "category": "Civic",
+            "implementingAgency": "Mysuru District Agricultural Marketing Board (Fictional)",
+            "vendorName": "Deccan Agro Power Systems (Fictional)",
+            "vendorId": "VND-KA-012",
+            "sanctionedAmount": 3800000,
+            "expenditure": 1900000,
+            "physicalProgress": 48,
+            "financialProgress": 50.0,
+            "status": "In Progress",
+            "riskScore": 42,
+            "riskLevel": "MEDIUM",
+            "daysDelayed": 0,
+            "costOverrun": False,
+            "duplicateRisk": False,
+            "paymentProgressMismatch": False,
+            "financialYear": "2025-26",
+            "dateSpent": "2025-07-10",
+            "quarterSpent": "Q2",
+            "fundDumpingFlag": False,
+            "disbursements": [{"tranche": "T1", "amount": 1900000, "date": "2025-07-10", "quarter": "Q2", "percentage": 50.0}],
+            "siteCoordinates": {"latitude": 12.3150, "longitude": 76.6200},
+            "latitude": 12.3150,
+            "longitude": 76.6200
+        }
+    ]
+    all_projects.extend(ka_projects)
+
+    # -------------------------------------------------------------
+    # TIER 2: MAHARASHTRA (13 Projects: Pune 8, Nagpur 5)
+    # -------------------------------------------------------------
+    mh_mps = [
+        {
+            "id": "MP-LS-MH-001",
+            "name": "Shri Aloknath Deshpande (Fictional)",
+            "state": "Maharashtra",
+            "constituency": "Pune",
+            "house": "Lok Sabha",
+            "term": "18th Lok Sabha (2024-2029)",
+            "mpType": "ELECTED_LOK_SABHA",
+            "totalSanctionedWorks": 8,
+            "totalSanctionedAmount": 54000000,
+            "totalExpenditure": 38200000,
+            "utilizationPercentage": 70.7,
+            "highRiskProjectsCount": 3
+        },
+        {
+            "id": "MP-LS-MH-002",
+            "name": "Smt. Shubhada Kulkarni (Fictional)",
+            "state": "Maharashtra",
+            "constituency": "Nagpur",
+            "house": "Lok Sabha",
+            "term": "18th Lok Sabha (2024-2029)",
+            "mpType": "ELECTED_LOK_SABHA",
+            "totalSanctionedWorks": 5,
+            "totalSanctionedAmount": 29000000,
+            "totalExpenditure": 18850000,
+            "utilizationPercentage": 65.0,
+            "highRiskProjectsCount": 2
+        }
+    ]
+    all_mps.extend(mh_mps)
+
+    mh_projects = [
+        # MH-1: CRITICAL Financial Risk Flag
+        {
+            "id": "PRJ-IND-MH-001",
+            "name": "Construction of Multipurpose Community Skill Development Center, Hadapsar, Pune",
+            "state": "Maharashtra",
+            "district": "Pune",
+            "constituency": "Pune",
+            "mpName": "Shri Aloknath Deshpande (Fictional)",
+            "mpId": "MP-LS-MH-001",
+            "category": "Education",
+            "implementingAgency": "Public Works Department (PWD) — Pune",
+            "vendorName": "Sahyadri Heavy Earthmovers (Fictional)",
+            "vendorId": "VND-MH-001",
+            "sanctionedAmount": 8900000,
+            "expenditure": 8188000,
+            "physicalProgress": 25,
+            "financialProgress": 92.0,
+            "status": "In Progress",
+            "riskScore": 92,
+            "riskLevel": "CRITICAL",
+            "daysDelayed": 210,
+            "costOverrun": True,
+            "duplicateRisk": False,
+            "paymentProgressMismatch": True,
+            "financialYear": "2024-25",
+            "dateSpent": "2025-02-28",
+            "quarterSpent": "Q4",
+            "fundDumpingFlag": True,
+            "disbursements": [
+                {"tranche": "T1", "amount": 2670000, "date": "2024-05-18", "quarter": "Q1", "percentage": 30.0},
+                {"tranche": "T2", "amount": 5518000, "date": "2025-02-28", "quarter": "Q4", "percentage": 62.0, "isFinalSixWeeks": True}
+            ],
+            "siteCoordinates": {"latitude": 18.5089, "longitude": 73.9259},
+            "latitude": 18.5089,
+            "longitude": 73.9259
+        },
+        # MH-2: Compliance Violation (Deadline Breach & Pacing Mismatch)
+        {
+            "id": "PRJ-IND-MH-002",
+            "name": "Upgradation and Bituminous Resurfacing of Feeder Link Road, Haveli, Pune",
+            "state": "Maharashtra",
+            "district": "Pune",
+            "constituency": "Pune",
+            "mpName": "Shri Aloknath Deshpande (Fictional)",
+            "mpId": "MP-LS-MH-001",
+            "category": "Road",
+            "implementingAgency": "Public Works Department (PWD) — Pune",
+            "vendorName": "Western Ghats Builders & Infra (Fictional)",
+            "vendorId": "VND-MH-002",
+            "sanctionedAmount": 6200000,
+            "expenditure": 5270000,
+            "physicalProgress": 50,
+            "financialProgress": 85.0,
+            "status": "Delayed",
+            "riskScore": 79,
+            "riskLevel": "HIGH",
+            "daysDelayed": 150,
+            "costOverrun": False,
+            "duplicateRisk": False,
+            "paymentProgressMismatch": True,
+            "financialYear": "2024-25",
+            "dateSpent": "2024-11-15",
+            "quarterSpent": "Q3",
+            "fundDumpingFlag": False,
+            "disbursements": [
+                {"tranche": "T1", "amount": 2480000, "date": "2024-06-10", "quarter": "Q1", "percentage": 40.0},
+                {"tranche": "T2", "amount": 2790000, "date": "2024-11-15", "quarter": "Q3", "percentage": 45.0}
+            ],
+            "siteCoordinates": {"latitude": 18.4600, "longitude": 73.8500},
+            "latitude": 18.4600,
+            "longitude": 73.8500
+        },
+        # MH-3: Cross-State Duplicate Scheme Match with Karnataka (PRJ-IND-KA-003)
+        {
+            "id": "PRJ-IND-MH-003",
+            "name": "Construction of Precast Reinforced Concrete Stormwater Drainage Box Culvert, Pune",
+            "state": "Maharashtra",
+            "district": "Pune",
+            "constituency": "Pune",
+            "mpName": "Shri Aloknath Deshpande (Fictional)",
+            "mpId": "MP-LS-MH-001",
+            "category": "Civic",
+            "implementingAgency": "Pune Municipal Corporation Infrastructure Wing (Fictional)",
+            "vendorName": "Deccan Apex Infrastructure Ltd (Fictional)",
+            "vendorId": "VND-NAT-002",
+            "sanctionedAmount": 7900000,
+            "expenditure": 5530000,
+            "physicalProgress": 72,
+            "financialProgress": 70.0,
+            "status": "In Progress",
+            "riskScore": 84,
+            "riskLevel": "HIGH",
+            "daysDelayed": 40,
+            "costOverrun": False,
+            "duplicateRisk": True,
+            "duplicateMatchedProjectId": "PRJ-IND-KA-003",
+            "paymentProgressMismatch": False,
+            "financialYear": "2025-26",
+            "dateSpent": "2025-07-20",
+            "quarterSpent": "Q2",
+            "fundDumpingFlag": False,
+            "disbursements": [
+                {"tranche": "T1", "amount": 2765000, "date": "2025-05-15", "quarter": "Q1", "percentage": 35.0},
+                {"tranche": "T2", "amount": 2765000, "date": "2025-07-20", "quarter": "Q2", "percentage": 35.0}
+            ],
+            "siteCoordinates": {"latitude": 18.5204, "longitude": 73.8567},
+            "latitude": 18.5204,
+            "longitude": 73.8567
+        },
+        # MH-4: Citizen Ground Truth Contradiction
+        {
+            "id": "PRJ-IND-MH-004",
+            "name": "Structural Strengthening & Pier Retrofitting of Rural River Bridge, Nagpur",
+            "state": "Maharashtra",
+            "district": "Nagpur",
+            "constituency": "Nagpur",
+            "mpName": "Smt. Shubhada Kulkarni (Fictional)",
+            "mpId": "MP-LS-MH-002",
+            "category": "Road",
+            "implementingAgency": "Public Works Department (PWD) — Nagpur",
+            "vendorName": "Vidarbha Civil Tech Ltd (Fictional)",
+            "vendorId": "VND-MH-004",
+            "sanctionedAmount": 6800000,
+            "expenditure": 5780000,
+            "physicalProgress": 85,
+            "financialProgress": 85.0,
+            "status": "In Progress",
+            "riskScore": 89,
+            "riskLevel": "CRITICAL",
+            "daysDelayed": 60,
+            "costOverrun": False,
+            "duplicateRisk": False,
+            "paymentProgressMismatch": False,
+            "hasCitizenReport": True,
+            "citizenReportSummary": "Official claim: 85% concrete pier jacket casing complete with load tests approved. Citizen audit: Scaffolding has been abandoned for 3 months, massive longitudinal cracks visible on pier #2, zero workers on site.",
+            "financialYear": "2025-26",
+            "dateSpent": "2025-08-10",
+            "quarterSpent": "Q2",
+            "fundDumpingFlag": False,
+            "disbursements": [
+                {"tranche": "T1", "amount": 2890000, "date": "2025-04-12", "quarter": "Q1", "percentage": 42.5},
+                {"tranche": "T2", "amount": 2890000, "date": "2025-08-10", "quarter": "Q2", "percentage": 42.5}
+            ],
+            "siteCoordinates": {"latitude": 21.1458, "longitude": 79.0882},
+            "latitude": 21.1458,
+            "longitude": 79.0882
+        },
+        # MH-5: Allocated by Nominated MP (Dr. Anandita Swaminathan)
+        {
+            "id": "PRJ-IND-MH-005",
+            "name": "Establishment of Specialized Pediatric ICU & Neonatal Unit, Aundh, Pune",
+            "state": "Maharashtra",
+            "district": "Pune",
+            "constituency": "Nominated (Rajya Sabha)",
+            "mpName": "Dr. Anandita Swaminathan (Fictional)",
+            "mpId": "MP-NOM-IND-001",
+            "category": "Health",
+            "implementingAgency": "Maharashtra State Health Infrastructure Corporation (Fictional)",
+            "vendorName": "Sahyadri Health Infrastructure (Fictional)",
+            "vendorId": "VND-MH-005",
+            "sanctionedAmount": 5000000,
+            "expenditure": 3000000,
+            "physicalProgress": 60,
+            "financialProgress": 60.0,
+            "status": "In Progress",
+            "riskScore": 40,
+            "riskLevel": "MEDIUM",
+            "daysDelayed": 0,
+            "costOverrun": False,
+            "duplicateRisk": False,
+            "paymentProgressMismatch": False,
+            "financialYear": "2025-26",
+            "dateSpent": "2025-06-25",
+            "quarterSpent": "Q1",
+            "fundDumpingFlag": False,
+            "disbursements": [
+                {"tranche": "T1", "amount": 3000000, "date": "2025-06-25", "quarter": "Q1", "percentage": 60.0}
+            ],
+            "siteCoordinates": {"latitude": 18.5580, "longitude": 73.8070},
+            "latitude": 18.5580,
+            "longitude": 73.8070
+        },
+        # Additional Pune & Nagpur projects (Total 13)
+        {
+            "id": "PRJ-IND-MH-006",
+            "name": "Installation of High-Capacity Piped Water Supply Sump & Pumps, Kothrud, Pune",
+            "state": "Maharashtra",
+            "district": "Pune",
+            "constituency": "Pune",
+            "mpName": "Shri Aloknath Deshpande (Fictional)",
+            "mpId": "MP-LS-MH-001",
+            "category": "Water",
+            "implementingAgency": "Maharashtra Jeevan Pradhikaran (MJP - Fictional)",
+            "vendorName": "Marathwada Hydro Engineering (Fictional)",
+            "vendorId": "VND-MH-006",
+            "sanctionedAmount": 5800000,
+            "expenditure": 4640000,
+            "physicalProgress": 80,
+            "financialProgress": 80.0,
+            "status": "In Progress",
+            "riskScore": 34,
+            "riskLevel": "LOW",
+            "daysDelayed": 0,
+            "costOverrun": False,
+            "duplicateRisk": False,
+            "paymentProgressMismatch": False,
+            "financialYear": "2024-25",
+            "dateSpent": "2024-10-08",
+            "quarterSpent": "Q3",
+            "fundDumpingFlag": False,
+            "disbursements": [{"tranche": "T1", "amount": 4640000, "date": "2024-10-08", "quarter": "Q3", "percentage": 80.0}],
+            "siteCoordinates": {"latitude": 18.5074, "longitude": 73.8077},
+            "latitude": 18.5074,
+            "longitude": 73.8077
+        },
+        {
+            "id": "PRJ-IND-MH-007",
+            "name": "Digital Audio-Visual Library & Composite Reading Hall, Shivajinagar, Pune",
+            "state": "Maharashtra",
+            "district": "Pune",
+            "constituency": "Pune",
+            "mpName": "Shri Aloknath Deshpande (Fictional)",
+            "mpId": "MP-LS-MH-001",
+            "category": "Education",
+            "implementingAgency": "Public Works Department (PWD) — Pune",
+            "vendorName": "Sahyadri Heavy Earthmovers (Fictional)",
+            "vendorId": "VND-MH-001",
+            "sanctionedAmount": 7100000,
+            "expenditure": 4260000,
+            "physicalProgress": 60,
+            "financialProgress": 60.0,
+            "status": "In Progress",
+            "riskScore": 67,
+            "riskLevel": "HIGH",
+            "daysDelayed": 30,
+            "costOverrun": False,
+            "duplicateRisk": False,
+            "paymentProgressMismatch": False,
+            "financialYear": "2024-25",
+            "dateSpent": "2024-08-01",
+            "quarterSpent": "Q2",
+            "fundDumpingFlag": False,
+            "disbursements": [{"tranche": "T1", "amount": 4260000, "date": "2024-08-01", "quarter": "Q2", "percentage": 60.0}],
+            "siteCoordinates": {"latitude": 18.5314, "longitude": 73.8446},
+            "latitude": 18.5314,
+            "longitude": 73.8446
+        },
+        {
+            "id": "PRJ-IND-MH-008",
+            "name": "Installation of 100kW Rooftop Solar Photovoltaic Grid for District Court, Pune",
+            "state": "Maharashtra",
+            "district": "Pune",
+            "constituency": "Pune",
+            "mpName": "Shri Aloknath Deshpande (Fictional)",
+            "mpId": "MP-LS-MH-001",
+            "category": "Civic",
+            "implementingAgency": "Maharashtra Energy Development Agency (MEDA - Fictional)",
+            "vendorName": "Western Ghats Solar Power Ltd (Fictional)",
+            "vendorId": "VND-MH-008",
+            "sanctionedAmount": 4500000,
+            "expenditure": 4050000,
+            "physicalProgress": 100,
+            "financialProgress": 90.0,
+            "status": "Completed",
+            "riskScore": 18,
+            "riskLevel": "LOW",
+            "daysDelayed": 0,
+            "costOverrun": False,
+            "duplicateRisk": False,
+            "paymentProgressMismatch": False,
+            "financialYear": "2024-25",
+            "dateSpent": "2024-07-15",
+            "quarterSpent": "Q2",
+            "fundDumpingFlag": False,
+            "disbursements": [{"tranche": "T1", "amount": 4050000, "date": "2024-07-15", "quarter": "Q2", "percentage": 90.0}],
+            "siteCoordinates": {"latitude": 18.5289, "longitude": 73.8600},
+            "latitude": 18.5289,
+            "longitude": 73.8600
+        },
+        {
+            "id": "PRJ-IND-MH-009",
+            "name": "Construction of Modern Trauma Care & Emergency Ward, Nagpur Civil Hospital",
+            "state": "Maharashtra",
+            "district": "Nagpur",
+            "constituency": "Nagpur",
+            "mpName": "Smt. Shubhada Kulkarni (Fictional)",
+            "mpId": "MP-LS-MH-002",
+            "category": "Health",
+            "implementingAgency": "Public Works Department (PWD) — Nagpur",
+            "vendorName": "Vidarbha Civil Tech Ltd (Fictional)",
+            "vendorId": "VND-MH-004",
+            "sanctionedAmount": 8200000,
+            "expenditure": 5740000,
+            "physicalProgress": 70,
+            "financialProgress": 70.0,
+            "status": "In Progress",
+            "riskScore": 62,
+            "riskLevel": "HIGH",
+            "daysDelayed": 20,
+            "costOverrun": False,
+            "duplicateRisk": False,
+            "paymentProgressMismatch": False,
+            "financialYear": "2024-25",
+            "dateSpent": "2024-09-20",
+            "quarterSpent": "Q2",
+            "fundDumpingFlag": False,
+            "disbursements": [{"tranche": "T1", "amount": 5740000, "date": "2024-09-20", "quarter": "Q2", "percentage": 70.0}],
+            "siteCoordinates": {"latitude": 21.1500, "longitude": 79.0900},
+            "latitude": 21.1500,
+            "longitude": 79.0900
+        },
+        {
+            "id": "PRJ-IND-MH-010",
+            "name": "Rejuvenation and Concrete Embankment of Ambazari Lake Feeder Canal, Nagpur",
+            "state": "Maharashtra",
+            "district": "Nagpur",
+            "constituency": "Nagpur",
+            "mpName": "Smt. Shubhada Kulkarni (Fictional)",
+            "mpId": "MP-LS-MH-002",
+            "category": "Water",
+            "implementingAgency": "Nagpur Municipal Corporation Water Works (Fictional)",
+            "vendorName": "Nag River Conservation Infratech (Fictional)",
+            "vendorId": "VND-MH-010",
+            "sanctionedAmount": 4900000,
+            "expenditure": 2450000,
+            "physicalProgress": 50,
+            "financialProgress": 50.0,
+            "status": "In Progress",
+            "riskScore": 41,
+            "riskLevel": "MEDIUM",
+            "daysDelayed": 0,
+            "costOverrun": False,
+            "duplicateRisk": False,
+            "paymentProgressMismatch": False,
+            "financialYear": "2025-26",
+            "dateSpent": "2025-06-18",
+            "quarterSpent": "Q1",
+            "fundDumpingFlag": False,
+            "disbursements": [{"tranche": "T1", "amount": 2450000, "date": "2025-06-18", "quarter": "Q1", "percentage": 50.0}],
+            "siteCoordinates": {"latitude": 21.1300, "longitude": 79.0400},
+            "latitude": 21.1300,
+            "longitude": 79.0400
+        },
+        {
+            "id": "PRJ-IND-MH-011",
+            "name": "Smart Classrooms and Science Laboratory Modernization, Sitabuldi, Nagpur",
+            "state": "Maharashtra",
+            "district": "Nagpur",
+            "constituency": "Nagpur",
+            "mpName": "Smt. Shubhada Kulkarni (Fictional)",
+            "mpId": "MP-LS-MH-002",
+            "category": "Education",
+            "implementingAgency": "Nagpur Zilla Parishad Education Division (Fictional)",
+            "vendorName": "Orange City Smart Education Systems (Fictional)",
+            "vendorId": "VND-MH-011",
+            "sanctionedAmount": 3800000,
+            "expenditure": 3420000,
+            "physicalProgress": 95,
+            "financialProgress": 90.0,
+            "status": "Completed",
+            "riskScore": 25,
+            "riskLevel": "LOW",
+            "daysDelayed": 0,
+            "costOverrun": False,
+            "duplicateRisk": False,
+            "paymentProgressMismatch": False,
+            "financialYear": "2024-25",
+            "dateSpent": "2024-11-28",
+            "quarterSpent": "Q3",
+            "fundDumpingFlag": False,
+            "disbursements": [{"tranche": "T1", "amount": 3420000, "date": "2024-11-28", "quarter": "Q3", "percentage": 90.0}],
+            "siteCoordinates": {"latitude": 21.1460, "longitude": 79.0820},
+            "latitude": 21.1460,
+            "longitude": 79.0820
+        },
+        {
+            "id": "PRJ-IND-MH-012",
+            "name": "Construction of High-Mast LED Lighting & Public Park Pavilions, Nagpur",
+            "state": "Maharashtra",
+            "district": "Nagpur",
+            "constituency": "Nagpur",
+            "mpName": "Smt. Shubhada Kulkarni (Fictional)",
+            "mpId": "MP-LS-MH-002",
+            "category": "Civic",
+            "implementingAgency": "Nagpur Municipal Corporation Infrastructure Wing (Fictional)",
+            "vendorName": "Vidarbha Power Solutions (Fictional)",
+            "vendorId": "VND-MH-012",
+            "sanctionedAmount": 3500000,
+            "expenditure": 1750000,
+            "physicalProgress": 50,
+            "financialProgress": 50.0,
+            "status": "In Progress",
+            "riskScore": 30,
+            "riskLevel": "LOW",
+            "daysDelayed": 0,
+            "costOverrun": False,
+            "duplicateRisk": False,
+            "paymentProgressMismatch": False,
+            "financialYear": "2025-26",
+            "dateSpent": "2025-05-30",
+            "quarterSpent": "Q1",
+            "fundDumpingFlag": False,
+            "disbursements": [{"tranche": "T1", "amount": 1750000, "date": "2025-05-30", "quarter": "Q1", "percentage": 50.0}],
+            "siteCoordinates": {"latitude": 21.1600, "longitude": 79.1000},
+            "latitude": 21.1600,
+            "longitude": 79.1000
+        },
+        {
+            "id": "PRJ-IND-MH-013",
+            "name": "Construction of Women Artisans Common Facility & Training Center, Pune",
+            "state": "Maharashtra",
+            "district": "Pune",
+            "constituency": "Pune",
+            "mpName": "Shri Aloknath Deshpande (Fictional)",
+            "mpId": "MP-LS-MH-001",
+            "category": "Civic",
+            "implementingAgency": "Public Works Department (PWD) — Pune",
+            "vendorName": "Sahyadri Heavy Earthmovers (Fictional)",
+            "vendorId": "VND-MH-001",
+            "sanctionedAmount": 4200000,
+            "expenditure": 2100000,
+            "physicalProgress": 50,
+            "financialProgress": 50.0,
+            "status": "In Progress",
+            "riskScore": 36,
+            "riskLevel": "LOW",
+            "daysDelayed": 0,
+            "costOverrun": False,
+            "duplicateRisk": False,
+            "paymentProgressMismatch": False,
+            "financialYear": "2025-26",
+            "dateSpent": "2025-07-05",
+            "quarterSpent": "Q2",
+            "fundDumpingFlag": False,
+            "disbursements": [{"tranche": "T1", "amount": 2100000, "date": "2025-07-05", "quarter": "Q2", "percentage": 50.0}],
+            "siteCoordinates": {"latitude": 18.5100, "longitude": 73.8400},
+            "latitude": 18.5100,
+            "longitude": 73.8400
+        }
+    ]
+    all_projects.extend(mh_projects)
+
+    # -------------------------------------------------------------
+    # TIER 2: UTTAR PRADESH (14 Projects: Lucknow 8, Varanasi 6)
+    # -------------------------------------------------------------
+    up_mps = [
+        {
+            "id": "MP-LS-UP-001",
+            "name": "Dr. Brajesh Tiwari (Fictional)",
+            "state": "Uttar Pradesh",
+            "constituency": "Lucknow",
+            "house": "Lok Sabha",
+            "term": "18th Lok Sabha (2024-2029)",
+            "mpType": "ELECTED_LOK_SABHA",
+            "totalSanctionedWorks": 8,
+            "totalSanctionedAmount": 58000000,
+            "totalExpenditure": 41200000,
+            "utilizationPercentage": 71.0,
+            "highRiskProjectsCount": 4
+        },
+        {
+            "id": "MP-LS-UP-002",
+            "name": "Shri Shailendra Nath Upadhyay (Fictional)",
+            "state": "Uttar Pradesh",
+            "constituency": "Varanasi",
+            "house": "Lok Sabha",
+            "term": "18th Lok Sabha (2024-2029)",
+            "mpType": "ELECTED_LOK_SABHA",
+            "totalSanctionedWorks": 6,
+            "totalSanctionedAmount": 38000000,
+            "totalExpenditure": 26600000,
+            "utilizationPercentage": 70.0,
+            "highRiskProjectsCount": 2
+        }
+    ]
+    all_mps.extend(up_mps)
+
+    up_projects = [
+        # UP-1: CRITICAL Citizen Contradiction Flag (PRJ-IND-2008 in Lucknow)
+        {
+            "id": "PRJ-IND-UP-001",
+            "name": "Provision of Modern Dual-Desk Ergonomic Furniture & Digital Podiums for 12 Schools, Lucknow",
+            "state": "Uttar Pradesh",
+            "district": "Lucknow",
+            "constituency": "Lucknow",
+            "mpName": "Dr. Brajesh Tiwari (Fictional)",
+            "mpId": "MP-LS-UP-001",
+            "category": "Education",
+            "implementingAgency": "Uttar Pradesh Basic Shiksha Parishad (Fictional)",
+            "vendorName": "Awadh Educational Supplies Ltd (Fictional)",
+            "vendorId": "VND-UP-001",
+            "sanctionedAmount": 6500000,
+            "expenditure": 6175000,
+            "physicalProgress": 95,
+            "financialProgress": 95.0,
+            "status": "In Progress",
+            "riskScore": 88,
+            "riskLevel": "CRITICAL",
+            "daysDelayed": 45,
+            "costOverrun": False,
+            "duplicateRisk": False,
+            "paymentProgressMismatch": False,
+            "hasCitizenReport": True,
+            "citizenReportSummary": "Official claim: 100% supply and delivery of modern dual-desk classroom furniture verified by school inspector. Citizen audit: Village school children are still sitting on floor mats; only 15 broken wooden benches delivered.",
+            "financialYear": "2024-25",
+            "dateSpent": "2024-07-24",
+            "quarterSpent": "Q2",
+            "fundDumpingFlag": False,
+            "disbursements": [
+                {"tranche": "T1", "amount": 6175000, "date": "2024-07-24", "quarter": "Q2", "percentage": 95.0}
+            ],
+            "siteCoordinates": {"latitude": 26.8467, "longitude": 80.9462},
+            "latitude": 26.8467,
+            "longitude": 80.9462
+        },
+        # UP-2: CRITICAL Financial Risk Flag (March Rush Outlay)
+        {
+            "id": "PRJ-IND-UP-002",
+            "name": "Construction of Stormwater Surface Drainage Network & Pumping Well, Gomti Nagar, Lucknow",
+            "state": "Uttar Pradesh",
+            "district": "Lucknow",
+            "constituency": "Lucknow",
+            "mpName": "Dr. Brajesh Tiwari (Fictional)",
+            "mpId": "MP-LS-UP-001",
+            "category": "Civic",
+            "implementingAgency": "Lucknow Municipal Corporation Works Wing (Fictional)",
+            "vendorName": "Gomti Infratech Projects (Fictional)",
+            "vendorId": "VND-UP-002",
+            "sanctionedAmount": 9800000,
+            "expenditure": 9016000,
+            "physicalProgress": 30,
+            "financialProgress": 92.0,
+            "status": "In Progress",
+            "riskScore": 95,
+            "riskLevel": "CRITICAL",
+            "daysDelayed": 180,
+            "costOverrun": True,
+            "duplicateRisk": False,
+            "paymentProgressMismatch": True,
+            "financialYear": "2024-25",
+            "dateSpent": "2025-03-25",
+            "quarterSpent": "Q4",
+            "fundDumpingFlag": True,
+            "disbursements": [
+                {"tranche": "T1", "amount": 2940000, "date": "2024-06-12", "quarter": "Q1", "percentage": 30.0},
+                {"tranche": "T2", "amount": 6076000, "date": "2025-03-25", "quarter": "Q4", "percentage": 62.0, "isFinalSixWeeks": True}
+            ],
+            "siteCoordinates": {"latitude": 26.8500, "longitude": 80.9900},
+            "latitude": 26.8500,
+            "longitude": 80.9900
+        },
+        # UP-3: Compliance Violation (Category Ceiling Breach)
+        {
+            "id": "PRJ-IND-UP-003",
+            "name": "Comprehensive Restoration and Bituminous Overlay of Main Highway Feeder, Lucknow",
+            "state": "Uttar Pradesh",
+            "district": "Lucknow",
+            "constituency": "Lucknow",
+            "mpName": "Dr. Brajesh Tiwari (Fictional)",
+            "mpId": "MP-LS-UP-001",
+            "category": "Road",
+            "implementingAgency": "Public Works Department (PWD) — Lucknow",
+            "vendorName": "Purvanchal Roadways Corporation (Fictional)",
+            "vendorId": "VND-UP-003",
+            "sanctionedAmount": 8500000,
+            "expenditure": 6800000,
+            "physicalProgress": 70,
+            "financialProgress": 80.0,
+            "status": "In Progress",
+            "riskScore": 75,
+            "riskLevel": "HIGH",
+            "daysDelayed": 0,
+            "costOverrun": False,
+            "duplicateRisk": False,
+            "paymentProgressMismatch": False,
+            "financialYear": "2024-25",
+            "dateSpent": "2024-10-18",
+            "quarterSpent": "Q3",
+            "fundDumpingFlag": False,
+            "disbursements": [
+                {"tranche": "T1", "amount": 3400000, "date": "2024-06-10", "quarter": "Q1", "percentage": 40.0},
+                {"tranche": "T2", "amount": 3400000, "date": "2024-10-18", "quarter": "Q3", "percentage": 40.0}
+            ],
+            "siteCoordinates": {"latitude": 26.8200, "longitude": 80.9200},
+            "latitude": 26.8200,
+            "longitude": 80.9200
+        },
+        # UP-4: Duplicate Work Match Pair A (Varanasi Solar Water Plant)
+        {
+            "id": "PRJ-IND-UP-004",
+            "name": "Installation of 50kL Solar Piped Drinking Water Filtration Plant, Kashi Environs, Varanasi",
+            "state": "Uttar Pradesh",
+            "district": "Varanasi",
+            "constituency": "Varanasi",
+            "mpName": "Shri Shailendra Nath Upadhyay (Fictional)",
+            "mpId": "MP-LS-UP-002",
+            "category": "Water",
+            "implementingAgency": "Uttar Pradesh Jal Nigam (Fictional)",
+            "vendorName": "Kashi Hydro Solar Solutions (Fictional)",
+            "vendorId": "VND-UP-004",
+            "sanctionedAmount": 6200000,
+            "expenditure": 4340000,
+            "physicalProgress": 70,
+            "financialProgress": 70.0,
+            "status": "In Progress",
+            "riskScore": 81,
+            "riskLevel": "HIGH",
+            "daysDelayed": 0,
+            "costOverrun": False,
+            "duplicateRisk": True,
+            "duplicateMatchedProjectId": "PRJ-IND-UP-005",
+            "paymentProgressMismatch": False,
+            "financialYear": "2024-25",
+            "dateSpent": "2024-09-12",
+            "quarterSpent": "Q2",
+            "fundDumpingFlag": False,
+            "disbursements": [
+                {"tranche": "T1", "amount": 4340000, "date": "2024-09-12", "quarter": "Q2", "percentage": 70.0}
+            ],
+            "siteCoordinates": {"latitude": 25.3176, "longitude": 82.9739},
+            "latitude": 25.3176,
+            "longitude": 82.9739
+        },
+        # UP-5: Duplicate Work Match Pair B (Varanasi Solar Water Plant)
+        {
+            "id": "PRJ-IND-UP-005",
+            "name": "Establishment of Solar Powered Piped Drinking Water System with 50kL Tank, Varanasi Rural",
+            "state": "Uttar Pradesh",
+            "district": "Varanasi",
+            "constituency": "Varanasi",
+            "mpName": "Shri Shailendra Nath Upadhyay (Fictional)",
+            "mpId": "MP-LS-UP-002",
+            "category": "Water",
+            "implementingAgency": "Uttar Pradesh Jal Nigam (Fictional)",
+            "vendorName": "Kashi Hydro Solar Solutions (Fictional)",
+            "vendorId": "VND-UP-004",
+            "sanctionedAmount": 6300000,
+            "expenditure": 3150000,
+            "physicalProgress": 50,
+            "financialProgress": 50.0,
+            "status": "In Progress",
+            "riskScore": 79,
+            "riskLevel": "HIGH",
+            "daysDelayed": 0,
+            "costOverrun": False,
+            "duplicateRisk": True,
+            "duplicateMatchedProjectId": "PRJ-IND-UP-004",
+            "paymentProgressMismatch": False,
+            "financialYear": "2025-26",
+            "dateSpent": "2025-06-20",
+            "quarterSpent": "Q1",
+            "fundDumpingFlag": False,
+            "disbursements": [
+                {"tranche": "T1", "amount": 3150000, "date": "2025-06-20", "quarter": "Q1", "percentage": 50.0}
+            ],
+            "siteCoordinates": {"latitude": 25.3190, "longitude": 82.9750},
+            "latitude": 25.3190,
+            "longitude": 82.9750
+        },
+        # UP-6: Citizen Contradiction Flag (Varanasi High-Mast Lighting)
+        {
+            "id": "PRJ-IND-UP-006",
+            "name": "Installation of 40 High-Mast Octagonal LED Solar Lighting Towers at Ghats, Varanasi",
+            "state": "Uttar Pradesh",
+            "district": "Varanasi",
+            "constituency": "Varanasi",
+            "mpName": "Shri Shailendra Nath Upadhyay (Fictional)",
+            "mpId": "MP-LS-UP-002",
+            "category": "Civic",
+            "implementingAgency": "Varanasi Smart City Infrastructure Division (Fictional)",
+            "vendorName": "Ganga Clean Energy Systems (Fictional)",
+            "vendorId": "VND-UP-006",
+            "sanctionedAmount": 5500000,
+            "expenditure": 4950000,
+            "physicalProgress": 90,
+            "financialProgress": 90.0,
+            "status": "In Progress",
+            "riskScore": 87,
+            "riskLevel": "CRITICAL",
+            "daysDelayed": 25,
+            "costOverrun": False,
+            "duplicateRisk": False,
+            "paymentProgressMismatch": False,
+            "hasCitizenReport": True,
+            "citizenReportSummary": "Official claim: 40 solar high-mast poles fully erected and operational. Citizen audit: Only 6 poles installed along Dashashwamedh ghat, remaining 34 absent; wires left exposed.",
+            "financialYear": "2025-26",
+            "dateSpent": "2025-07-14",
+            "quarterSpent": "Q2",
+            "fundDumpingFlag": False,
+            "disbursements": [
+                {"tranche": "T1", "amount": 4950000, "date": "2025-07-14", "quarter": "Q2", "percentage": 90.0}
+            ],
+            "siteCoordinates": {"latitude": 25.3080, "longitude": 83.0090},
+            "latitude": 25.3080,
+            "longitude": 83.0090
+        },
+        # Additional Lucknow & Varanasi projects (Total 14)
+        {
+            "id": "PRJ-IND-UP-007",
+            "name": "Establishment of Advanced Mother & Child Care Wing, Civil Hospital, Lucknow",
+            "state": "Uttar Pradesh",
+            "district": "Lucknow",
+            "constituency": "Lucknow",
+            "mpName": "Dr. Brajesh Tiwari (Fictional)",
+            "mpId": "MP-LS-UP-001",
+            "category": "Health",
+            "implementingAgency": "Uttar Pradesh Medical Health Infrastructure Division (Fictional)",
+            "vendorName": "Awadh Healthcare Solutions (Fictional)",
+            "vendorId": "VND-UP-007",
+            "sanctionedAmount": 8000000,
+            "expenditure": 5600000,
+            "physicalProgress": 70,
+            "financialProgress": 70.0,
+            "status": "In Progress",
+            "riskScore": 38,
+            "riskLevel": "LOW",
+            "daysDelayed": 0,
+            "costOverrun": False,
+            "duplicateRisk": False,
+            "paymentProgressMismatch": False,
+            "financialYear": "2025-26",
+            "dateSpent": "2025-08-05",
+            "quarterSpent": "Q2",
+            "fundDumpingFlag": False,
+            "disbursements": [{"tranche": "T1", "amount": 5600000, "date": "2025-08-05", "quarter": "Q2", "percentage": 70.0}],
+            "siteCoordinates": {"latitude": 26.8520, "longitude": 80.9400},
+            "latitude": 26.8520,
+            "longitude": 80.9400
+        },
+        {
+            "id": "PRJ-IND-UP-008",
+            "name": "Rejuvenation of Traditional Water Bodies & Rainwater Harvesting Ponds, Lucknow",
+            "state": "Uttar Pradesh",
+            "district": "Lucknow",
+            "constituency": "Lucknow",
+            "mpName": "Dr. Brajesh Tiwari (Fictional)",
+            "mpId": "MP-LS-UP-001",
+            "category": "Water",
+            "implementingAgency": "Lucknow Minor Irrigation Division (Fictional)",
+            "vendorName": "Gomti Infratech Projects (Fictional)",
+            "vendorId": "VND-UP-002",
+            "sanctionedAmount": 4500000,
+            "expenditure": 4050000,
+            "physicalProgress": 90,
+            "financialProgress": 90.0,
+            "status": "Completed",
+            "riskScore": 24,
+            "riskLevel": "LOW",
+            "daysDelayed": 0,
+            "costOverrun": False,
+            "duplicateRisk": False,
+            "paymentProgressMismatch": False,
+            "financialYear": "2024-25",
+            "dateSpent": "2024-11-10",
+            "quarterSpent": "Q3",
+            "fundDumpingFlag": False,
+            "disbursements": [{"tranche": "T1", "amount": 4050000, "date": "2024-11-10", "quarter": "Q3", "percentage": 90.0}],
+            "siteCoordinates": {"latitude": 26.8600, "longitude": 80.9100},
+            "latitude": 26.8600,
+            "longitude": 80.9100
+        },
+        {
+            "id": "PRJ-IND-UP-009",
+            "name": "Construction of Modern Community Sports Pavilion & Youth Center, Alambagh, Lucknow",
+            "state": "Uttar Pradesh",
+            "district": "Lucknow",
+            "constituency": "Lucknow",
+            "mpName": "Dr. Brajesh Tiwari (Fictional)",
+            "mpId": "MP-LS-UP-001",
+            "category": "Civic",
+            "implementingAgency": "Public Works Department (PWD) — Lucknow",
+            "vendorName": "Purvanchal Roadways Corporation (Fictional)",
+            "vendorId": "VND-UP-003",
+            "sanctionedAmount": 5200000,
+            "expenditure": 2600000,
+            "physicalProgress": 50,
+            "financialProgress": 50.0,
+            "status": "In Progress",
+            "riskScore": 32,
+            "riskLevel": "LOW",
+            "daysDelayed": 0,
+            "costOverrun": False,
+            "duplicateRisk": False,
+            "paymentProgressMismatch": False,
+            "financialYear": "2025-26",
+            "dateSpent": "2025-05-12",
+            "quarterSpent": "Q1",
+            "fundDumpingFlag": False,
+            "disbursements": [{"tranche": "T1", "amount": 2600000, "date": "2025-05-12", "quarter": "Q1", "percentage": 50.0}],
+            "siteCoordinates": {"latitude": 26.8100, "longitude": 80.9000},
+            "latitude": 26.8100,
+            "longitude": 80.9000
+        },
+        {
+            "id": "PRJ-IND-UP-010",
+            "name": "Widening and Concrete Paving of Main Vegetable Mandi Road, Dubagga, Lucknow",
+            "state": "Uttar Pradesh",
+            "district": "Lucknow",
+            "constituency": "Lucknow",
+            "mpName": "Dr. Brajesh Tiwari (Fictional)",
+            "mpId": "MP-LS-UP-001",
+            "category": "Road",
+            "implementingAgency": "Public Works Department (PWD) — Lucknow",
+            "vendorName": "Purvanchal Roadways Corporation (Fictional)",
+            "vendorId": "VND-UP-003",
+            "sanctionedAmount": 4800000,
+            "expenditure": 2880000,
+            "physicalProgress": 60,
+            "financialProgress": 60.0,
+            "status": "In Progress",
+            "riskScore": 44,
+            "riskLevel": "MEDIUM",
+            "daysDelayed": 0,
+            "costOverrun": False,
+            "duplicateRisk": False,
+            "paymentProgressMismatch": False,
+            "financialYear": "2025-26",
+            "dateSpent": "2025-06-28",
+            "quarterSpent": "Q1",
+            "fundDumpingFlag": False,
+            "disbursements": [{"tranche": "T1", "amount": 2880000, "date": "2025-06-28", "quarter": "Q1", "percentage": 60.0}],
+            "siteCoordinates": {"latitude": 26.8700, "longitude": 80.8800},
+            "latitude": 26.8700,
+            "longitude": 80.8800
+        },
+        {
+            "id": "PRJ-IND-UP-011",
+            "name": "Modernization of Rural Community Health Centre with Digital X-Ray, Shivpur, Varanasi",
+            "state": "Uttar Pradesh",
+            "district": "Varanasi",
+            "constituency": "Varanasi",
+            "mpName": "Shri Shailendra Nath Upadhyay (Fictional)",
+            "mpId": "MP-LS-UP-002",
+            "category": "Health",
+            "implementingAgency": "Uttar Pradesh Medical Health Infrastructure Division (Fictional)",
+            "vendorName": "Awadh Healthcare Solutions (Fictional)",
+            "vendorId": "VND-UP-007",
+            "sanctionedAmount": 6500000,
+            "expenditure": 5200000,
+            "physicalProgress": 80,
+            "financialProgress": 80.0,
+            "status": "In Progress",
+            "riskScore": 33,
+            "riskLevel": "LOW",
+            "daysDelayed": 0,
+            "costOverrun": False,
+            "duplicateRisk": False,
+            "paymentProgressMismatch": False,
+            "financialYear": "2024-25",
+            "dateSpent": "2024-12-10",
+            "quarterSpent": "Q3",
+            "fundDumpingFlag": False,
+            "disbursements": [{"tranche": "T1", "amount": 5200000, "date": "2024-12-10", "quarter": "Q3", "percentage": 80.0}],
+            "siteCoordinates": {"latitude": 25.3500, "longitude": 82.9600},
+            "latitude": 25.3500,
+            "longitude": 82.9600
+        },
+        {
+            "id": "PRJ-IND-UP-012",
+            "name": "Construction of Inter-Village Concrete Link Road & Culvert, Babatpur, Varanasi",
+            "state": "Uttar Pradesh",
+            "district": "Varanasi",
+            "constituency": "Varanasi",
+            "mpName": "Shri Shailendra Nath Upadhyay (Fictional)",
+            "mpId": "MP-LS-UP-002",
+            "category": "Road",
+            "implementingAgency": "Public Works Department (PWD) — Varanasi",
+            "vendorName": "Purvanchal Roadways Corporation (Fictional)",
+            "vendorId": "VND-UP-003",
+            "sanctionedAmount": 5400000,
+            "expenditure": 3780000,
+            "physicalProgress": 70,
+            "financialProgress": 70.0,
+            "status": "In Progress",
+            "riskScore": 46,
+            "riskLevel": "MEDIUM",
+            "daysDelayed": 10,
+            "costOverrun": False,
+            "duplicateRisk": False,
+            "paymentProgressMismatch": False,
+            "financialYear": "2025-26",
+            "dateSpent": "2025-05-22",
+            "quarterSpent": "Q1",
+            "fundDumpingFlag": False,
+            "disbursements": [{"tranche": "T1", "amount": 3780000, "date": "2025-05-22", "quarter": "Q1", "percentage": 70.0}],
+            "siteCoordinates": {"latitude": 25.4400, "longitude": 82.8500},
+            "latitude": 25.4400,
+            "longitude": 82.8500
+        },
+        {
+            "id": "PRJ-IND-UP-013",
+            "name": "Establishment of Smart Classrooms in 8 Secondary Schools, Sigra, Varanasi",
+            "state": "Uttar Pradesh",
+            "district": "Varanasi",
+            "constituency": "Varanasi",
+            "mpName": "Shri Shailendra Nath Upadhyay (Fictional)",
+            "mpId": "MP-LS-UP-002",
+            "category": "Education",
+            "implementingAgency": "Uttar Pradesh Basic Shiksha Parishad (Fictional)",
+            "vendorName": "Awadh Educational Supplies Ltd (Fictional)",
+            "vendorId": "VND-UP-001",
+            "sanctionedAmount": 4200000,
+            "expenditure": 3780000,
+            "physicalProgress": 90,
+            "financialProgress": 90.0,
+            "status": "In Progress",
+            "riskScore": 29,
+            "riskLevel": "LOW",
+            "daysDelayed": 0,
+            "costOverrun": False,
+            "duplicateRisk": False,
+            "paymentProgressMismatch": False,
+            "financialYear": "2024-25",
+            "dateSpent": "2024-08-14",
+            "quarterSpent": "Q2",
+            "fundDumpingFlag": False,
+            "disbursements": [{"tranche": "T1", "amount": 3780000, "date": "2024-08-14", "quarter": "Q2", "percentage": 90.0}],
+            "siteCoordinates": {"latitude": 25.3200, "longitude": 82.9800},
+            "latitude": 25.3200,
+            "longitude": 82.9800
+        },
+        {
+            "id": "PRJ-IND-UP-014",
+            "name": "Construction of Senior Citizens Community Recreation Hall & Library, Varanasi",
+            "state": "Uttar Pradesh",
+            "district": "Varanasi",
+            "constituency": "Varanasi",
+            "mpName": "Shri Shailendra Nath Upadhyay (Fictional)",
+            "mpId": "MP-LS-UP-002",
+            "category": "Civic",
+            "implementingAgency": "Varanasi Municipal Corporation Infrastructure Wing (Fictional)",
+            "vendorName": "Kashi Civil Projects (Fictional)",
+            "vendorId": "VND-UP-014",
+            "sanctionedAmount": 3900000,
+            "expenditure": 1950000,
+            "physicalProgress": 50,
+            "financialProgress": 50.0,
+            "status": "In Progress",
+            "riskScore": 27,
+            "riskLevel": "LOW",
+            "daysDelayed": 0,
+            "costOverrun": False,
+            "duplicateRisk": False,
+            "paymentProgressMismatch": False,
+            "financialYear": "2025-26",
+            "dateSpent": "2025-07-02",
+            "quarterSpent": "Q2",
+            "fundDumpingFlag": False,
+            "disbursements": [{"tranche": "T1", "amount": 1950000, "date": "2025-07-02", "quarter": "Q2", "percentage": 50.0}],
+            "siteCoordinates": {"latitude": 25.3100, "longitude": 82.9900},
+            "latitude": 25.3100,
+            "longitude": 82.9900
+        }
+    ]
+    all_projects.extend(up_projects)
+
+    # -------------------------------------------------------------
+    # TIER 3 STATES (14 States/UTs, 3-5 Projects each for National Realism)
+    # -------------------------------------------------------------
+    tier3_specs = [
+        ("West Bengal", "Kolkata", "Kolkata South", "Dr. Subhasis Banerjee (Fictional)", 5, [
+            ("Piped Drinking Water Treatment Facility, Kolkata South", "Water", 5600000, 4480000, 80, 42, "MEDIUM"),
+            ("Asphalt Resurfacing of Rural Road Network, Howrah Feeder", "Road", 6100000, 4880000, 80, 55, "MEDIUM"),
+            ("Renovation of Government High School Science Wing, Darjeeling", "Education", 3800000, 3420000, 90, 26, "LOW"),
+            ("Construction of Primary Health Centre Diagnostic Block, Asansol", "Health", 7200000, 4320000, 60, 68, "HIGH"),
+            ("Solar Street Lighting & Community Park Pavilions, Kolkata", "Civic", 4500000, 4050000, 90, 20, "LOW")
+        ]),
+        ("Rajasthan", "Jaipur", "Jaipur", "Shri Raghuvir Singh Rathore (Fictional)", 5, [
+            ("Rainwater Harvesting & Ground Water Recharge Wells, Jaipur", "Water", 5200000, 4160000, 80, 35, "LOW"),
+            ("Construction of Rural Bituminous Road, Bikaner Feeder", "Road", 6500000, 5200000, 80, 75, "HIGH"),
+            ("Modernization of Government Secondary School, Jodhpur", "Education", 4200000, 3780000, 90, 28, "LOW"),
+            ("Establishment of Solar Cold Storage Unit for Farmers, Udaipur", "Civic", 5800000, 3480000, 60, 45, "MEDIUM"),
+            ("Community Health Diagnostic Centre & Pharmacy Wing, Jaipur", "Health", 6900000, 4830000, 70, 50, "MEDIUM")
+        ]),
+        ("Kerala", "Thiruvananthapuram", "Thiruvananthapuram", "Smt. Jayasree Menon (Fictional)", 4, [
+            ("Coastal Road Paving & Sea Wall Protection Drainage, Thiruvananthapuram", "Road", 6800000, 5440000, 80, 40, "LOW"),
+            ("Smart Digital Library and Composite Skill Centre, Ernakulam", "Education", 4500000, 3600000, 80, 32, "LOW"),
+            ("Desalination RO Drinking Water Kiosks, Kozhikode", "Water", 5100000, 4080000, 80, 29, "LOW"),
+            ("Sub-District Hospital Dialysis Unit Equipment Supply, Thiruvananthapuram", "Health", 7500000, 5250000, 70, 48, "MEDIUM")
+        ]),
+        ("Punjab", "Amritsar", "Amritsar", "Sardar Gurpreet Singh Gill (Fictional)", 4, [
+            ("Paved Agricultural Feeder Road & Culvert, Amritsar", "Road", 6400000, 5120000, 80, 58, "MEDIUM"),
+            ("Modern Sports Ground & Gymnasium Pavilion, Jalandhar", "Civic", 4800000, 3840000, 80, 30, "LOW"),
+            ("Solar Powered Deep Tube-Well Water Grid, Ludhiana", "Water", 5500000, 4400000, 80, 36, "LOW"),
+            ("Upgradation of Civil Hospital Emergency Trauma Unit, Amritsar", "Health", 7000000, 4900000, 70, 52, "MEDIUM")
+        ]),
+        ("Gujarat", "Ahmedabad", "Ahmedabad West", "Shri Hiteshbhai Patel (Fictional)", 4, [
+            ("Stormwater Drainage Network & Surface Channel, Ahmedabad", "Civic", 7200000, 5760000, 80, 65, "HIGH"),
+            ("Primary Health Centre Modernization & Diagnostic Lab, Surat", "Health", 6000000, 4800000, 80, 38, "LOW"),
+            ("Underground Piped Drinking Water System, Vadodara", "Water", 5400000, 4320000, 80, 25, "LOW"),
+            ("Construction of Asphalt Industrial Feeder Road, Ahmedabad", "Road", 6800000, 4760000, 70, 45, "MEDIUM")
+        ]),
+        ("Bihar", "Patna", "Patna Sahib", "Shri Ramkrishna Jha (Fictional)", 4, [
+            ("Flood-Resilient Concrete Feeder Road & Culverts, Patna", "Road", 6200000, 4960000, 80, 72, "HIGH"),
+            ("Community Health Diagnostic Centre, Muzaffarpur", "Health", 5800000, 4060000, 70, 60, "HIGH"),
+            ("Rooftop Solar Array for Government Girls High School, Gaya", "Education", 3900000, 3510000, 90, 22, "LOW"),
+            ("Deep Borewell Automated Drinking Water Plant, Patna", "Water", 4800000, 3840000, 80, 33, "LOW")
+        ]),
+        ("Odisha", "Puri", "Puri", "Shri Bipin Bihari Mohapatra (Fictional)", 4, [
+            ("Cyclone-Resilient Multi-Purpose Cyclone Shelter & Road, Puri", "Civic", 7800000, 6240000, 80, 42, "MEDIUM"),
+            ("Piped Drinking Water Grid & Sump System, Sambalpur", "Water", 5200000, 4160000, 80, 35, "LOW"),
+            ("Secondary School Science Block Modernization, Puri", "Education", 4100000, 3690000, 90, 26, "LOW"),
+            ("Upgradation of Coastal Community Health Centre, Puri", "Health", 6500000, 4550000, 70, 50, "MEDIUM")
+        ]),
+        ("Assam", "Kamrup Metropolitan", "Guwahati", "Shri Dhiren Borgohain (Fictional)", 4, [
+            ("Flood Embankment Bituminous Road Protection, Kamrup", "Road", 6900000, 5520000, 80, 64, "HIGH"),
+            ("Solar Drinking Water Supply System in Hill Tracts, Sonitpur", "Water", 4900000, 3920000, 80, 30, "LOW"),
+            ("Construction of High School Computer Laboratory, Guwahati", "Education", 3800000, 3420000, 90, 25, "LOW"),
+            ("Primary Health Centre Maternity Wing Upgradation, Kamrup", "Health", 6200000, 4340000, 70, 44, "MEDIUM")
+        ]),
+        ("Andhra Pradesh", "Visakhapatnam", "Visakhapatnam", "Shri K. Venkataramana (Fictional)", 4, [
+            ("Piped Drinking Water Telemetry Network, Visakhapatnam", "Water", 6500000, 5200000, 80, 38, "LOW"),
+            ("Four-Lane Concrete Feeder Road & Storm Drain, Krishna", "Road", 7200000, 5760000, 80, 54, "MEDIUM"),
+            ("Digital Smart Classrooms in Zilla Parishad High Schools, Visakhapatnam", "Education", 4200000, 3780000, 90, 24, "LOW"),
+            ("Community Health Diagnostic & Telemedicine Center, Visakhapatnam", "Health", 5900000, 4130000, 70, 40, "LOW")
+        ]),
+        ("Madhya Pradesh", "Bhopal", "Bhopal", "Smt. Archana Chouhan (Fictional)", 4, [
+            ("Urban Lake Surface Drainage Rejuvenation, Bhopal", "Water", 5800000, 4640000, 80, 36, "LOW"),
+            ("Construction of Concrete Feeder Road, Gwalior", "Road", 6200000, 4960000, 80, 48, "MEDIUM"),
+            ("Government Science College Laboratory Modernization, Bhopal", "Education", 4500000, 4050000, 90, 22, "LOW"),
+            ("District Civil Hospital Pediatric ICU Equipment, Bhopal", "Health", 7100000, 4970000, 70, 55, "MEDIUM")
+        ]),
+        ("Telangana", "Hyderabad", "Secunderabad", "Shri B. Narayana Goud (Fictional)", 4, [
+            ("Urban Rooftop Rainwater Harvesting & Recharging Shafts, Hyderabad", "Water", 5400000, 4320000, 80, 28, "LOW"),
+            ("Flyover Underside Community Park & Sports Pavilions, Secunderabad", "Civic", 6200000, 4960000, 80, 35, "LOW"),
+            ("Establishment of Digital STEM Skill Center for High School Students, Hyderabad", "Education", 4800000, 4320000, 90, 24, "LOW"),
+            ("Urban Primary Health Centre Diagnostics Modernization, Hyderabad", "Health", 6500000, 4550000, 70, 45, "MEDIUM")
+        ]),
+        ("Haryana", "Gurugram", "Gurugram", "Shri Sandeep Hooda (Fictional)", 4, [
+            ("Stormwater Surface Drainage & Recharging Pit Network, Gurugram", "Civic", 7500000, 6000000, 80, 52, "MEDIUM"),
+            ("Construction of Paved Feeder Road, Faridabad", "Road", 6100000, 4880000, 80, 40, "LOW"),
+            ("Smart Classrooms & Solar Power System in Government College, Gurugram", "Education", 4400000, 3960000, 90, 25, "LOW"),
+            ("Primary Health Centre Medical Equipment Supply, Gurugram", "Health", 5800000, 4060000, 70, 38, "LOW")
+        ]),
+        ("Jharkhand", "Ranchi", "Ranchi", "Shri Birsa Mundu (Fictional)", 3, [
+            ("Tribal Village Solar Piped Drinking Water Network, Ranchi", "Water", 5200000, 4160000, 80, 64, "HIGH"),
+            ("Construction of All-Weather Concrete Village Feeder Road, Ranchi", "Road", 6300000, 5040000, 80, 75, "HIGH"),
+            ("Establishment of Vocational Skill Center for Youth, Ranchi", "Education", 4200000, 3780000, 90, 28, "LOW")
+        ]),
+        ("Himachal Pradesh", "Shimla", "Shimla", "Shri Yashwant Verma (Fictional)", 3, [
+            ("Hill Slope Road Retaining Wall & Bituminous Paving, Shimla", "Road", 5900000, 4720000, 80, 45, "MEDIUM"),
+            ("Gravity-Fed Spring Water Supply Network, Shimla Rural", "Water", 4600000, 3680000, 80, 30, "LOW"),
+            ("Rooftop Solar Heating & Computer Center in Government School, Shimla", "Education", 3700000, 3330000, 90, 22, "LOW")
+        ]),
+        ("Delhi (UT)", "New Delhi", "New Delhi", "Shri Ravinder Kaushik (Fictional)", 3, [
+            ("Modernization of MCD Primary School Computer Labs, New Delhi", "Education", 4600000, 4140000, 90, 25, "LOW"),
+            ("Installation of Solar Powered Smart Public Water Kiosks, Central Delhi", "Water", 4200000, 3360000, 80, 32, "LOW"),
+            ("Senior Citizens Recreation & Healthcare Wellness Center, New Delhi", "Health", 5500000, 3850000, 70, 36, "LOW")
+        ]),
+        ("Uttarakhand", "Dehradun", "Tehri Garhwal", "Shri Mahendra Rawat (Fictional)", 3, [
+            ("Hilly Terrain Link Road & Anti-Landslide Protection Drainage, Dehradun", "Road", 6100000, 4880000, 80, 44, "MEDIUM"),
+            ("Solar Drinking Water Pumping Grid for Hill Villages, Tehri", "Water", 4700000, 3760000, 80, 28, "LOW"),
+            ("Secondary School Digital Science Laboratory, Dehradun", "Education", 3600000, 3240000, 90, 20, "LOW")
+        ])
+    ]
+
+    tier3_start_id = 3001
+    for st_name, dist_name, const_name, mp_name, proj_count, schemes in tier3_specs:
+        mp_id = f"MP-LS-{st_name[:2].upper()}-001"
+        all_mps.append({
+            "id": mp_id,
+            "name": mp_name,
+            "state": st_name,
+            "constituency": const_name,
+            "house": "Lok Sabha",
+            "term": "18th Lok Sabha (2024-2029)",
+            "mpType": "ELECTED_LOK_SABHA",
+            "totalSanctionedWorks": proj_count,
+            "totalSanctionedAmount": sum(s[2] for s in schemes),
+            "totalExpenditure": sum(s[3] for s in schemes),
+            "utilizationPercentage": round((sum(s[3] for s in schemes) / sum(s[2] for s in schemes)) * 100, 1),
+            "highRiskProjectsCount": sum(1 for s in schemes if s[5] >= 60)
+        })
+
+        for idx, (pname, cat, sanc, exp, prog, rscore, rlevel) in enumerate(schemes, start=1):
+            pid = f"PRJ-IND-{tier3_start_id}"
+            tier3_start_id += 1
+            all_projects.append({
+                "id": pid,
+                "name": pname,
+                "state": st_name,
+                "district": dist_name,
+                "constituency": const_name,
+                "mpName": mp_name,
+                "mpId": mp_id,
+                "category": cat,
+                "implementingAgency": f"Public Works & Infrastructure Division ({st_name} - Fictional)",
+                "vendorName": f"{st_name} National Infra Ventures Ltd (Fictional)",
+                "vendorId": f"VND-{st_name[:2].upper()}-{idx:03d}",
+                "sanctionedAmount": sanc,
+                "expenditure": exp,
+                "physicalProgress": prog,
+                "financialProgress": round((exp / sanc) * 100, 1),
+                "status": "In Progress" if prog < 90 else "Completed",
+                "riskScore": rscore,
+                "riskLevel": rlevel,
+                "daysDelayed": 15 if rscore >= 60 else 0,
+                "costOverrun": False,
+                "duplicateRisk": False,
+                "paymentProgressMismatch": False,
+                "financialYear": "2024-25" if idx % 2 == 0 else "2025-26",
+                "dateSpent": "2024-10-15" if idx % 2 == 0 else "2025-06-20",
+                "quarterSpent": "Q3" if idx % 2 == 0 else "Q1",
+                "fundDumpingFlag": False,
+                "disbursements": [
+                    {"tranche": "T1", "amount": exp, "date": "2024-10-15" if idx % 2 == 0 else "2025-06-20", "quarter": "Q3" if idx % 2 == 0 else "Q1", "percentage": round((exp / sanc) * 100, 1)}
+                ],
+                "siteCoordinates": {"latitude": 20.0 + (idx * 0.1), "longitude": 78.0 + (idx * 0.1)},
+                "latitude": 20.0 + (idx * 0.1),
+                "longitude": 78.0 + (idx * 0.1)
+            })
+
+    print(f"Total projects compiled: {len(all_projects)}")
+    print(f"Total MPs compiled: {len(all_mps)}")
+
+    # -------------------------------------------------------------
+    # 2. Update mockCredentials.json with multi-state State Nodal Logins
+    # -------------------------------------------------------------
+    creds_list = [
+        # District Authority (Tamil Nadu - Chennai)
+        {
+            "loginId": "ADM-DA-TN-CHN-001",
+            "passwordHash": hash_pw("DistAdmin#Pass2026"),
+            "officialRole": "District Authority",
+            "role": "District Authority",
+            "roleName": "District Authority",
+            "roleId": "district_authority",
+            "officialName": "District Magistrate & Collectorate Admin (Chennai)",
+            "jurisdiction": "Chennai District (Tamil Nadu)",
+            "level": "District Level",
+            "accessScope": "district_all",
+            "state": "Tamil Nadu",
+            "district": "Chennai",
+            "constituency": None,
+            "agency": None,
+            "aliases": ["district_admin", "da_chennai", "collector_chn", "district_authority_chennai"]
+        },
+        # Central Nodal Agency / MoSPI (National Scope)
+        {
+            "loginId": "ADM-CNA-MOSPI-HQ-002",
+            "passwordHash": hash_pw("CentralApex#Pass2026"),
+            "officialRole": "Central Nodal Agency (MoSPI)",
+            "role": "Central Nodal Agency (MoSPI)",
+            "roleName": "Central Nodal Agency (MoSPI)",
+            "roleId": "mospi_officer",
+            "officialName": "Director General (MPLADS Monitoring), MoSPI HQ",
+            "jurisdiction": "Ministry of Statistics & Programme Implementation (National Apex)",
+            "level": "National Level",
+            "accessScope": "national_all",
+            "state": None,
+            "district": None,
+            "constituency": None,
+            "agency": None,
+            "aliases": ["mospi_officer", "cna_admin", "mospi_hq", "central_nodal_agency", "mospi"]
+        },
+        # State Nodal Authority - Primary Demo (Tamil Nadu)
+        {
+            "loginId": "ADM-SNA-TN-CHN-005",
+            "passwordHash": hash_pw("StateNodal#Pass2026"),
+            "officialRole": "State Nodal Authority",
+            "role": "State Nodal Authority",
+            "roleName": "State Nodal Authority",
+            "roleId": "state_nodal",
+            "officialName": "State Nodal Officer (Planning & Development, Tamil Nadu)",
+            "jurisdiction": "Tamil Nadu State Planning Department (Statewide)",
+            "level": "State Level",
+            "accessScope": "state_rollup",
+            "state": "Tamil Nadu",
+            "district": None,
+            "constituency": None,
+            "agency": None,
+            "aliases": ["state_nodal_tn", "sna_chennai", "state_planning_tn", "state_nodal_authority"]
+        },
+        # State Nodal Authority - Secondary Demo Tier 2 (Karnataka)
+        {
+            "loginId": "ADM-SNA-KA-BLR-006",
+            "passwordHash": hash_pw("StateNodalKA#Pass2026"),
+            "officialRole": "State Nodal Authority",
+            "role": "State Nodal Authority",
+            "roleName": "State Nodal Authority",
+            "roleId": "state_nodal",
+            "officialName": "State Nodal Officer (Planning & Statistics, Karnataka)",
+            "jurisdiction": "Karnataka State Planning Department (Statewide)",
+            "level": "State Level",
+            "accessScope": "state_rollup",
+            "state": "Karnataka",
+            "district": None,
+            "constituency": None,
+            "agency": None,
+            "aliases": ["state_nodal_ka", "sna_bengaluru", "state_planning_ka"]
+        },
+        # State Nodal Authority - Secondary Demo Tier 2 (Maharashtra)
+        {
+            "loginId": "ADM-SNA-MH-PUN-007",
+            "passwordHash": hash_pw("StateNodalMH#Pass2026"),
+            "officialRole": "State Nodal Authority",
+            "role": "State Nodal Authority",
+            "roleName": "State Nodal Authority",
+            "roleId": "state_nodal",
+            "officialName": "State Nodal Officer (Planning & Development, Maharashtra)",
+            "jurisdiction": "Maharashtra State Planning Department (Statewide)",
+            "level": "State Level",
+            "accessScope": "state_rollup",
+            "state": "Maharashtra",
+            "district": None,
+            "constituency": None,
+            "agency": None,
+            "aliases": ["state_nodal_mh", "sna_maharashtra", "state_planning_mh"]
+        },
+        # Auditor / CAG (Statutory National Audit)
+        {
+            "loginId": "ADM-CAG-AUD-TN-CHN-003",
+            "passwordHash": hash_pw("CAGAudit#Pass2026"),
+            "officialRole": "Auditor / CAG",
+            "role": "Auditor / CAG",
+            "roleName": "Auditor / CAG",
+            "roleId": "auditor_cag",
+            "officialName": "Principal Accountant General (Audit), Statutory Field Office",
+            "jurisdiction": "Comptroller & Auditor General of India (Statutory Audit)",
+            "level": "Statutory Audit",
+            "accessScope": "statutory_audit_all",
+            "state": None,
+            "district": None,
+            "constituency": None,
+            "agency": None,
+            "aliases": ["auditor_cag", "cag_auditor", "cag_field_lead", "auditor"]
+        },
+        # Implementing Agency (Tamil Nadu - PWD Chennai)
+        {
+            "loginId": "ADM-IA-PWD-TN-CHN-008",
+            "passwordHash": hash_pw("PWDWorks#Pass2026"),
+            "officialRole": "Implementing Agency",
+            "role": "Implementing Agency",
+            "roleName": "Implementing Agency",
+            "roleId": "implementing_agency",
+            "officialName": "Executive Engineer (Buildings & Roads), PWD Chennai Division",
+            "jurisdiction": "Public Works Department (PWD) — Chennai (Tamil Nadu)",
+            "level": "Execution Agency",
+            "accessScope": "agency_assigned_only",
+            "state": "Tamil Nadu",
+            "district": "Chennai",
+            "constituency": None,
+            "agency": "Public Works Department (PWD) — Chennai",
+            "aliases": ["agency_pwd_tn", "pwd_chennai_ee", "ia_pwd_chn", "implementing_agency_pwd"]
+        },
+        # MP Office (Chennai Central)
+        {
+            "loginId": "ADM-MP-TN-CHN-021",
+            "passwordHash": hash_pw("MPOffice#Pass2026"),
+            "officialRole": "MP Office",
+            "role": "MP Office",
+            "roleName": "MP Office",
+            "roleId": "mp_office",
+            "officialName": "Nodal Representative, Office of Member of Parliament (Chennai Central)",
+            "jurisdiction": "Chennai Central Parliamentary Constituency (Tamil Nadu)",
+            "level": "Constituency Level",
+            "accessScope": "constituency_only",
+            "state": "Tamil Nadu",
+            "district": "Chennai",
+            "constituency": "Chennai Central",
+            "agency": None,
+            "aliases": ["mp_office_chn", "mp_rep_chennai", "mp_office_chennai_central", "mp_office"]
+        },
+        # District Authority (Uttar Pradesh - Lucknow)
+        {
+            "loginId": "ADM-DA-UP-LKO-012",
+            "passwordHash": hash_pw("DistAdmin#Pass2026"),
+            "officialRole": "District Authority",
+            "role": "District Authority",
+            "roleName": "District Authority",
+            "roleId": "district_authority",
+            "officialName": "District Magistrate & Collectorate Admin (Lucknow)",
+            "jurisdiction": "Lucknow District (Uttar Pradesh)",
+            "level": "District Level",
+            "accessScope": "district_all",
+            "state": "Uttar Pradesh",
+            "district": "Lucknow",
+            "constituency": None,
+            "agency": None,
+            "aliases": ["district_admin_lko", "da_lucknow", "collector_lko"]
+        },
+        # Implementing Agency (Karnataka - PWD Bengaluru)
+        {
+            "loginId": "ADM-IA-PWD-KA-BLR-028",
+            "passwordHash": hash_pw("PWDWorks#Pass2026"),
+            "officialRole": "Implementing Agency",
+            "role": "Implementing Agency",
+            "roleName": "Implementing Agency",
+            "roleId": "implementing_agency",
+            "officialName": "Executive Engineer, PWD Bengaluru Urban Division",
+            "jurisdiction": "Public Works Department (PWD) — Bengaluru Urban (Karnataka)",
+            "level": "Execution Agency",
+            "accessScope": "agency_assigned_only",
+            "state": "Karnataka",
+            "district": "Bengaluru Urban",
+            "constituency": None,
+            "agency": "Public Works Department (PWD) — Bengaluru Urban",
+            "aliases": ["agency_pwd_ka", "pwd_bengaluru", "ia_pwd_blr"]
+        }
+    ]
+
+    # 3. Update mockOverview.json
+    total_sanctioned = sum(p.get("sanctionedAmount", 0) for p in all_projects)
+    total_expenditure = sum(p.get("expenditure", 0) for p in all_projects)
+    high_risk_total = sum(1 for p in all_projects if (p.get("riskScore") or 0) >= 60 or p.get("riskLevel") == "HIGH")
+    
+    from collections import Counter, defaultdict
+    status_counts = Counter(p.get("status", "In Progress") for p in all_projects)
+    cat_stats = defaultdict(lambda: {"sanctioned": 0, "expenditure": 0, "count": 0})
+    for p in all_projects:
+        c = p.get("category", "Civic")
+        cat_stats[c]["sanctioned"] += p.get("sanctionedAmount", 0)
+        cat_stats[c]["expenditure"] += p.get("expenditure", 0)
+        cat_stats[c]["count"] += 1
+
+    state_stats = defaultdict(lambda: {"totalProjects": 0, "sanctionedAmount": 0, "expenditure": 0, "highRiskCount": 0})
+    for p in all_projects:
+        s = p.get("state", "Unknown")
+        state_stats[s]["totalProjects"] += 1
+        state_stats[s]["sanctionedAmount"] += p.get("sanctionedAmount", 0)
+        state_stats[s]["expenditure"] += p.get("expenditure", 0)
+        if (p.get("riskScore") or 0) >= 60 or p.get("riskLevel") == "HIGH":
+            state_stats[s]["highRiskCount"] += 1
+
+    state_wise_perf = []
+    for s, data in sorted(state_stats.items(), key=lambda x: -x[1]["totalProjects"]):
+        util = round((data["expenditure"] / data["sanctionedAmount"] * 100), 1) if data["sanctionedAmount"] else 0.0
+        state_wise_perf.append({
+            "state": s,
+            "totalProjects": data["totalProjects"],
+            "sanctionedAmount": data["sanctionedAmount"],
+            "expenditure": data["expenditure"],
+            "utilizationPercentage": util,
+            "highRiskCount": data["highRiskCount"]
+        })
+
+    overview_data = {
+        "summary": {
+            "totalAllocated": total_sanctioned * 2,
+            "totalAllocatedFormatted": f"₹{round(total_sanctioned * 2 / 1e7, 2)} Cr",
+            "totalSanctionedAmount": total_sanctioned,
+            "totalSanctionedAmountFormatted": f"₹{round(total_sanctioned / 1e7, 2)} Cr",
+            "totalExpenditure": total_expenditure,
+            "totalExpenditureFormatted": f"₹{round(total_expenditure / 1e7, 2)} Cr",
+            "utilizationPercentage": round((total_expenditure / total_sanctioned) * 100, 1),
+            "totalMonitoredMPs": len(all_mps),
+            "totalProjects": len(all_projects),
+            "totalHighRiskProjects": high_risk_total,
+            "totalActiveAlerts": 24
+        },
+        "workStatusDistribution": dict(status_counts),
+        "sectorExpenditureDistribution": [
+            {"category": k, "sanctioned": v["sanctioned"], "expenditure": v["expenditure"], "count": v["count"]}
+            for k, v in cat_stats.items()
+        ],
+        "stateWisePerformance": state_wise_perf
+    }
+
+    # Save all files atomically
+    with open(DATA_DIR / "mockProjects.json", "w", encoding="utf-8") as f:
+        json.dump(all_projects, f, indent=2, ensure_ascii=False)
+
+    with open(DATA_DIR / "mockMPs.json", "w", encoding="utf-8") as f:
+        json.dump(all_mps, f, indent=2, ensure_ascii=False)
+
+    with open(DATA_DIR / "mockCredentials.json", "w", encoding="utf-8") as f:
+        json.dump(creds_list, f, indent=2, ensure_ascii=False)
+
+    with open(DATA_DIR / "mockOverview.json", "w", encoding="utf-8") as f:
+        json.dump(overview_data, f, indent=2, ensure_ascii=False)
+
+    print(f"Successfully written datasets:")
+    print(f"  - mockProjects.json: {len(all_projects)} projects")
+    print(f"  - mockMPs.json: {len(all_mps)} MPs")
+    print(f"  - mockCredentials.json: {len(creds_list)} users")
+    print(f"  - mockOverview.json: {len(state_wise_perf)} states performance summary")
+
+if __name__ == "__main__":
+    build_dataset()

@@ -7,7 +7,7 @@ Exposes endpoints for credential validation against bcrypt password hashes in mo
 """
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
@@ -47,6 +47,9 @@ class LoginResponse(BaseModel):
     state: Optional[str] = Field(None, description="Assigned state jurisdiction")
     constituency: Optional[str] = Field(None, description="Assigned parliamentary constituency")
     agency: Optional[str] = Field(None, description="Assigned execution agency")
+    mpType: Optional[str] = Field(None, description="MP classification: CONSTITUENCY_MP or NOMINATED_MP")
+    mpId: Optional[str] = Field(None, description="MP code")
+    chosenDistricts: Optional[List[str]] = Field(None, description="Chosen districts for Nominated MP")
     jurisdiction: str = Field(..., description="Human-readable jurisdictional description")
     officialName: str = Field(..., description="Designated official title")
 
@@ -63,6 +66,9 @@ class UserProfileResponse(BaseModel):
     state: Optional[str] = None
     constituency: Optional[str] = None
     agency: Optional[str] = None
+    mpType: Optional[str] = None
+    mpId: Optional[str] = None
+    chosenDistricts: Optional[List[str]] = None
     jurisdiction: str
 
 
@@ -123,9 +129,13 @@ def login(request: LoginRequest) -> LoginResponse:
         state=user.get("state"),
         constituency=user.get("constituency"),
         agency=user.get("agency"),
+        mpType=user.get("mpType"),
+        mpId=user.get("mpId"),
+        chosenDistricts=user.get("chosenDistricts"),
         jurisdiction=user.get("jurisdiction", "National Oversight"),
         officialName=user.get("officialName", "Authorized Official"),
     )
+
 
 
 @router.get(

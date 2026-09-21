@@ -1,21 +1,25 @@
 """
 FastAPI Router for Duplicate Work Detection.
 
-Exposes endpoints for auditing duplicate public schemes, reworded tenders,
-and cross-year contractor duplication:
+Exposes endpoints for detecting cross-year repetitions, spatial-proximity overlaps,
+and fuzzy title matches across MPLADS projects:
 - GET /projects/{id}/duplicates
 - GET /projects/duplicates/summary
 - GET /projects/duplicates/pairs
+
+Enforces strict RBAC: Implementing Agency cannot access duplicate detection modules per ROLES.md.
 """
 
 from typing import Any, Dict, List, Optional
-from fastapi import APIRouter, HTTPException, Path, Query
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, status
 from pydantic import BaseModel, Field
 
+from app.services.auth import get_optional_current_user
 from app.services.duplicate import (
     find_project_duplicates,
     get_all_duplicate_pairs,
     get_duplicate_summary,
+    load_projects,
 )
 
 router = APIRouter(
@@ -24,48 +28,90 @@ router = APIRouter(
 )
 
 
-class DuplicateMatch(BaseModel):
-    """Details of a detected duplicate or overlapping project match."""
-    matchedProjectId: str = Field(..., description="Unique ID of the matched project")
-    matchedProjectName: str = Field(..., description="Descriptive title of the matched project")
-    matchedDistrict: Optional[str] = Field(None, description="Administrative district of matched project")
-    matchedState: Optional[str] = Field(None, description="State of matched project")
-    matchedFinancialYear: Optional[str] = Field(None, description="Fiscal year (e.g. '2024-25')")
-    matchedVendorId: Optional[str] = Field(None, description="Assigned contractor ID of matched project")
-    matchedVendorName: Optional[str] = Field(None, description="Assigned contractor name of matched project")
-    matchedSanctionedAmount: Optional[int] = Field(None, description="Sanctioned budget of matched project")
-    similarityScore: float = Field(..., description="Weighted composite duplicate confidence score (0-100)")
-    textSimilarity: float = Field(..., description="RapidFuzz fuzzy token similarity percentage")
-    matchType: str = Field(..., description="'same-year' or 'cross-year'")
-    vendorMatch: bool = Field(..., description="Whether both projects share the same contractor/vendor")
-    sameDistrict: bool = Field(..., description="Whether both projects are co-located in the same district")
-    sameState: bool = Field(..., description="Whether both projects are located in the same state")
-    similarCostRange: bool = Field(..., description="Whether project budgets fall within a 25% variance range")
-    costVariancePercentage: float = Field(..., description="Percentage difference in sanctioned amounts")
-    reasons: List[str] = Field(..., description="Itemized evidentiary audit rationale for match")
+def enforce_duplicate_access(current_user: Optional[Dict[str, Any]]) -> None:
+    """Blocks Implementing Agency and MP Office from accessing duplicate work detection engine per ROLES.md."""
+    if not current_user:
+        return
+    import re
+    role_id = current_user.get("roleId", "")
+    role_name = (current_user.get("role") or "").lower()
+    scope = current_user.get("accessScope", "")
+    if scope == "agency_assigned_only" or "implementing" in role_id or "implementing" in role_name:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied: Duplicate scheme detection engine is restricted to statutory oversight authorities per ROLES.md.",
+        )
+    if scope in ["constituency_only", "nominated_mp_districts"] or role_id == "mp_office" or bool(re.search(r"\bmp\b", role_name)):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied: Cross-scheme duplicate tenders and spatial overlap detection are restricted to oversight authorities per ROLES.md.",
+        )
+
+
+
+class MatchedProjectDetail(BaseModel):
+    id: str
+    name: str
+    financialYear: Optional[str] = "2025-26"
+    sanctionedAmount: int
+    expenditure: Optional[int] = 0
+    status: Optional[str] = "In Progress"
+    district: str
+    state: Optional[str] = None
+    category: Optional[str] = None
+    vendorName: Optional[str] = None
+    vendorId: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    physicalProgress: Optional[int] = 0
+
+
+class DuplicateMatchItem(BaseModel):
+    matchedProjectId: str
+    matchedProject: MatchedProjectDetail
+    similarityScore: float
+    textSimilarity: float
+    distanceMeters: Optional[float] = None
+    sameVendor: bool
+    sameCategory: bool
+    sameDistrict: bool
+    costDifferencePercentage: float
+    matchType: str
+    flaggedReasons: List[str]
+    confidenceLevel: Optional[str] = "HIGH"
 
 
 class ProjectDuplicatesResponse(BaseModel):
-    """Full duplicate detection evaluation report for a project."""
-    projectId: str = Field(..., description="Target project ID")
-    projectName: str = Field(..., description="Target project name")
-    category: Optional[str] = Field(None, description="Infrastructure category")
-    district: Optional[str] = Field(None, description="Administrative district")
-    state: Optional[str] = Field(None, description="State")
-    financialYear: Optional[str] = Field(None, description="Fiscal year")
-    vendorId: Optional[str] = Field(None, description="Assigned contractor ID")
-    vendorName: Optional[str] = Field(None, description="Assigned contractor name")
-    sanctionedAmount: Optional[int] = Field(None, description="Sanctioned amount in INR")
-    hasDuplicates: bool = Field(..., description="True if any matches meet or exceed the similarity threshold")
-    totalDuplicates: int = Field(..., description="Number of duplicate matches detected")
-    highestSimilarityScore: float = Field(..., description="Top match confidence score")
-    thresholdApplied: float = Field(..., description="Similarity score cutoff threshold applied")
-    duplicates: List[DuplicateMatch] = Field(..., description="List of matched duplicate projects")
-    evaluatedAt: str = Field(..., description="ISO 8601 UTC timestamp of evaluation")
+    projectId: str
+    projectName: str
+    totalMatchesFound: int
+    highestSimilarityScore: float
+    hasHighConfidenceDuplicate: bool
+    matches: List[DuplicateMatchItem]
+    evaluatedAt: str
+
+
+class DuplicatePairItem(BaseModel):
+    projectA: MatchedProjectDetail
+    projectB: MatchedProjectDetail
+    similarityScore: float
+    textSimilarity: Optional[float] = None
+    matchType: str
+    distanceMeters: Optional[float] = None
+    confidenceLevel: Optional[str] = "HIGH"
+    flaggedReasons: Optional[List[str]] = Field(default_factory=list, alias="reasons")
+    sameDistrict: bool
+    sameState: Optional[bool] = True
+    isCrossDistrict: Optional[bool] = False
+    isCrossState: Optional[bool] = False
+    vendorMatch: Optional[bool] = False
+    adjudication: Optional[Dict[str, Any]] = None
+
+    class Config:
+        populate_by_name = True
 
 
 class DuplicateSummaryResponse(BaseModel):
-    """Portfolio-level duplicate detection statistics."""
     totalFlaggedPairs: int
     crossYearDuplicates: int
     sameYearDuplicates: int
@@ -75,16 +121,37 @@ class DuplicateSummaryResponse(BaseModel):
     generatedAt: str
 
 
-class DuplicatePairItem(BaseModel):
-    """A pair of duplicate projects detected across the platform."""
-    projectA: Dict[str, Any]
-    projectB: Dict[str, Any]
-    similarityScore: float
-    textSimilarity: float
-    matchType: str
-    vendorMatch: bool
-    sameDistrict: bool
-    reasons: List[str]
+class DuplicateAdjudicationRequest(BaseModel):
+    projectAId: str = Field(..., description="Project A identifier")
+    projectBId: str = Field(..., description="Project B identifier")
+    legitimateProjectId: Optional[str] = Field(None, description="Project marked legitimate (if one is chosen)")
+    action: str = Field(..., description="Adjudication decision: PROJECT_A_LEGITIMATE | PROJECT_B_LEGITIMATE | FLAG_BOTH_RECOVERY")
+    notes: Optional[str] = Field(None, description="Official adjudication remarks")
+
+
+@router.post(
+    "/duplicates/adjudicate",
+    summary="Adjudicate Duplicate Scheme Pair (State Nodal / MoSPI)",
+    description="Records formal State Nodal / MoSPI adjudication on a flagged cross-district duplicate pair.",
+)
+def adjudicate_duplicate(
+    payload: DuplicateAdjudicationRequest,
+    current_user: Optional[Dict[str, Any]] = Depends(get_optional_current_user),
+) -> Dict[str, Any]:
+    from app.services.duplicate import adjudicate_duplicate_pair
+    result = adjudicate_duplicate_pair(
+        project_a_id=payload.projectAId,
+        project_b_id=payload.projectBId,
+        legitimate_id=payload.legitimateProjectId,
+        action=payload.action,
+        notes=payload.notes,
+        user=current_user,
+    )
+    return {
+        "success": True,
+        "message": f"Duplicate pair adjudication recorded successfully: {payload.action}.",
+        "adjudication": result,
+    }
 
 
 @router.get(
@@ -93,21 +160,35 @@ class DuplicatePairItem(BaseModel):
     summary="Get Portfolio Duplicate Summary",
     description="Returns aggregate duplicate risk and repetition metrics across all registered projects.",
 )
-def get_summary() -> DuplicateSummaryResponse:
-    return DuplicateSummaryResponse(**get_duplicate_summary())
+def get_summary(
+    state: Optional[str] = Query(None, description="Optional state filter (e.g. 'Tamil Nadu')"),
+    current_user: Optional[Dict[str, Any]] = Depends(get_optional_current_user),
+) -> DuplicateSummaryResponse:
+    enforce_duplicate_access(current_user)
+    effective_state = state or (current_user.get("state") if current_user and current_user.get("accessScope") == "state_rollup" else None)
+    all_projects = load_projects()
+    if effective_state:
+        all_projects = [p for p in all_projects if (p.get("state") or "").strip().lower() == effective_state.strip().lower()]
+    return DuplicateSummaryResponse(**get_duplicate_summary(all_projects=all_projects))
 
 
 @router.get(
     "/duplicates/pairs",
-    response_model=List[DuplicatePairItem],
     summary="List All Duplicate Project Pairs",
     description="Returns all flagged duplicate project pairs across the platform meeting the similarity threshold.",
 )
 def list_duplicate_pairs(
-    threshold: float = Query(80.0, ge=0.0, le=100.0, description="Minimum similarity score threshold (default: 80.0)")
-) -> List[DuplicatePairItem]:
-    pairs = get_all_duplicate_pairs(threshold=threshold)
-    return [DuplicatePairItem(**p) for p in pairs]
+    threshold: float = Query(80.0, ge=0.0, le=100.0, description="Minimum similarity score threshold (default: 80.0)"),
+    state: Optional[str] = Query(None, description="Optional state filter (e.g. 'Tamil Nadu')"),
+    current_user: Optional[Dict[str, Any]] = Depends(get_optional_current_user),
+) -> List[Dict[str, Any]]:
+    enforce_duplicate_access(current_user)
+    effective_state = state or (current_user.get("state") if current_user and current_user.get("accessScope") == "state_rollup" else None)
+    all_projects = load_projects()
+    if effective_state:
+        all_projects = [p for p in all_projects if (p.get("state") or "").strip().lower() == effective_state.strip().lower()]
+    pairs = get_all_duplicate_pairs(threshold=threshold, all_projects=all_projects)
+    return pairs
 
 
 @router.get(
@@ -120,7 +201,9 @@ def get_project_duplicates(
     id: str = Path(..., description="Unique project ID (e.g. PRJ-IND-2008)", examples=["PRJ-IND-2008"]),
     threshold: float = Query(80.0, ge=0.0, le=100.0, description="Minimum similarity score threshold (default: 80.0)"),
     same_district_only: bool = Query(False, description="Filter matches strictly within the same district"),
+    current_user: Optional[Dict[str, Any]] = Depends(get_optional_current_user),
 ) -> ProjectDuplicatesResponse:
+    enforce_duplicate_access(current_user)
     result = find_project_duplicates(
         project_id=id,
         threshold=threshold,
@@ -132,3 +215,4 @@ def get_project_duplicates(
             detail=f"Project with ID '{id}' was not found in the platform registry."
         )
     return ProjectDuplicatesResponse(**result)
+

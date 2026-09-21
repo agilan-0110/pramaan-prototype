@@ -6,12 +6,15 @@ and SHAP-based feature attribution:
 - GET /projects/{id}/risk
 - GET /projects/risk/summary
 - GET /projects/risk/high-risk
+
+Enforces strict RBAC: Implementing Agency cannot access financial risk scores or SHAP evaluations per ROLES.md.
 """
 
 from typing import Any, Dict, List, Optional
-from fastapi import APIRouter, HTTPException, Path, Query
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, status
 from pydantic import BaseModel, Field
 
+from app.services.auth import get_optional_current_user
 from app.services.risk import (
     get_high_risk_projects,
     get_project_risk,
@@ -22,6 +25,27 @@ router = APIRouter(
     prefix="/projects",
     tags=["Financial Risk"],
 )
+
+
+def enforce_risk_access(current_user: Optional[Dict[str, Any]]) -> None:
+    """Blocks Implementing Agency and MP Office from accessing raw financial risk models and SHAP attributions per ROLES.md."""
+    if not current_user:
+        return
+    import re
+    role_id = current_user.get("roleId", "")
+    role_name = (current_user.get("role") or "").lower()
+    scope = current_user.get("accessScope", "")
+    if scope == "agency_assigned_only" or "implementing" in role_id or "implementing" in role_name:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied: Financial risk evaluations and SHAP predictive models are restricted to statutory oversight authorities per ROLES.md.",
+        )
+    if scope in ["constituency_only", "nominated_mp_districts"] or role_id == "mp_office" or bool(re.search(r"\bmp\b", role_name)):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied: Raw predictive risk models and SHAP attribution metrics are restricted. MP Office access is provided via plain-language explanations on project records per ROLES.md.",
+        )
+
 
 
 class FeatureContribution(BaseModel):
@@ -72,7 +96,10 @@ class RiskSummaryResponse(BaseModel):
     summary="Get Portfolio Financial Risk Summary",
     description="Returns aggregate risk score distribution and model metadata across all monitored MPLADS projects.",
 )
-def get_summary() -> RiskSummaryResponse:
+def get_summary(
+    current_user: Optional[Dict[str, Any]] = Depends(get_optional_current_user)
+) -> RiskSummaryResponse:
+    enforce_risk_access(current_user)
     return RiskSummaryResponse(**get_risk_summary())
 
 
@@ -83,8 +110,10 @@ def get_summary() -> RiskSummaryResponse:
     description="Returns all projects categorized under HIGH (61-80) or CRITICAL (81+) risk levels.",
 )
 def list_high_risk_projects(
-    min_score: int = Query(61, ge=0, le=100, description="Minimum risk score threshold (default: 61)")
+    min_score: int = Query(61, ge=0, le=100, description="Minimum risk score threshold (default: 61)"),
+    current_user: Optional[Dict[str, Any]] = Depends(get_optional_current_user),
 ) -> List[ProjectRiskResponse]:
+    enforce_risk_access(current_user)
     projects = get_high_risk_projects(min_score)
     return [ProjectRiskResponse(**p) for p in projects]
 
@@ -96,8 +125,10 @@ def list_high_risk_projects(
     description="Evaluates expenditure anomaly pacing using IsolationForest and extracts feature contributions via SHAP KernelExplainer.",
 )
 def get_risk(
-    id: str = Path(..., description="Unique project ID (e.g. PRJ-IND-2003)", examples=["PRJ-IND-2003"])
+    id: str = Path(..., description="Unique project ID (e.g. PRJ-IND-2003)", examples=["PRJ-IND-2003"]),
+    current_user: Optional[Dict[str, Any]] = Depends(get_optional_current_user),
 ) -> ProjectRiskResponse:
+    enforce_risk_access(current_user)
     result = get_project_risk(id)
     if not result:
         raise HTTPException(

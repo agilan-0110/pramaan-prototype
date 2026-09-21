@@ -222,5 +222,21 @@
     "status": "Corroborated",
     "nlpConfidence": 0.99,
     "geoMatchDistance": 1.1
+  },
+  {
+    "id": "CIT-2026-115",
+    "projectId": "PRJ-IND-TN-104",
+    "projectName": "Reconstruction of Heavy-Duty Reinforced Stormwater Trunk Drain, Chepauk, Chennai",
+    "district": "Chennai",
+    "state": "Tamil Nadu",
+    "complaintText": "Official records state that 65% of the trunk stormwater drain desilting and reinforced slab laying is finished. In reality, large mounds of excavated earth and broken concrete chunks are dumped blocking the canal near Chepauk, and no construction work has happened for over 45 days.",
+    "contradictionScore": 0.88,
+    "isContradiction": true,
+    "officialClaim": "Physical progress certified at 65%; precast box culverts installed and trunk drain operationalized.",
+    "citizenSummary": "Citizen reports indicate excavation debris blocking canal and construction abandoned, contradicting official claim of 65% completion.",
+    "submittedAt": "2026-08-10T14:30:00Z",
+    "status": "Under Investigation",
+    "nlpConfidence": 0.91,
+    "geoMatchDistance": 0.4
   }
 ]

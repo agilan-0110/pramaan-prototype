@@ -9,9 +9,10 @@ supporting real-time citizen portal grievance submissions with automated NLP sco
 """
 
 from typing import Any, Dict, List, Optional
-from fastapi import APIRouter, HTTPException, Path, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Path, Query, status
 from pydantic import BaseModel, Field
 
+from app.services.auth import get_optional_current_user
 from app.services.citizen_nlp import (
     evaluate_all_complaints,
     get_citizen_nlp_summary,
@@ -25,6 +26,27 @@ router = APIRouter(
     prefix="/projects",
     tags=["Citizen Ground Truth NLP"],
 )
+
+
+def enforce_citizen_access(current_user: Optional[Dict[str, Any]]) -> None:
+    """Blocks Implementing Agency and MP Office from inspecting citizen contradiction queues per ROLES.md."""
+    if not current_user:
+        return
+    import re
+    role_id = current_user.get("roleId", "")
+    role_name = (current_user.get("role") or "").lower()
+    scope = current_user.get("accessScope", "")
+    if scope == "agency_assigned_only" or "implementing" in role_id or "implementing" in role_name:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied: Citizen ground truth contradiction audits are restricted to statutory oversight authorities per ROLES.md.",
+        )
+    if scope in ["constituency_only", "nominated_mp_districts"] or role_id == "mp_office" or bool(re.search(r"\bmp\b", role_name)):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied: Citizen ground truth discrepancy reports and contradiction metrics are restricted to oversight authorities per ROLES.md.",
+        )
+
 
 
 class ReportedLocation(BaseModel):
@@ -131,8 +153,11 @@ class CitizenComplaintSubmissionResponse(BaseModel):
     summary="List All Citizen Ground Truth Reports",
     description="Returns all citizen grievances across the platform evaluated by the hybrid NLP pipeline.",
 )
-def list_all_citizen_reports() -> List[CitizenComplaintItem]:
+def list_all_citizen_reports(
+    current_user: Optional[Dict[str, Any]] = Depends(get_optional_current_user),
+) -> List[CitizenComplaintItem]:
     """Retrieves all evaluated citizen complaints across all projects."""
+    enforce_citizen_access(current_user)
     evals = evaluate_all_complaints()
     return [
         CitizenComplaintItem(
@@ -167,8 +192,10 @@ def list_all_citizen_reports() -> List[CitizenComplaintItem]:
 )
 def get_project_citizen_reports(
     id: str = Path(..., description="Unique project identifier (e.g. PRJ-IND-2003)", examples=["PRJ-IND-2003"]),
+    current_user: Optional[Dict[str, Any]] = Depends(get_optional_current_user),
 ) -> ProjectCitizenReportsResponse:
     """Retrieves evaluated citizen reports for a single project."""
+    enforce_citizen_access(current_user)
     project = get_project_by_id(id)
     if not project:
         raise HTTPException(

@@ -22,7 +22,7 @@ DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 PROJECTS_FILE = DATA_DIR / "mockProjects.json"
 
 # Default detection parameters
-DEFAULT_SIMILARITY_THRESHOLD = 80.0
+DEFAULT_SIMILARITY_THRESHOLD = 70.0
 BASE_TEXT_FILTER_THRESHOLD = 70.0
 MAX_COST_VARIANCE_SIMILAR = 0.25  # 25% cost variance considered similar range
 
@@ -271,35 +271,91 @@ def get_all_duplicate_pairs(
             match = compute_pair_similarity(p1, p2)
             if match["similarityScore"] >= threshold or (
                 match["sameDistrict"] and match["textSimilarity"] >= threshold
+            ) or (
+                match["vendorMatch"] and match["textSimilarity"] >= 75.0
             ):
                 seen.add(pair_key)
+                same_st = (p1.get("state") or "").strip().lower() == (p2.get("state") or "").strip().lower()
+                same_dist = match["sameDistrict"]
+                is_cross_dist = same_st and not same_dist
+                is_cross_state = not same_st
+
                 pairs.append({
                     "projectA": {
                         "id": p1["id"],
                         "name": p1["name"],
+                        "state": p1.get("state"),
                         "district": p1.get("district"),
                         "financialYear": p1.get("financialYear"),
+                        "category": p1.get("category"),
                         "vendorId": p1.get("vendorId"),
+                        "vendorName": p1.get("vendorName"),
                         "sanctionedAmount": p1.get("sanctionedAmount"),
+                        "expenditure": p1.get("expenditure", 0),
+                        "physicalProgress": p1.get("physicalProgress", 0),
+                        "status": p1.get("status", "In Progress"),
                     },
                     "projectB": {
                         "id": p2["id"],
                         "name": p2["name"],
+                        "state": p2.get("state"),
                         "district": p2.get("district"),
                         "financialYear": p2.get("financialYear"),
+                        "category": p2.get("category"),
                         "vendorId": p2.get("vendorId"),
+                        "vendorName": p2.get("vendorName"),
                         "sanctionedAmount": p2.get("sanctionedAmount"),
+                        "expenditure": p2.get("expenditure", 0),
+                        "physicalProgress": p2.get("physicalProgress", 0),
+                        "status": p2.get("status", "In Progress"),
                     },
                     "similarityScore": match["similarityScore"],
                     "textSimilarity": match["textSimilarity"],
                     "matchType": match["matchType"],
                     "vendorMatch": match["vendorMatch"],
-                    "sameDistrict": match["sameDistrict"],
+                    "sameDistrict": same_dist,
+                    "sameState": same_st,
+                    "isCrossDistrict": is_cross_dist,
+                    "isCrossState": is_cross_state,
                     "reasons": match["reasons"],
+                    "adjudication": ADJUDICATION_STORE.get(f"{p1['id']}-{p2['id']}") or ADJUDICATION_STORE.get(f"{p2['id']}-{p1['id']}"),
                 })
 
     pairs.sort(key=lambda x: x["similarityScore"], reverse=True)
     return pairs
+
+
+ADJUDICATION_STORE: Dict[str, Dict[str, Any]] = {}
+
+
+def adjudicate_duplicate_pair(
+    project_a_id: str,
+    project_b_id: str,
+    legitimate_id: Optional[str],
+    action: str,
+    notes: Optional[str] = None,
+    user: Optional[Dict[str, Any]] = None,
+) -> Dict[str, Any]:
+    """Records formal State Nodal / MoSPI adjudication on a flagged duplicate pair."""
+    pair_key = "-".join(sorted([project_a_id, project_b_id]))
+    adjudicator = (user.get("officialName") if user else "State Nodal Authority") or "State Nodal Authority"
+    now_iso = datetime.now(timezone.utc).isoformat()
+
+    rec = {
+        "pairKey": pair_key,
+        "projectAId": project_a_id,
+        "projectBId": project_b_id,
+        "legitimateProjectId": legitimate_id,
+        "action": action,
+        "notes": notes or f"Adjudicated as {action} by {adjudicator}.",
+        "adjudicatedBy": adjudicator,
+        "adjudicatedAt": now_iso,
+        "timestamp": now_iso,
+        "status": "ADJUDICATED",
+    }
+    ADJUDICATION_STORE[pair_key] = rec
+    return rec
+
 
 
 def get_duplicate_summary(all_projects: Optional[List[Dict[str, Any]]] = None) -> Dict[str, Any]:

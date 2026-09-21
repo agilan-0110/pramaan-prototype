@@ -397,3 +397,85 @@ def get_project_spending_trend(
         "auditFinding": finding,
         "evaluatedAt": datetime.now(timezone.utc).isoformat(),
     }
+
+
+def get_chronic_non_utilization_report(
+    state: Optional[str] = None,
+    all_projects: Optional[List[Dict[str, Any]]] = None,
+) -> Dict[str, Any]:
+    """
+    Identifies multi-year carried-forward unspent fund balances (CHRONIC_NON_UTILIZATION).
+    Per ROLES.md, this signal skips District Authority and surfaces directly to State Nodal & MoSPI.
+    """
+    projects = all_projects if all_projects is not None else load_projects()
+    if state:
+        projects = [p for p in projects if (p.get("state") or "").strip().lower() == state.strip().lower()]
+
+    flagged = []
+    total_unspent = 0
+
+    for p in projects:
+        fy = p.get("financialYear", "2025-26")
+        status = p.get("status", "")
+        phys_prog = p.get("physicalProgress", 0)
+        sanc = p.get("sanctionedAmount", 0)
+        exp = p.get("expenditure", 0)
+        unspent = max(0, sanc - exp)
+        unspent_pct = round((unspent / max(sanc, 1)) * 100, 1)
+        days_delayed = p.get("daysDelayed", 0)
+
+        # Multi-year carried forward signal: FY 2024-25 or earlier, incomplete work, significant unspent balance
+        is_multi_year = fy in ("2023-24", "2024-25") or "2024" in fy or "2023" in fy
+        is_stagnant = (
+            (is_multi_year and status != "Completed" and unspent >= 1500000 and unspent_pct >= 25.0) or
+            (is_multi_year and days_delayed >= 60 and unspent >= 1000000) or
+            (unspent_pct >= 40.0 and days_delayed >= 90 and status != "Completed")
+        )
+
+        if is_stagnant and unspent > 0:
+            total_unspent += unspent
+            stagnation_months = 24 if "2023" in fy else 18 if "2024" in fy else 14
+            severity = "CRITICAL" if (unspent >= 3000000 or unspent_pct >= 50.0) else "HIGH"
+
+            flagged.append({
+                "projectId": p.get("id"),
+                "projectName": p.get("name"),
+                "state": p.get("state"),
+                "district": p.get("district"),
+                "category": p.get("category"),
+                "financialYear": fy,
+                "sanctionedAmount": sanc,
+                "expenditure": exp,
+                "unspentBalance": unspent,
+                "unspentPercentage": unspent_pct,
+                "physicalProgress": phys_prog,
+                "financialProgress": p.get("financialProgress", 0.0),
+                "status": status,
+                "daysDelayed": days_delayed,
+                "stagnationMonths": stagnation_months,
+                "severity": severity,
+                "skippedDistrictAuthority": True,
+                "auditObservation": (
+                    f"Stagnant unspent allocation of ₹{unspent:,.0f} ({unspent_pct}%) carried forward "
+                    f"across {stagnation_months} months from FY {fy} with only {phys_prog}% physical completion. "
+                    "Statutory State Nodal / MoSPI direct intervention signal."
+                ),
+            })
+
+    flagged.sort(key=lambda x: x["unspentBalance"], reverse=True)
+
+    return {
+        "stateFilter": state or "All Registered States",
+        "totalProjectsAudited": len(projects),
+        "chronicNonUtilizationCount": len(flagged),
+        "totalCarriedForwardUnspent": total_unspent,
+        "criticalCount": sum(1 for x in flagged if x["severity"] == "CRITICAL"),
+        "highCount": sum(1 for x in flagged if x["severity"] == "HIGH"),
+        "definition": (
+            "Non-lapsable multi-year unspent balances carried forward across fiscal years (>18 months) "
+            "without completion, skipping District Authority operational tier per ROLES.md."
+        ),
+        "flaggedProjects": flagged,
+        "generatedAt": datetime.now(timezone.utc).isoformat(),
+    }
+
