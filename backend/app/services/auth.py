@@ -13,7 +13,10 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import bcrypt
-import jwt
+try:
+    import jwt
+except ImportError:
+    from jose import jwt
 from fastapi import Header, HTTPException, status
 
 logger = logging.getLogger("setu.auth")
@@ -430,7 +433,22 @@ def sanitize_project_for_user(project: Dict[str, Any], user: Optional[Dict[str, 
     - alerts
     """
     if not user:
-        return project
+        p_copy = dict(project)
+        p_copy.pop("riskScore", None)
+        p_copy.pop("riskLevel", None)
+        p_copy.pop("plainLanguageExplanation", None)
+        p_copy.pop("shapValues", None)
+        p_copy.pop("complianceFlags", None)
+        p_copy.pop("costOverrun", None)
+        p_copy.pop("paymentProgressMismatch", None)
+        p_copy.pop("duplicateRisk", None)
+        p_copy.pop("duplicateMatchedProjectId", None)
+        p_copy.pop("hasCitizenReport", None)
+        p_copy.pop("citizenReportSummary", None)
+        p_copy.pop("citizenReports", None)
+        p_copy.pop("fundDumpingFlag", None)
+        p_copy.pop("alerts", None)
+        return p_copy
 
     role_id = user.get("roleId", "")
     role_name = (user.get("role") or "").lower()

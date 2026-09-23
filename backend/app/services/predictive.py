@@ -98,8 +98,10 @@ def compute_empirical_forecast(
             delay_tier = "SEVERE"
 
         if delay > 0:
+            elapsed_days = max(30, int(project.get("daysSinceStart") or ((fin / 100.0) * 300) + delay))
+            phys_velocity = max(0.05, phys / elapsed_days)
             delay_rationale = (
-                f"Existing schedule slippage of {delay} days and physical velocity of {max(0.1, phys/max(1, delay)):.2f}%/day "
+                f"Existing schedule slippage of {delay} days and physical velocity of {phys_velocity:.2f}%/day "
                 f"indicate high probability of an additional {add_delay_days} days delay before civil milestone handover."
             )
         else:
@@ -130,11 +132,14 @@ def compute_empirical_forecast(
             else:
                 cost_prob = 0.12
 
-        # Project final completion outlay
+        # Project final completion outlay (blended with baseline to avoid mobilization advance distortions)
         rem_work = max(0.0, 100.0 - phys)
         if phys > 15.0 and exp > 0:
-            unit_cost_per_pct = exp / phys
-            est_remaining_cost = unit_cost_per_pct * rem_work
+            baseline_unit = (sanc / 100.0) if sanc > 0 else (exp / max(phys, 1.0))
+            observed_unit = exp / phys
+            weight_obs = min(0.85, max(0.20, phys / 100.0))
+            blended_unit = (observed_unit * weight_obs) + (baseline_unit * (1.0 - weight_obs))
+            est_remaining_cost = blended_unit * rem_work
             final_cost = int(exp + est_remaining_cost)
         else:
             escalation_factor = 1.0 + (max(0.0, gap) / 100.0) * 0.8

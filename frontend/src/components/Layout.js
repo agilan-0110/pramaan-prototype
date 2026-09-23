@@ -275,56 +275,190 @@ export function getLayoutHtml({
     filteredNavItems = navItems.filter((item) => allowedNavIds.includes(item.id));
   }
 
+  // Icon mapping for navigation items
+  const NAV_ICONS = {
+    'projects': 'dashboard',
+    'evidence-tranche': 'fact_check',
+    'evidence': 'pin_drop',
+    'invoices': 'receipt_long',
+    'utilization-certificates': 'verified',
+    'risk': 'psychology',
+    'compliance': 'security',
+    'duplicates': 'difference',
+    'citizen-reports': 'campaign',
+    'trend': 'trending_up',
+    'audit-trail': 'history',
+    'alerts': 'notifications',
+    'status-trail': 'history_edu',
+    'unresolved-completion': 'warning',
+    'observations': 'rule_folder',
+    'override-log': 'published_with_changes',
+    'escalations': 'report_problem',
+    'submit-proposal': 'post_add',
+  };
+
+  // Officer Profile mapping
+  const officerProfile = isAuditorRole ? {
+    name: 'Rajesh Verma, IA&AS',
+    title: 'Pr. Director of Audit (MoSPI)',
+    roleBadge: 'Constitutional CAG Quorum',
+    tag: 'CAG Article 149'
+  } : isMospiRole ? {
+    name: 'Dr. A. K. Sen, IES',
+    title: 'Joint Secretary (Central Nodal Desk)',
+    roleBadge: 'National Apex Desk',
+    tag: 'MoSPI SIH26102'
+  } : isStateRole ? {
+    name: 'K. S. Narayanan, IAS',
+    title: 'Principal Secretary (Planning & Nodal TN)',
+    roleBadge: 'State Nodal Cell',
+    tag: 'Tamil Nadu SNA'
+  } : isAgencyRole ? {
+    name: 'Er. M. Shanmugam',
+    title: 'Superintending Engineer (PWD Buildings)',
+    roleBadge: 'Execution Quorum',
+    tag: 'PWD Building Div'
+  } : isMpRole ? {
+    name: 'Shri Dayanidhi Maran',
+    title: 'Member of Parliament (Lok Sabha)',
+    roleBadge: 'Constituency MP',
+    tag: 'Chennai Central (LS)'
+  } : {
+    name: 'Dr. R. K. Verma, IAS',
+    title: 'District Magistrate & Nodal Officer',
+    roleBadge: 'District Collectorate',
+    tag: 'Chennai District (TN)'
+  };
+
   const navHtml = filteredNavItems
-    .map(
-      (item) => `
-      <li class="setu-nav-item">
-        <a href="#${item.id}" class="setu-nav-link ${item.active ? 'active' : ''}" data-nav-id="${item.id}">
-          ${item.label}
+    .map((item) => {
+      const icon = NAV_ICONS[item.id] || 'circle';
+      const isActive = item.active;
+      return `
+        <a
+          href="#${item.id}"
+          class="setu-nav-link flex items-center gap-space-sm px-space-md py-space-sm rounded-lg transition-colors ${
+            isActive
+              ? 'bg-primary-container text-on-primary font-semibold'
+              : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
+          }"
+          data-nav-id="${item.id}"
+        >
+          <span class="material-symbols-outlined text-[20px]">${icon}</span>
+          <span class="font-label-lg text-label-lg">${item.label}</span>
         </a>
-      </li>`
-    )
+      `;
+    })
     .join('');
 
   return `
-    <div class="setu-shell">
-      <!-- Institutional Navy Header -->
-      <header class="setu-header">
-        <div class="setu-header-brand">
-          <div class="setu-brand-logo">GOV</div>
-          <span class="setu-brand-title">${projectName}</span>
-          <span class="setu-brand-subtitle">${subtitle}</span>
-        </div>
-        <div class="setu-header-actions">
-          <div class="setu-role-badge">
-            <span class="setu-role-label">Role:</span>
-            <span class="setu-role-name">${displayRole}</span>
+    <div class="bg-surface font-body-md text-body-md text-on-surface antialiased min-h-screen">
+      <!-- Fixed Institutional Navy Top Header -->
+      <header class="fixed top-0 left-0 right-0 z-50 bg-primary text-on-primary select-none">
+        <div class="h-16 w-full px-margin-desktop flex items-center justify-between border-b border-primary-container">
+          <div class="flex items-center gap-space-lg">
+            <div class="flex items-center gap-space-md">
+              <div class="h-9 w-9 bg-primary-container text-on-primary rounded flex items-center justify-center font-bold text-base shadow-sm border border-primary-container">
+                SETU
+              </div>
+              <div class="flex flex-col">
+                <div class="flex items-center gap-space-sm">
+                  <span class="font-headline-md text-headline-md tracking-tight uppercase text-on-primary font-bold">SETU</span>
+                  <span class="px-space-xs py-0.5 bg-secondary-container text-on-secondary-container text-[10px] font-bold rounded tracking-wider uppercase">SIH26102 APEX</span>
+                </div>
+                <span class="font-label-sm text-label-sm text-primary-fixed opacity-90 hidden sm:inline-block">MoSPI & CAG National Audit & Monitoring Grid</span>
+              </div>
+            </div>
+
+            <div class="h-6 w-[1px] bg-primary-container hidden md:block"></div>
+
+            <div class="hidden lg:flex items-center gap-space-sm font-label-sm text-label-sm text-primary-fixed">
+              <span class="material-symbols-outlined text-[16px]">shield</span>
+              <span>${officerProfile.roleBadge}</span>
+              <span class="text-primary-fixed-dim">/</span>
+              <span class="text-on-primary font-medium">${displayRole}</span>
+            </div>
           </div>
-          <button type="button" class="setu-logout-btn" id="setu-logout-button">Logout</button>
+
+          <div class="hidden xl:flex items-center gap-space-md px-space-md py-1 bg-primary-container/80 rounded border border-primary-container text-primary-fixed font-label-sm text-label-sm">
+            <span class="inline-block w-2 h-2 rounded-full bg-tertiary-fixed animate-pulse"></span>
+            <span class="text-on-primary font-semibold">AUDIT RUNTIME:</span>
+            <span>₹4,821.50 Cr Tracked</span>
+            <span class="text-primary-fixed-dim">|</span>
+            <span>98.4% Geo-Tagged</span>
+          </div>
+
+          <div class="flex items-center gap-space-md">
+            <div class="hidden md:flex items-center text-xs font-mono bg-primary-container px-2.5 py-1 rounded text-primary-fixed">
+              TTL: 42:10
+            </div>
+
+            <div class="h-6 w-[1px] bg-primary-container"></div>
+
+            <div class="flex items-center gap-space-sm">
+              <div class="text-right hidden sm:block">
+                <div class="font-label-md text-label-md text-on-primary leading-tight">${officerProfile.name}</div>
+                <div class="font-label-sm text-label-sm text-primary-fixed-dim">${officerProfile.title}</div>
+              </div>
+              <div class="w-8 h-8 rounded-full bg-primary-container border border-primary-fixed-dim flex items-center justify-center text-on-primary">
+                <span class="material-symbols-outlined text-[18px]">person</span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              class="px-3 py-1 bg-primary-container hover:bg-error-container hover:text-on-error-container text-primary-fixed text-xs font-semibold rounded border border-primary-container transition-colors cursor-pointer"
+              id="setu-logout-button"
+              title="Logout of session"
+            >
+              Sign Out
+            </button>
+          </div>
         </div>
       </header>
 
-      <!-- Workspace: Sidebar + Main Content -->
-      <div class="setu-workspace">
-        <aside class="setu-sidebar">
-          <div class="setu-nav-group-title">${groupTitle}</div>
-          <nav>
-            <ul class="setu-nav-list">
-              ${navHtml}
-            </ul>
-          </nav>
-        </aside>
+      <!-- Fixed Left Sidebar -->
+      <aside class="fixed left-0 top-16 bottom-0 w-64 bg-surface-container-lowest border-r border-outline-variant z-40 flex flex-col justify-between overflow-y-auto">
+        <div class="py-space-md">
+          <div class="px-space-md pb-space-sm border-b border-outline-variant mb-space-sm">
+            <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">
+              ${groupTitle}
+            </span>
+          </div>
 
-        <!-- Main Content Area -->
-        <main class="setu-main" id="setu-main-content">
+          <nav class="space-y-1 px-space-xs">
+            ${navHtml}
+          </nav>
+        </div>
+
+        <!-- Sidebar Bottom: Secured Node Status -->
+        <div class="p-space-md border-t border-outline-variant bg-surface-container-low">
+          <div class="flex items-start gap-space-sm">
+            <span class="material-symbols-outlined text-secondary text-[20px] shrink-0 mt-0.5">encrypted</span>
+            <div class="flex flex-col">
+              <span class="font-label-sm text-label-sm font-semibold text-on-surface">NIC Gateway Active</span>
+              <span class="font-label-sm text-label-sm text-on-surface-variant">Secured 256-bit GovNet Node · ${officerProfile.tag}</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Content Area Offset by Sidebar and Header -->
+      <div class="pl-64">
+        <main class="relative pt-16 min-h-screen bg-surface w-full px-margin-desktop py-space-lg" id="setu-main-content">
           ${defaultContent}
         </main>
-      </div>
 
-      <!-- Minimal Single-Line Disclaimer Footer -->
-      <footer class="setu-footer">
-        <span class="setu-footer-text">${disclaimer}</span>
-      </footer>
+        <footer class="w-full bg-surface-container-lowest border-t border-outline-variant py-space-md px-margin-desktop">
+          <div class="flex flex-col sm:flex-row items-center justify-between gap-space-sm text-on-surface-variant font-label-sm text-label-sm">
+            <div>Government of India • Ministry of Statistics and Programme Implementation (MoSPI) • CAG India</div>
+            <div class="flex items-center gap-space-md">
+              <span>National Informatics Centre (NIC) Cloud</span>
+              <span>Version 4.2.1-SEC</span>
+            </div>
+          </div>
+        </footer>
+      </div>
     </div>
   `;
 }
@@ -405,8 +539,12 @@ export function mountLayout(mountEl, options = {}) {
   navLinks.forEach((link) => {
     link.addEventListener('click', (e) => {
       e.preventDefault();
-      navLinks.forEach((l) => l.classList.remove('active'));
-      link.classList.add('active');
+      navLinks.forEach((l) => {
+        l.classList.remove('bg-primary-container', 'text-on-primary', 'font-semibold');
+        l.classList.add('text-on-surface-variant');
+      });
+      link.classList.remove('text-on-surface-variant');
+      link.classList.add('bg-primary-container', 'text-on-primary', 'font-semibold');
 
       const navId = link.getAttribute('data-nav-id');
       if (mainContentEl) {

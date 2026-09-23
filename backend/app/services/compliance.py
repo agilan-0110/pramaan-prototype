@@ -224,8 +224,12 @@ def evaluate_deadline_breach(
     days_delayed = project.get("daysDelayed", 0)
 
     # Compute execution timeline from daysSinceStart if provided, else baseline 365 + daysDelayed
+    status = project.get("status", "")
+    phys = float(project.get("physicalProgress", 0.0) or 0.0)
     if "daysSinceStart" in project and project["daysSinceStart"] is not None:
         elapsed_days = int(project["daysSinceStart"])
+    elif status in ("Proposed", "Sanctioned") and phys == 0.0 and days_delayed == 0:
+        elapsed_days = 0
     else:
         elapsed_days = BASELINE_SCHEDULED_DAYS + days_delayed
 

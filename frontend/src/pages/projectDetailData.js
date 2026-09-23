@@ -9378,24 +9378,21 @@ const FALLBACK_COMPLAINTS = [
   }
 ];
 
-let fetchedProjects = null;
-let fetchedComplaints = null;
+export let allProjects = FALLBACK_PROJECTS;
+export let allComplaints = FALLBACK_COMPLAINTS;
 
-try {
-  if (typeof fetch === 'function') {
-    const [prRes, cmRes] = await Promise.all([
-      fetch('/backend/app/data/mockProjects.json'),
-      fetch('/backend/app/data/mockComplaints.json'),
-    ]);
-    if (prRes.ok) fetchedProjects = await prRes.json();
-    if (cmRes.ok) fetchedComplaints = await cmRes.json();
-  }
-} catch {
-  // Non-HTTP environment or offline: fallback gracefully
+export async function initProjectData() {
+  if (typeof fetch !== 'function') return;
+  try {
+    const res = await fetch('http://127.0.0.1:8000/projects');
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        allProjects = data;
+      }
+    }
+  } catch {}
 }
-
-export const allProjects = fetchedProjects || FALLBACK_PROJECTS;
-export const allComplaints = fetchedComplaints || FALLBACK_COMPLAINTS;
 
 /**
  * Finds a project record by ID.
@@ -11352,40 +11349,626 @@ export function getProjectDetailHtml(projectId, activeTab = 'overview') {
     `;
   }
 
+  
+  const sanctionedLakhs = ((p.sanctionedAmount || 28000000) / 100000).toFixed(2);
+  const disbursedLakhs = ((p.expenditure || 18200000) / 100000).toFixed(2);
+  const ucVerifiedLakhs = (((p.expenditure || 18200000) * 0.9) / 100000).toFixed(2);
+  const physProg = p.physicalProgress != null ? p.physicalProgress : 72;
+
+  // Rich Stitch Stitch Two-Column Overview Extension when activeTab === 'overview'
+  const stitchOverviewColumnsHtml = `
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter-desktop mt-space-lg">
+      <!-- Left Column (8 Columns): Financial Stepper, Milestone Gating & Evidence Gallery -->
+      <div class="lg:col-span-8 space-y-space-xl">
+        <!-- Module 1: Milestone Progress & Multi-Tranche Disbursement Ledger -->
+        <section class="bg-surface-container-lowest rounded p-space-lg shadow-sm border border-outline-variant/30">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm pb-space-md border-b border-outline-variant/20">
+            <div>
+              <h2 class="font-headline-md text-headline-md text-primary font-bold">Financial &amp; Milestone Disbursement Ledger</h2>
+              <p class="text-body-sm font-body-sm text-on-surface-variant">Gated tranche releases under MPLADS Guidelines 2023 §7.4 based on physical verification logs.</p>
+            </div>
+            <span class="px-2 py-1 rounded bg-surface-container text-primary font-mono text-label-sm font-label-sm self-start sm:self-auto font-semibold">
+              Escrow Ref: SBI-PFMS-993182
+            </span>
+          </div>
+          <!-- Visual Milestone Stepper Flow -->
+          <div class="py-space-md">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-space-sm relative">
+              <!-- Step 1: Foundation & Substructure -->
+              <div class="bg-surface-container-low rounded p-space-sm flex flex-col justify-between border border-outline-variant/20">
+                <div class="flex items-center justify-between pb-space-xs">
+                  <span class="w-6 h-6 rounded-full bg-tertiary-container text-on-tertiary flex items-center justify-center text-label-sm font-label-sm">
+                    <span class="material-symbols-outlined text-[14px]">done</span>
+                  </span>
+                  <span class="text-label-sm font-label-sm font-mono text-tertiary-container font-semibold">100% Done</span>
+                </div>
+                <div>
+                  <h4 class="text-label-md font-label-md text-primary font-bold">1. Substructure</h4>
+                  <p class="text-body-sm font-body-sm text-on-surface-variant pt-0.5">Pile foundations &amp; plinth</p>
+                </div>
+                <div class="mt-space-sm pt-space-xs bg-surface-container-lowest rounded p-1.5 text-label-sm font-label-sm font-mono text-on-surface">
+                  Tranche 1: ₹70.0L [PAID]
+                </div>
+              </div>
+              <!-- Step 2: Superstructure Framework -->
+              <div class="bg-surface-container-low rounded p-space-sm flex flex-col justify-between border border-outline-variant/20">
+                <div class="flex items-center justify-between pb-space-xs">
+                  <span class="w-6 h-6 rounded-full bg-tertiary-container text-on-tertiary flex items-center justify-center text-label-sm font-label-sm">
+                    <span class="material-symbols-outlined text-[14px]">done</span>
+                  </span>
+                  <span class="text-label-sm font-label-sm font-mono text-tertiary-container font-semibold">100% Done</span>
+                </div>
+                <div>
+                  <h4 class="text-label-md font-label-md text-primary font-bold">2. Superstructure</h4>
+                  <p class="text-body-sm font-body-sm text-on-surface-variant pt-0.5">RCC columns &amp; 3 floor slabs</p>
+                </div>
+                <div class="mt-space-sm pt-space-xs bg-surface-container-lowest rounded p-1.5 text-label-sm font-label-sm font-mono text-on-surface">
+                  Tranche 2: ₹112.0L [PAID]
+                </div>
+              </div>
+              <!-- Step 3: Masonry, Roofing & MEP (Active) -->
+              <div class="bg-secondary-fixed rounded p-space-sm flex flex-col justify-between border border-secondary-fixed-dim">
+                <div class="flex items-center justify-between pb-space-xs">
+                  <span class="w-6 h-6 rounded-full bg-secondary text-on-secondary flex items-center justify-center text-label-sm font-label-sm font-bold animate-pulse">
+                    3
+                  </span>
+                  <span class="text-label-sm font-label-sm font-mono text-on-secondary-container font-bold">80% Active</span>
+                </div>
+                <div>
+                  <h4 class="text-label-md font-label-md text-on-secondary-fixed font-bold">3. Masonry &amp; MEP</h4>
+                  <p class="text-body-sm font-body-sm text-on-secondary-container pt-0.5">Brickwork, electrical &amp; plumbing</p>
+                </div>
+                <div class="mt-space-sm pt-space-xs bg-surface-container-lowest rounded p-1.5 text-label-sm font-label-sm font-mono text-secondary font-bold">
+                  Tranche 3: ₹56.0L [GATED]
+                </div>
+              </div>
+              <!-- Step 4: Finishing & Statutory Handover -->
+              <div class="bg-surface-container-low rounded p-space-sm flex flex-col justify-between opacity-80 border border-outline-variant/20">
+                <div class="flex items-center justify-between pb-space-xs">
+                  <span class="w-6 h-6 rounded-full bg-surface-variant text-on-surface-variant flex items-center justify-center text-label-sm font-label-sm">
+                    4
+                  </span>
+                  <span class="text-label-sm font-label-sm font-mono text-on-surface-variant">Scheduled</span>
+                </div>
+                <div>
+                  <h4 class="text-label-md font-label-md text-primary font-bold">4. Finishing &amp; UC</h4>
+                  <p class="text-body-sm font-body-sm text-on-surface-variant pt-0.5">HVAC, lift, safety audit &amp; UC</p>
+                </div>
+                <div class="mt-space-sm pt-space-xs bg-surface-container-lowest rounded p-1.5 text-label-sm font-label-sm font-mono text-on-surface-variant">
+                  Tranche 4: ₹42.0L [RETAINED]
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Multi-Tranche Disbursement Tabular Breakdown -->
+          <div class="overflow-x-auto mt-space-md">
+            <table class="w-full text-left border-collapse text-body-sm font-body-sm">
+              <thead>
+                <tr class="bg-surface-container text-on-surface-variant uppercase text-label-sm font-label-sm">
+                  <th class="py-2.5 px-3 font-semibold">Tranche #</th>
+                  <th class="py-2.5 px-3 font-semibold">Sanction Amount</th>
+                  <th class="py-2.5 px-3 font-semibold">Release Condition</th>
+                  <th class="py-2.5 px-3 font-semibold">Voucher / UTR</th>
+                  <th class="py-2.5 px-3 font-semibold text-right">Status</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-surface-variant">
+                <tr class="hover:bg-surface-container-low transition-colors">
+                  <td class="py-2 px-3 font-semibold text-primary">Tranche 1 (Mobilization)</td>
+                  <td class="py-2 px-3 font-mono font-semibold">₹ 70,00,000</td>
+                  <td class="py-2 px-3 text-on-surface-variant">Initial mobilization + Soil test approvals</td>
+                  <td class="py-2 px-3 font-mono text-label-sm font-label-sm">RBI-NEFT-2024-91823</td>
+                  <td class="py-2 px-3 text-right">
+                    <span class="px-2 py-0.5 rounded bg-tertiary-fixed text-on-tertiary-fixed text-label-sm font-label-sm font-semibold">Released (22 Apr 2024)</span>
+                  </td>
+                </tr>
+                <tr class="hover:bg-surface-container-low transition-colors">
+                  <td class="py-2 px-3 font-semibold text-primary">Tranche 2 (Stage-1 Plinth)</td>
+                  <td class="py-2 px-3 font-mono font-semibold">₹ 1,12,00,000</td>
+                  <td class="py-2 px-3 text-on-surface-variant">Superstructure completion + Physical inspection check</td>
+                  <td class="py-2 px-3 font-mono text-label-sm font-label-sm">RBI-NEFT-2024-66319</td>
+                  <td class="py-2 px-3 text-right">
+                    <span class="px-2 py-0.5 rounded bg-tertiary-fixed text-on-tertiary-fixed text-label-sm font-label-sm font-semibold">Released (10 Oct 2024)</span>
+                  </td>
+                </tr>
+                <tr class="hover:bg-surface-container-low transition-colors bg-secondary-fixed/20">
+                  <td class="py-2 px-3 font-semibold text-primary">Tranche 3 (Stage-2 Masonry)</td>
+                  <td class="py-2 px-3 font-mono font-semibold">₹ 56,00,000</td>
+                  <td class="py-2 px-3 text-on-surface-variant">80% internal brickwork + certified drone inspection</td>
+                  <td class="py-2 px-3 font-mono text-label-sm font-label-sm">PENDING-DIV-CH-04</td>
+                  <td class="py-2 px-3 text-right">
+                    <span class="px-2 py-0.5 rounded bg-secondary-fixed text-on-secondary-container text-label-sm font-label-sm font-semibold">Gated (Field Inspection Due)</span>
+                  </td>
+                </tr>
+                <tr class="hover:bg-surface-container-low transition-colors">
+                  <td class="py-2 px-3 font-semibold text-primary">Tranche 4 (Final Handover)</td>
+                  <td class="py-2 px-3 font-mono font-semibold">₹ 42,00,000</td>
+                  <td class="py-2 px-3 text-on-surface-variant">100% completion certificate + statutory Utilization Cert (UC)</td>
+                  <td class="py-2 px-3 font-mono text-label-sm font-label-sm">RETAINED-ESCROW</td>
+                  <td class="py-2 px-3 text-right">
+                    <span class="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant text-label-sm font-label-sm">Retained</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Module 2: Contractor Inspection Photo Gallery with CV Badges -->
+        <section class="bg-surface-container-lowest rounded p-space-lg shadow-sm border border-outline-variant/30">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm pb-space-md border-b border-outline-variant/20">
+            <div>
+              <div class="flex items-center gap-space-xs">
+                <h2 class="font-headline-md text-headline-md text-primary font-bold">Contractor Geo-Tagged Evidence Vault</h2>
+                <span class="px-2 py-0.5 rounded bg-tertiary-fixed text-on-tertiary-fixed text-label-sm font-label-sm font-semibold flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[13px]">psychology</span> Simulated AI Audited
+                </span>
+              </div>
+              <p class="text-body-sm font-body-sm text-on-surface-variant">Automated computer vision detection applied to verify asset progress on site.</p>
+            </div>
+            <div class="flex items-center gap-space-xs text-label-sm font-label-sm text-on-surface-variant">
+              <span class="material-symbols-outlined text-[16px] text-tertiary-container">satellite_alt</span>
+              <span>Geofence: ± 4.2m accuracy</span>
+            </div>
+          </div>
+          <!-- Photo Card Grid (4 Verified Photo Cards) -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-gutter-desktop mt-space-md">
+            <!-- Photo Card 1: Substructure Slab Casting -->
+            <div class="bg-surface-container-low rounded overflow-hidden shadow-sm flex flex-col justify-between border border-outline-variant/20">
+              <div class="relative w-full h-48 bg-surface-container">
+                <img class="w-full h-full object-cover" data-alt="High-resolution site inspection photograph showing heavy reinforced concrete foundation piles in Chennai" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDYTCmAyi8LLpTlAsMEaJHFKhkjsyF1KAGnHBnxiLLNrLDW1H18-TvsxkgFl1fW84c4DwERkPwyc-YcD3xXw8wmHx9fOgUnDwe_NyqWiQU6hbXioTkDiGSBMVz95uxRtKrnQ-2oH6HyvfFxDD6V-xCj49kPRnLOPDIAJ-t8k4DP_2ZomB6q6uEsuGXjhEiBDM3WpbK3NJrQE5NNq2VOZS2MYcsCix5sYn4ZITAofqSZB9An2jup3an_"/>
+                <div class="absolute top-2 left-2 flex flex-col gap-1">
+                  <span class="px-2 py-0.5 rounded bg-inverse-surface/90 text-inverse-on-surface text-label-sm font-label-sm font-mono flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[13px] text-tertiary-fixed-dim">my_location</span>
+                    13.0827° N, 80.2707° E
+                  </span>
+                  <span class="px-2 py-0.5 rounded bg-tertiary-container/95 text-on-tertiary text-label-sm font-label-sm font-semibold flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[13px]">psychology</span>
+                    CV: RCC Pile Cap (98.4% Match)
+                  </span>
+                </div>
+                <div class="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-inverse-surface/80 text-inverse-on-surface text-label-sm font-label-sm font-mono">
+                  12 Jun 2024 · 11:24 IST
+                </div>
+              </div>
+              <div class="p-space-sm space-y-1">
+                <div class="flex justify-between items-start">
+                  <h4 class="text-label-md font-label-md text-primary font-bold">Piling &amp; Raft Foundation Curing</h4>
+                  <span class="text-label-sm font-label-sm text-tertiary-container font-semibold">STAGE 1 PASS</span>
+                </div>
+                <p class="text-body-sm font-body-sm text-on-surface-variant">Concrete cube strength certification: M30 grade certified by PWD Quality Assurance Wing.</p>
+                <div class="pt-space-xs text-label-sm font-label-sm text-on-surface-variant font-mono flex items-center justify-between">
+                  <span>Uploaded by: Coromandel InfraCon</span>
+                  <span class="text-primary font-semibold">Hash: #a982f...d1</span>
+                </div>
+              </div>
+            </div>
+            <!-- Photo Card 2: 2nd Floor Structural Framing -->
+            <div class="bg-surface-container-low rounded overflow-hidden shadow-sm flex flex-col justify-between border border-outline-variant/20">
+              <div class="relative w-full h-48 bg-surface-container">
+                <img class="w-full h-full object-cover" data-alt="Civil construction site view of modern multi-story institutional office in Chennai" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAtC4DSMo-9fLKhkBFWPjRc5BBhV7Rylr_Tr_hVv9iPVdoO3MyVX-ZfVWZadLLIxpTpytkuAhLIdfL2urc9esOa8GnMkS1Kr3P5RD2etzijAK7xI67b8UND-DLPw9dbU3ft1e7NzYsrH5AvlD21SjAFqyFKHoP2xtlRcuw9rI_g0Ud57grk3HZDdyPe6VTh8iS7R52JYSonU3EmrasvZJMakYxzkF0leSnGohG6hs3VtPK5lD_1LnhS"/>
+                <div class="absolute top-2 left-2 flex flex-col gap-1">
+                  <span class="px-2 py-0.5 rounded bg-inverse-surface/90 text-inverse-on-surface text-label-sm font-label-sm font-mono flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[13px] text-tertiary-fixed-dim">my_location</span>
+                    13.0828° N, 80.2709° E
+                  </span>
+                  <span class="px-2 py-0.5 rounded bg-tertiary-container/95 text-on-tertiary text-label-sm font-label-sm font-semibold flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[13px]">psychology</span>
+                    CV: Slab Shuttering &amp; Beams (96.2%)
+                  </span>
+                </div>
+                <div class="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-inverse-surface/80 text-inverse-on-surface text-label-sm font-label-sm font-mono">
+                  18 Sep 2024 · 16:45 IST
+                </div>
+              </div>
+              <div class="p-space-sm space-y-1">
+                <div class="flex justify-between items-start">
+                  <h4 class="text-label-md font-label-md text-primary font-bold">Level 2 Column &amp; Slab Pouring</h4>
+                  <span class="text-label-sm font-label-sm text-tertiary-container font-semibold">STAGE 2 PASS</span>
+                </div>
+                <p class="text-body-sm font-body-sm text-on-surface-variant">Reinforcement spacing verified against structural blueprints approved by consultant.</p>
+                <div class="pt-space-xs text-label-sm font-label-sm text-on-surface-variant font-mono flex items-center justify-between">
+                  <span>Uploaded by: Coromandel InfraCon</span>
+                  <span class="text-primary font-semibold">Hash: #b771e...88</span>
+                </div>
+              </div>
+            </div>
+            <!-- Photo Card 3: Brickwork & Wall Masonry -->
+            <div class="bg-surface-container-low rounded overflow-hidden shadow-sm flex flex-col justify-between border border-outline-variant/20">
+              <div class="relative w-full h-48 bg-surface-container">
+                <img class="w-full h-full object-cover" data-alt="Interior site shot showing red brick masonry partition walls" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAXLjLzkC-Scp8FGAedZSEX4hx_7k2jxSWl2R1Cnpedk0Vx4gtVoiomW1BsQgdoHPnresVidmKYXCz-32IMad58FrVxy--xCoGDVn3D5kIQ8hxnErngXNe0cVMpgOndDoKcrcfM6f_FpNYKJgwJMlKcWRxKp7Bs1nuVIcgxmuM-nqDurPkpG8xSZS1-ML4-kIxJ120g7XAeyt1dnLvv2brnxE1HhhQiKsVpBGtZDQ1cydeoGbMNiHsf"/>
+                <div class="absolute top-2 left-2 flex flex-col gap-1">
+                  <span class="px-2 py-0.5 rounded bg-inverse-surface/90 text-inverse-on-surface text-label-sm font-label-sm font-mono flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[13px] text-tertiary-fixed-dim">my_location</span>
+                    13.0826° N, 80.2708° E
+                  </span>
+                  <span class="px-2 py-0.5 rounded bg-tertiary-container/95 text-on-tertiary text-label-sm font-label-sm font-semibold flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[13px]">psychology</span>
+                    CV: Fly-Ash Brickwork (94.8%)
+                  </span>
+                </div>
+                <div class="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-inverse-surface/80 text-inverse-on-surface text-label-sm font-label-sm font-mono">
+                  04 Jan 2025 · 09:12 IST
+                </div>
+              </div>
+              <div class="p-space-sm space-y-1">
+                <div class="flex justify-between items-start">
+                  <h4 class="text-label-md font-label-md text-primary font-bold">External &amp; Internal Brick Masonry</h4>
+                  <span class="text-label-sm font-label-sm text-secondary font-bold">STAGE 3 IN AUDIT</span>
+                </div>
+                <p class="text-body-sm font-body-sm text-on-surface-variant">Moisture retention checking and mortar ratio testing conducted by Assistant Executive Engineer.</p>
+                <div class="pt-space-xs text-label-sm font-label-sm text-on-surface-variant font-mono flex items-center justify-between">
+                  <span>Uploaded by: Coromandel InfraCon</span>
+                  <span class="text-primary font-semibold">Hash: #f041a...5c</span>
+                </div>
+              </div>
+            </div>
+            <!-- Photo Card 4: Electrical Conduit & Ducting -->
+            <div class="bg-surface-container-low rounded overflow-hidden shadow-sm flex flex-col justify-between border border-outline-variant/20">
+              <div class="relative w-full h-48 bg-surface-container">
+                <img class="w-full h-full object-cover" data-alt="Technical photo of electrical PVC conduit routing and fire suppression pipelines" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB8g2Xa4n95tfd7YMOq43mzRRnCukAitQEs45LbfCNR6iKBXt-NOewkhAWxA_daLASX39y5IUJ8Pd3oNNbzxliKuOQfY-0Q-v91TD3njFPO-BwwR8Fh4bzmHmTCI8sGB12yxUqQeSMmAFbJEz4zcb6n7Y8Res7wCAVoE76Htg3VTESvJX1JBkKCOplH49RjaLl0JekKiy0S10NS_JA7F3R1RS-B16q7ayRwzU6Z618BrgfFJNXAkxO1"/>
+                <div class="absolute top-2 left-2 flex flex-col gap-1">
+                  <span class="px-2 py-0.5 rounded bg-inverse-surface/90 text-inverse-on-surface text-label-sm font-label-sm font-mono flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[13px] text-tertiary-fixed-dim">my_location</span>
+                    13.0827° N, 80.2706° E
+                  </span>
+                  <span class="px-2 py-0.5 rounded bg-tertiary-container/95 text-on-tertiary text-label-sm font-label-sm font-semibold flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[13px]">psychology</span>
+                    CV: Conduit Installation (91.0%)
+                  </span>
+                </div>
+                <div class="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-inverse-surface/80 text-inverse-on-surface text-label-sm font-label-sm font-mono">
+                  12 Feb 2025 · 14:05 IST
+                </div>
+              </div>
+              <div class="p-space-sm space-y-1">
+                <div class="flex justify-between items-start">
+                  <h4 class="text-label-md font-label-md text-primary font-bold">MEP Trunking &amp; Conduit Lines</h4>
+                  <span class="text-label-sm font-label-sm text-secondary font-bold">STAGE 3 IN AUDIT</span>
+                </div>
+                <p class="text-body-sm font-body-sm text-on-surface-variant">ISI marked fire-retardant conduits installed per National Building Code (NBC 2016).</p>
+                <div class="pt-space-xs text-label-sm font-label-sm text-on-surface-variant font-mono flex items-center justify-between">
+                  <span>Uploaded by: Coromandel InfraCon</span>
+                  <span class="text-primary font-semibold">Hash: #82e99...1b</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Right Column (4 Columns): Citizen Observation Timeline & Public Action Module -->
+      <div class="lg:col-span-4 space-y-space-xl">
+        <!-- Citizen Ground-Truth Verification Section -->
+        <section class="bg-surface-container-lowest rounded p-space-lg shadow-sm border border-outline-variant/30">
+          <div class="flex items-center justify-between pb-space-sm border-b border-outline-variant/20">
+            <div class="flex items-center gap-space-xs">
+              <span class="material-symbols-outlined text-secondary text-[20px]">groups</span>
+              <h3 class="font-headline-md text-headline-md text-primary font-bold">Citizen Ground-Truth Feed</h3>
+            </div>
+            <span class="text-label-sm font-label-sm bg-surface-container px-2 py-0.5 rounded font-mono text-primary font-semibold">
+              4 Audits Logged
+            </span>
+          </div>
+          <p class="text-body-sm font-body-sm text-on-surface-variant py-space-sm">
+            Unfiltered public social audits verified against official specifications by District Nodal Teams.
+          </p>
+          <!-- Citizen Observation Timeline Items -->
+          <div class="space-y-space-md">
+            <!-- Item 1: Citizen Verified -->
+            <div class="bg-surface-container-low rounded p-space-sm space-y-2 border border-outline-variant/20">
+              <div class="flex items-start justify-between gap-2">
+                <div class="flex items-center gap-2">
+                  <div class="w-7 h-7 rounded-full bg-surface-container flex items-center justify-center font-bold text-primary text-label-sm font-label-sm">
+                    KR
+                  </div>
+                  <div>
+                    <span class="font-semibold text-on-surface text-label-md font-label-md block">K. Radhakrishnan</span>
+                    <span class="text-label-sm font-label-sm text-on-surface-variant font-mono">Resident · Egmore Ward 77</span>
+                  </div>
+                </div>
+                <span class="px-2 py-0.5 rounded bg-tertiary-fixed text-on-tertiary-fixed text-label-sm font-label-sm font-semibold">
+                  Inspected &amp; Closed
+                </span>
+              </div>
+              <p class="text-body-sm font-body-sm text-on-surface">
+                "Verified boundary wall alignment. Construction dust screen barriers installed along main road. Workers wearing safety gear."
+              </p>
+              <div class="bg-surface-container rounded p-space-xs text-label-sm font-label-sm text-on-surface-variant flex items-center gap-2">
+                <span class="material-symbols-outlined text-[16px] text-tertiary-container">verified_user</span>
+                <span>Inspected by PWD Technical Officer (Er. S. Murugan, AEE) on 28 Jan 2025</span>
+              </div>
+            </div>
+            <!-- Item 2: Citizen Observation Pending Technical Action -->
+            <div class="bg-surface-container-low rounded p-space-sm space-y-2 border border-outline-variant/20">
+              <div class="flex items-start justify-between gap-2">
+                <div class="flex items-center gap-2">
+                  <div class="w-7 h-7 rounded-full bg-surface-container flex items-center justify-center font-bold text-primary text-label-sm font-label-sm">
+                    ST
+                  </div>
+                  <div>
+                    <span class="font-semibold text-on-surface text-label-md font-label-md block">S. Thenmozhi</span>
+                    <span class="text-label-sm font-label-sm text-on-surface-variant font-mono">Civil Society Volunteer</span>
+                  </div>
+                </div>
+                <span class="px-2 py-0.5 rounded bg-secondary-fixed text-on-secondary-container text-label-sm font-label-sm font-semibold">
+                  Action Assigned
+                </span>
+              </div>
+              <p class="text-body-sm font-body-sm text-on-surface">
+                "Noticed water stagnation near southeastern basement excavation after rain. Drainage sump pump needed."
+              </p>
+              <div class="bg-surface-container rounded p-space-xs text-label-sm font-label-sm text-on-surface-variant flex items-center gap-2">
+                <span class="material-symbols-outlined text-[16px] text-secondary">pending_actions</span>
+                <span>Work Order issued to Contractor for pump de-watering (Ref: #OBS-992)</span>
+              </div>
+            </div>
+            <!-- Item 3: Citizen Material Observation -->
+            <div class="bg-surface-container-low rounded p-space-sm space-y-2 border border-outline-variant/20">
+              <div class="flex items-start justify-between gap-2">
+                <div class="flex items-center gap-2">
+                  <div class="w-7 h-7 rounded-full bg-surface-container flex items-center justify-center font-bold text-primary text-label-sm font-label-sm">
+                    VA
+                  </div>
+                  <div>
+                    <span class="font-semibold text-on-surface text-label-md font-label-md block">V. Anand Kumar</span>
+                    <span class="text-label-sm font-label-sm text-on-surface-variant font-mono">Structural Engineer (Citizen)</span>
+                  </div>
+                </div>
+                <span class="px-2 py-0.5 rounded bg-tertiary-fixed text-on-tertiary-fixed text-label-sm font-label-sm font-semibold">
+                  Technical Sign-off
+                </span>
+              </div>
+              <p class="text-body-sm font-body-sm text-on-surface">
+                "Sampled curing quality of 2nd floor columns. Surface moisture retention was optimal. Photographic evidence uploaded."
+              </p>
+              <div class="bg-surface-container rounded p-space-xs text-label-sm font-label-sm text-on-surface-variant flex items-center gap-2">
+                <span class="material-symbols-outlined text-[16px] text-tertiary-container">done_all</span>
+                <span>MoSPI SIH Audit Engine auto-correlated with Contractor Milestone Log</span>
+              </div>
+            </div>
+          </div>
+          <!-- Submit Observation Action Trigger -->
+          <div class="mt-space-lg pt-space-md border-t border-surface-variant">
+            <button class="w-full py-space-sm px-space-md bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md rounded flex items-center justify-center gap-2 transition-colors shadow-sm" id="open-audit-modal-btn" type="button" onclick="document.getElementById('audit-modal')?.classList.remove('hidden')">
+              <span class="material-symbols-outlined text-[18px]">add_a_photo</span>
+              <span>Submit Citizen Audit / Geo-Report</span>
+            </button>
+            <p class="text-label-sm font-label-sm text-on-surface-variant text-center pt-2">
+              Protected under Section 11 of MPLADS Social Audit Framework. Whistleblower identity protected.
+            </p>
+          </div>
+        </section>
+
+        <!-- Statutory Nodal Contact & Sanction Order Verification -->
+        <section class="bg-surface-container-low rounded p-space-md shadow-sm space-y-space-sm border border-outline-variant/30">
+          <h4 class="text-label-md font-label-md text-primary font-bold uppercase tracking-wider flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-[18px] text-primary">policy</span>
+            Statutory Accountability Matrix
+          </h4>
+          <div class="space-y-space-xs text-body-sm font-body-sm">
+            <div class="p-2 bg-surface-container-lowest rounded border border-outline-variant/20">
+              <span class="block text-label-sm font-label-sm text-on-surface-variant">Member of Parliament (Lok Sabha)</span>
+              <span class="font-bold text-on-surface">${p.mpName || 'Central Chennai MP'} (${p.constituency || 'Parliamentary Constituency'})</span>
+              <span class="block text-label-sm font-label-sm text-primary font-mono pt-0.5">MP Recommendation Date: 12 Jan 2024</span>
+            </div>
+            <div class="p-2 bg-surface-container-lowest rounded border border-outline-variant/20">
+              <span class="block text-label-sm font-label-sm text-on-surface-variant">District Authority Contact</span>
+              <span class="font-bold text-on-surface">District Collector &amp; DM (${p.district})</span>
+              <span class="block text-label-sm font-label-sm text-on-surface-variant">Collectorate Complex, ${p.district}, ${p.state}</span>
+              <span class="block text-label-sm font-label-sm text-secondary font-mono pt-0.5">dc.${(p.district || 'chennai').toLowerCase()}@gov.in · 044-25268341</span>
+            </div>
+            <div class="p-2 bg-surface-container-lowest rounded border border-outline-variant/20">
+              <span class="block text-label-sm font-label-sm text-on-surface-variant">Right to Information (RTI) Dossier</span>
+              <div class="flex items-center justify-between pt-1">
+                <span class="font-mono text-label-sm font-label-sm text-on-surface">SANCTION-${p.id}.PDF</span>
+                <a class="text-label-sm font-label-sm font-semibold text-secondary hover:underline flex items-center gap-0.5" href="#" onclick="alert('Downloading Official Sanction Dossier...'); return false;">
+                  <span class="material-symbols-outlined text-[14px]">download</span> Download
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Location Geofence Map Context Widget -->
+        <section class="bg-surface-container-lowest rounded p-space-md shadow-sm space-y-space-sm border border-outline-variant/30">
+          <div class="flex items-center justify-between">
+            <h4 class="text-label-md font-label-md text-primary font-bold uppercase tracking-wider flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-[18px] text-tertiary-container">location_on</span>
+              Sanctioned Site Boundaries
+            </h4>
+            <span class="text-label-sm font-label-sm font-mono text-on-surface-variant">EPSG:4326</span>
+          </div>
+          <div class="w-full h-44 bg-surface-container rounded flex items-center justify-center relative overflow-hidden">
+            <div class="absolute inset-0 bg-surface-container-high/40 flex items-center justify-center pointer-events-none">
+              <div class="bg-surface-container-lowest/90 px-3 py-1.5 rounded shadow text-center border border-outline-variant/30">
+                <span class="block font-mono font-bold text-primary text-label-sm font-label-sm">13.0827° N, 80.2707° E</span>
+                <span class="text-label-sm font-label-sm text-on-surface-variant">Radius: 150m Gated Perimeter</span>
+              </div>
+            </div>
+          </div>
+          <div class="text-label-sm font-label-sm text-on-surface-variant flex items-center justify-between">
+            <span>Perimeter check: Active</span>
+            <span class="text-tertiary-container font-semibold flex items-center gap-1">
+              <span class="w-2 h-2 rounded-full bg-tertiary-container"></span> Drone Survey Verified
+            </span>
+          </div>
+        </section>
+      </div>
+    </div>
+  `;
+
   return `
-    <div class="setu-detail-container">
-      <!-- Breadcrumbs & Back Link -->
-      <div class="setu-detail-top-bar">
-        <a href="#/dashboard" class="setu-back-to-dashboard" id="btn-back-dashboard">
-          ← Return to Projects Audit Dashboard
-        </a>
-        <div style="font-size: var(--setu-font-size-caption); color: var(--setu-color-text-muted);">
-          MPLADS Institutional Project Record
+    <div class="flex flex-col w-full space-y-space-md">
+      <!-- Statutory Breadcrumb & Context Navigation Bar -->
+      <div class="w-full bg-surface-container-low rounded p-space-sm border border-outline-variant/20 flex flex-wrap items-center justify-between gap-space-sm text-label-sm font-label-sm">
+        <div class="flex items-center gap-space-xs text-on-surface-variant flex-wrap">
+          <a class="hover:text-primary transition-colors font-medium" href="#/dashboard">SETU Dashboard</a>
+          <span class="text-outline-variant">/</span>
+          <span class="text-on-surface-variant">${p.state} Register</span>
+          <span class="text-outline-variant">/</span>
+          <span class="text-primary font-semibold">${p.constituency} (${p.district})</span>
+          <span class="text-outline-variant">/</span>
+          <span class="text-on-surface font-mono font-bold">${p.id}</span>
+        </div>
+        <div class="flex items-center gap-space-md">
+          <div class="flex items-center gap-1 text-on-surface-variant">
+            <span class="material-symbols-outlined text-[16px] text-tertiary-container">verified</span>
+            <span class="text-label-sm font-label-sm">PFMS Integrated &amp; Geofenced</span>
+          </div>
+          <button class="flex items-center gap-1 px-space-sm py-0.5 rounded bg-surface-container hover:bg-surface-container-high text-primary transition-colors text-label-sm font-label-sm font-semibold" onclick="window.print()" type="button">
+            <span class="material-symbols-outlined text-[14px]">print</span>
+            <span>Official Gazette Sheet</span>
+          </button>
         </div>
       </div>
 
-      <!-- Project Header Card -->
-      <div class="setu-detail-header-card">
-        <div class="setu-detail-meta-row">
-          <span class="setu-detail-id-tag">${p.id}</span>
-          <span class="setu-status-tag">${p.status}</span>
-          <span class="setu-badge ${badgeClass}">Risk ${p.riskScore} (${riskLevel})</span>
-          <span style="font-size: var(--setu-font-size-small); color: var(--setu-color-text-secondary);">
-            ${p.district}, ${p.state}
-          </span>
+      <!-- Primary Project Summary Banner (High-Density Institutional Ledger Card) -->
+      <div class="w-full bg-surface-container-lowest rounded-lg shadow-sm border border-outline-variant/30 p-space-lg md:p-space-xl">
+        <div class="flex flex-col lg:flex-row items-start justify-between gap-gutter-desktop">
+          <!-- Main Project Metadata Header -->
+          <div class="space-y-space-sm flex-1 min-w-0">
+            <div class="flex flex-wrap items-center gap-space-xs">
+              <span class="px-2 py-0.5 rounded bg-surface-container-high text-primary font-mono text-label-sm font-label-sm font-bold">
+                SANCTION ID: ${p.id}
+              </span>
+              <span class="px-2 py-0.5 rounded bg-secondary-fixed text-on-secondary-container text-label-sm font-label-sm font-semibold flex items-center gap-1">
+                <span class="inline-block w-1.5 h-1.5 rounded-full bg-secondary"></span>
+                Stage: ${p.status}
+              </span>
+              <span class="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant text-label-sm font-label-sm">
+                Sector: ${p.category}
+              </span>
+              <span class="px-2 py-0.5 rounded bg-tertiary-fixed text-on-tertiary-fixed text-label-sm font-label-sm font-semibold flex items-center gap-1">
+                <span class="material-symbols-outlined text-[14px]">lock_clock</span>
+                Milestone Escrow Active
+              </span>
+            </div>
+            <h1 class="font-headline-lg text-headline-lg text-primary tracking-tight font-bold">
+              ${p.name}
+            </h1>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-space-md pt-space-xs text-body-sm font-body-sm">
+              <div>
+                <span class="block text-on-surface-variant text-label-sm font-label-sm uppercase tracking-wider">Implementing Body</span>
+                <span class="font-semibold text-on-surface">${p.implementingAgency || 'State Line Agency'}</span>
+              </div>
+              <div>
+                <span class="block text-on-surface-variant text-label-sm font-label-sm uppercase tracking-wider">Executing Contractor</span>
+                <span class="font-semibold text-on-surface">${p.vendorName || 'Coromandel InfraCon Pvt. Ltd.'}</span>
+              </div>
+              <div>
+                <span class="block text-on-surface-variant text-label-sm font-label-sm uppercase tracking-wider">Statutory Nodal Authority</span>
+                <span class="font-semibold text-on-surface">District Collectorate, ${p.district} / MoSPI</span>
+              </div>
+              <div>
+                <span class="block text-on-surface-variant text-label-sm font-label-sm uppercase tracking-wider">Sanction Date &amp; Gazette</span>
+                <span class="font-semibold text-on-surface">14 Mar 2024 (${p.sanctionOrderNumber || 'GO-MPLAD-192'})</span>
+              </div>
+            </div>
+          </div>
+          <!-- Financial & Physical Progress Radial Summary Widget -->
+          <div class="w-full lg:w-80 flex-shrink-0 bg-surface-container-low rounded p-space-md shadow-sm border border-outline-variant/30">
+            <div class="flex items-center justify-between pb-space-xs">
+              <span class="text-label-md font-label-md text-primary font-bold uppercase tracking-wider">Physical Progress</span>
+              <span class="text-headline-md font-headline-md font-bold text-secondary">${physProg}%</span>
+            </div>
+            <div class="w-full bg-surface-variant rounded-full h-2.5 overflow-hidden">
+              <div class="bg-secondary-container h-full rounded-full transition-all duration-500" style="width: ${physProg}%;"></div>
+            </div>
+            <div class="flex items-center justify-between pt-1 text-label-sm font-label-sm text-on-surface-variant">
+              <span>Stage: Superstructure Complete</span>
+              <span>Target: Dec 2026</span>
+            </div>
+            <div class="mt-space-md pt-space-sm bg-surface-container-lowest rounded p-space-sm space-y-1 border border-outline-variant/20">
+              <div class="flex justify-between items-center text-label-sm font-label-sm">
+                <span class="text-on-surface-variant">Total Sanctioned Outlay:</span>
+                <span class="font-bold font-mono text-primary">₹ ${sanctionedLakhs} Lakhs</span>
+              </div>
+              <div class="flex justify-between items-center text-label-sm font-label-sm">
+                <span class="text-on-surface-variant">Disbursed via PFMS:</span>
+                <span class="font-bold font-mono text-tertiary-container">₹ ${disbursedLakhs} Lakhs</span>
+              </div>
+              <div class="flex justify-between items-center text-label-sm font-label-sm">
+                <span class="text-on-surface-variant">UC Submitted &amp; Verified:</span>
+                <span class="font-bold font-mono text-on-surface">₹ ${ucVerifiedLakhs} Lakhs</span>
+              </div>
+            </div>
+          </div>
         </div>
-        <h1 class="setu-detail-title">${p.name}</h1>
       </div>
 
       <!-- Horizontal Tab Navigation Strip -->
-      <div class="setu-tab-wrapper">
-        <nav class="setu-tab-nav" id="setu-detail-tab-nav">
+      <div class="bg-surface-container-lowest rounded-lg shadow-sm border border-outline-variant/30 p-space-md">
+        <nav class="flex items-center gap-space-xs overflow-x-auto pb-space-xs border-b border-outline-variant/20" id="setu-detail-tab-nav">
           ${tabsHtml}
         </nav>
 
         <!-- Tab Panel Content Area -->
-        <div class="setu-tab-panel" id="setu-detail-tab-content">
+        <div class="pt-space-md" id="setu-detail-tab-content">
           ${tabContentHtml}
+          ${activeTab === 'overview' ? stitchOverviewColumnsHtml : ''}
+        </div>
+      </div>
+
+      <!-- Citizen Audit Modal (Simulated Micro-interaction for Public Reporting) -->
+      <div class="fixed inset-0 z-50 bg-[#111827]/40 flex items-center justify-center hidden p-margin-desktop" id="audit-modal">
+        <div class="bg-surface-container-lowest rounded-lg max-w-lg w-full p-space-lg shadow-xl border border-surface-variant space-y-space-md">
+          <div class="flex items-center justify-between pb-space-xs border-b border-surface-variant">
+            <div>
+              <h3 class="text-headline-md font-headline-md text-primary font-bold">Submit Citizen Ground Observation</h3>
+              <p class="text-body-sm font-body-sm text-on-surface-variant">MPLADS Statutory Social Audit System · SIH26102</p>
+            </div>
+            <button class="text-on-surface-variant hover:text-primary" onclick="document.getElementById('audit-modal')?.classList.add('hidden')" type="button">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+          </div>
+          <form class="space-y-space-sm" id="citizen-audit-form" onsubmit="event.preventDefault(); document.getElementById('audit-success').classList.remove('hidden'); this.classList.add('hidden');">
+            <div>
+              <label class="block text-label-md font-label-md text-on-surface mb-1">Citizen Full Name / Alias <span class="text-error">*</span></label>
+              <input class="w-full px-space-sm py-2 rounded bg-surface border border-outline-variant text-body-md font-body-md focus:border-primary focus:outline-none" placeholder="e.g. Ramesh V." required type="text"/>
+            </div>
+            <div>
+              <label class="block text-label-md font-label-md text-on-surface mb-1">Category of Ground Observation <span class="text-error">*</span></label>
+              <select class="w-full px-space-sm py-2 rounded bg-surface border border-outline-variant text-body-md font-body-md focus:border-primary focus:outline-none" required>
+                <option value="">Select Observation Type...</option>
+                <option value="quality">Material Quality / Workmanship</option>
+                <option value="progress">Physical Work Stoppage / Delay</option>
+                <option value="safety">Public Safety &amp; Dust Mitigation</option>
+                <option value="milestone">Milestone Verification Confirmation</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-label-md font-label-md text-on-surface mb-1">Detailed Findings &amp; Ground Evidence Notes <span class="text-error">*</span></label>
+              <textarea class="w-full px-space-sm py-2 rounded bg-surface border border-outline-variant text-body-md font-body-md focus:border-primary focus:outline-none" placeholder="Describe specific physical work visible on site..." required rows="3"></textarea>
+            </div>
+            <div class="p-space-sm bg-surface-container-low rounded border border-surface-variant">
+              <div class="flex items-center gap-2 text-label-sm font-label-sm text-primary font-semibold mb-1">
+                <span class="material-symbols-outlined text-[16px] text-tertiary-container">location_on</span>
+                <span>GPS Geotag Verification Auto-Acquire</span>
+              </div>
+              <p class="text-label-sm font-label-sm text-on-surface-variant">
+                Browser geolocation coordinates will be stamped onto submitted imagery to match project geofence (${p.district}).
+              </p>
+            </div>
+            <div class="flex items-center justify-end gap-space-sm pt-space-xs">
+              <button class="px-space-md py-2 text-label-md font-label-md text-on-surface-variant hover:bg-surface-container rounded" onclick="document.getElementById('audit-modal')?.classList.add('hidden')" type="button">
+                Cancel
+              </button>
+              <button class="px-space-lg py-2 bg-primary hover:bg-primary-container text-on-primary text-label-md font-label-md font-semibold rounded" type="submit">
+                Submit for Technical Officer Audit
+              </button>
+            </div>
+          </form>
+          <div class="hidden text-center py-space-lg space-y-space-sm" id="audit-success">
+            <span class="material-symbols-outlined text-[48px] text-tertiary-container">check_circle</span>
+            <h4 class="text-headline-md font-headline-md font-bold text-primary">Observation Recorded Successfully</h4>
+            <p class="text-body-sm font-body-sm text-on-surface-variant">
+              Your ground-truth report has been assigned Docket ID <span class="font-mono font-bold text-on-surface">#DOK-${p.id}-104</span>. The Technical Officer has been alerted.
+            </p>
+            <button class="px-space-lg py-2 bg-primary text-on-primary text-label-md font-label-md rounded font-semibold" onclick="document.getElementById('audit-modal')?.classList.add('hidden')" type="button">
+              Return to Ledger
+            </button>
+          </div>
         </div>
       </div>
     </div>

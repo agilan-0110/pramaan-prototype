@@ -15,6 +15,7 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Query, status
 from pydantic import BaseModel, Field
 
 from app.services.alerts import (
+    alerts_service,
     get_alert_by_id,
     get_alerts,
     get_alerts_summary,

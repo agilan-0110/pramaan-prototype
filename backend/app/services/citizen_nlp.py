@@ -279,12 +279,15 @@ class CitizenGroundTruthNLP:
             # Relevance gating factor: if relevance is high (>= 40%), full confidence
             if topical_relevance >= 40.0:
                 gate = 1.0
+            elif topical_relevance >= 10.0:
+                gate = max(0.20, topical_relevance / 40.0)
             else:
-                gate = max(0.45, topical_relevance / 40.0)
+                gate = 0.05
             contradiction_score = int(round(base_score * gate))
             is_contradiction = contradiction_score >= 50
         else:
-            contradiction_score = int(round(negation_res["negationIntensity"] * 100.0))
+            # If not a directional contradiction, negation reflects minor observation or corroboration
+            contradiction_score = min(20, int(round(negation_res["negationIntensity"] * 20.0)))
             is_contradiction = False
 
         # 4. Synthesize Plain-Language Explanation

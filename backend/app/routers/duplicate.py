@@ -138,6 +138,15 @@ def adjudicate_duplicate(
     payload: DuplicateAdjudicationRequest,
     current_user: Optional[Dict[str, Any]] = Depends(get_optional_current_user),
 ) -> Dict[str, Any]:
+    if current_user:
+        role_id = current_user.get("roleId", "")
+        role_name = (current_user.get("role") or "").lower()
+        if "state" not in role_id and "state" not in role_name and role_id not in ("mospi_officer", "central_nodal") and "mospi" not in role_name:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Access denied: Only State Nodal Authority or Central Nodal Agency (MoSPI) can adjudicate duplicate schemes per ROLES.md.",
+            )
+
     from app.services.duplicate import adjudicate_duplicate_pair
     result = adjudicate_duplicate_pair(
         project_a_id=payload.projectAId,

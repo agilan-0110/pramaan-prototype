@@ -99,9 +99,13 @@ def compute_pair_similarity(
     v_name1 = (p1.get("vendorName") or "").strip().lower()
     v_name2 = (p2.get("vendorName") or "").strip().lower()
 
+    GENERIC_SENTINELS = {"pending", "tbd", "unassigned", "not assigned", "n/a", "none", "", "departmental", "departmental execution"}
+    is_valid_vname = v_name1 and v_name2 and (v_name1 not in GENERIC_SENTINELS) and (v_name2 not in GENERIC_SENTINELS)
+    is_valid_vid = v_id1 and v_id2 and (str(v_id1).strip().lower() not in GENERIC_SENTINELS)
+
     vendor_match = bool(
-        (v_id1 and v_id2 and v_id1 == v_id2) or
-        (v_name1 and v_name2 and v_name1 == v_name2)
+        (is_valid_vid and v_id1 == v_id2) or
+        (is_valid_vname and v_name1 == v_name2)
     )
 
     # 5. Cross-Year vs Same-Year Check
@@ -354,6 +358,20 @@ def adjudicate_duplicate_pair(
         "status": "ADJUDICATED",
     }
     ADJUDICATION_STORE[pair_key] = rec
+
+    # Synchronize with master alerts aggregator cache if active
+    try:
+        from app.services.alerts import alerts_service
+        for alert in alerts_service.alerts_cache:
+            if alert.get("alertType") == "DUPLICATE_WORK" and alert.get("projectId") in (project_a_id, project_b_id):
+                if alert.get("status") in ("OPEN", "ESCALATED", "INSPECTION_ORDERED"):
+                    alert["status"] = "RESOLVED_CONFIRMED"
+                    alert["resolvedBy"] = adjudicator
+                    alert["resolvedAt"] = now_iso
+                    alert["resolutionNotes"] = f"Administrative adjudication ({action}) recorded by {adjudicator}. {notes or ''}".strip()
+    except Exception:
+        pass
+
     return rec
 
 

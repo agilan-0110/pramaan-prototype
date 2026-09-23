@@ -96,6 +96,15 @@ def attach_formal_observation(
     payload: AttachObservationRequest,
     current_user: Optional[Dict[str, Any]] = Depends(get_optional_current_user),
 ) -> FormalObservationItem:
+    if current_user:
+        role_id = current_user.get("roleId", "")
+        role_name = (current_user.get("role") or "").lower()
+        if "auditor" not in role_id and "cag" not in role_id and "auditor" not in role_name and "cag" not in role_name:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Access denied: Only Auditor / CAG is authorized to attach formal statutory audit observations per ROLES.md.",
+            )
+
     try:
         obs = audit_service.attach_observation(
             project_id=payload.projectId,

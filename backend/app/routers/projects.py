@@ -583,8 +583,6 @@ def submit_project_proposal(
 ) -> Dict[str, Any]:
     """Creates a new project proposal record submitted by MP Office."""
     now = datetime.now(timezone.utc)
-    proposal_id = f"PROP-TN-{now.strftime('%Y%m%d%H%M%S')}"
-
     # Determine constituency, district, and MP details from caller's token or defaults
     constituency = "Chennai Central"
     district = "Chennai"
@@ -614,6 +612,16 @@ def submit_project_proposal(
             state = proposal.state
         constituency = "Nominated (Rajya Sabha)"
         proposal_id = f"PROP-NOM-{now.strftime('%Y%m%d%H%M%S')}"
+    else:
+        state_code_map = {
+            "Tamil Nadu": "TN", "Karnataka": "KA", "Maharashtra": "MH", "Uttar Pradesh": "UP",
+            "Gujarat": "GJ", "Rajasthan": "RJ", "West Bengal": "WB", "Kerala": "KL",
+            "Madhya Pradesh": "MP", "Andhra Pradesh": "AP", "Telangana": "TS", "Bihar": "BR",
+            "Odisha": "OD", "Punjab": "PB", "Haryana": "HR", "Assam": "AS", "Jharkhand": "JH",
+            "Chhattisgarh": "CG", "Uttarakhand": "UK", "Himachal Pradesh": "HP", "Delhi": "DL",
+        }
+        st_abbr = state_code_map.get(state, "IND")
+        proposal_id = f"PROP-{st_abbr}-{now.strftime('%Y%m%d%H%M%S')}"
 
     # Map category to standard executing agency
     cat_clean = proposal.category.strip().title()
@@ -697,6 +705,13 @@ def decide_project_proposal(
 
     if current_user:
         check_project_access(project, current_user)
+        role_id = current_user.get("roleId", "")
+        role_name = (current_user.get("role") or "").lower()
+        if "district" not in role_id and "district" not in role_name and role_id not in ("mospi_officer", "central_nodal") and "mospi" not in role_name:
+            raise HTTPException(
+                status_code=403,
+                detail="Access denied: Only District Authority is authorized to scrutinize and decide MP proposals per ROLES.md.",
+            )
 
     now = datetime.now(timezone.utc)
     updated_fields = dict(IN_MEMORY_UPDATES.get(id, {}))
@@ -881,6 +896,20 @@ def release_milestone_tranche(
 
     if current_user:
         check_project_access(project, current_user)
+        role_id = current_user.get("roleId", "")
+        role_name = (current_user.get("role") or "").lower()
+        if "district" not in role_id and "district" not in role_name and role_id not in ("mospi_officer", "central_nodal") and "mospi" not in role_name:
+            raise HTTPException(
+                status_code=403,
+                detail="Access denied: Only District Authority is authorized to release fund tranches per ROLES.md.",
+            )
+
+    updated_fields = dict(IN_MEMORY_UPDATES.get(id, {}))
+    if project.get("trancheFrozen") or updated_fields.get("trancheFrozen"):
+        raise HTTPException(
+            status_code=403,
+            detail="Fund release locked: An administrative tranche freeze has been imposed on this project by State Nodal Authority.",
+        )
 
     # MILESTONE GATING CHECK: Verify accepted evidence exists
     evidence_list = project.get("evidenceArtifacts", [])
@@ -895,16 +924,17 @@ def release_milestone_tranche(
         )
 
     now = datetime.now(timezone.utc)
-    updated_fields = dict(IN_MEMORY_UPDATES.get(id, {}))
     disbursements = list(project.get("disbursements", []))
 
-    sanctioned = project.get("sanctionedAmount") or project.get("estimatedCost") or 5000000
+    sanctioned = max(1, int(project.get("sanctionedAmount") or project.get("estimatedCost") or 5000000))
     current_exp = updated_fields.get("expenditure", project.get("expenditure", 0))
 
     tranche_num = len(disbursements) + 1
     tranche_label = (payload.trancheLabel if payload and payload.trancheLabel else None) or f"T{tranche_num}"
     
-    release_amt = (payload.amount if payload and payload.amount else None) or int(round(sanctioned * 0.25))
+    default_release = int(round(sanctioned * 0.25))
+    requested_amt = (payload.amount if payload and payload.amount else None) or default_release
+    release_amt = max(0, min(requested_amt, sanctioned - current_exp))
     new_exp = min(sanctioned, current_exp + release_amt)
     new_fin_prog = round((new_exp / sanctioned) * 100, 1)
 
@@ -1053,6 +1083,13 @@ def freeze_project_tranche(
 
     if current_user:
         check_project_access(project, current_user)
+        role_id = current_user.get("roleId", "")
+        role_name = (current_user.get("role") or "").lower()
+        if "state" not in role_id and "state" not in role_name and role_id not in ("mospi_officer", "central_nodal") and "mospi" not in role_name:
+            raise HTTPException(
+                status_code=403,
+                detail="Access denied: Only State Nodal Authority or Central Nodal Agency (MoSPI) can freeze fund tranches per ROLES.md.",
+            )
 
     now = datetime.now(timezone.utc)
     updated_fields = dict(IN_MEMORY_UPDATES.get(id, {}))
@@ -1299,6 +1336,15 @@ def task_auditor_for_project(
     if not project:
         raise HTTPException(status_code=404, detail=f"Project '{id}' not found.")
 
+    if current_user:
+        role_id = current_user.get("roleId", "")
+        role_name = (current_user.get("role") or "").lower()
+        if role_id not in ("mospi_officer", "central_nodal") and "mospi" not in role_name and "central" not in role_name:
+            raise HTTPException(
+                status_code=403,
+                detail="Access denied: Only Central Nodal Agency (MoSPI) is authorized to task Auditor / CAG per ROLES.md.",
+            )
+
     now = datetime.now(timezone.utc)
     updated_fields = dict(IN_MEMORY_UPDATES.get(id, {}))
     actor_name = (current_user.get("officialName") if current_user else "Central Nodal Agency (MoSPI)") or "Central Nodal Agency (MoSPI)"
@@ -1373,6 +1419,15 @@ def direct_state_corrective_action(
     if not project:
         raise HTTPException(status_code=404, detail=f"Project '{id}' not found.")
 
+    if current_user:
+        role_id = current_user.get("roleId", "")
+        role_name = (current_user.get("role") or "").lower()
+        if role_id not in ("mospi_officer", "central_nodal") and "mospi" not in role_name and "central" not in role_name:
+            raise HTTPException(
+                status_code=403,
+                detail="Access denied: Only Central Nodal Agency (MoSPI) is authorized to issue central directives per ROLES.md.",
+            )
+
     now = datetime.now(timezone.utc)
     updated_fields = dict(IN_MEMORY_UPDATES.get(id, {}))
     actor_name = (current_user.get("officialName") if current_user else "Central Nodal Agency (MoSPI)") or "Central Nodal Agency (MoSPI)"
@@ -1440,6 +1495,15 @@ def initiate_state_performance_review(
     payload: StatePerformanceReviewRequest = ...,
     current_user: Optional[Dict[str, Any]] = Depends(get_optional_current_user),
 ) -> Dict[str, Any]:
+    if current_user:
+        role_id = current_user.get("roleId", "")
+        role_name = (current_user.get("role") or "").lower()
+        if role_id not in ("mospi_officer", "central_nodal") and "mospi" not in role_name and "central" not in role_name:
+            raise HTTPException(
+                status_code=403,
+                detail="Access denied: Only Central Nodal Agency (MoSPI) is authorized to initiate state performance reviews per ROLES.md.",
+            )
+
     now = datetime.now(timezone.utc)
     actor_name = (current_user.get("officialName") if current_user else "Central Nodal Agency (MoSPI)") or "Central Nodal Agency (MoSPI)"
     state_clean = state.strip()

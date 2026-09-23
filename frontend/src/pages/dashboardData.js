@@ -15,24 +15,23 @@
 // Fallback datasets directly embedded from /backend/app/data/
 const FALLBACK_OVERVIEW = {
   "summary": {
-    "totalAllocated": 2250000000,
-    "totalAllocatedFormatted": "₹225.00 Cr",
-    "totalSanctionedAmount": 762300000,
-    "totalSanctionedAmountFormatted": "₹76.23 Cr",
-    "totalExpenditure": 531151999,
-    "totalExpenditureFormatted": "₹53.12 Cr",
-    "utilizationPercentage": 69.68,
-    "totalMonitoredMPs": 45,
-    "totalProjects": 90,
-    "totalHighRiskProjects": 34,
-    "totalActiveAlerts": 18
+    "totalAllocated": 1769900000,
+    "totalAllocatedFormatted": "₹176.99 Cr",
+    "totalSanctionedAmount": 884950000,
+    "totalSanctionedAmountFormatted": "₹88.50 Cr",
+    "totalExpenditure": 687116000,
+    "totalExpenditureFormatted": "₹68.71 Cr",
+    "utilizationPercentage": 77.6,
+    "totalMonitoredMPs": 27,
+    "totalProjects": 124,
+    "totalHighRiskProjects": 32,
+    "totalActiveAlerts": 24
   },
   "workStatusDistribution": {
-    "In Progress": 28,
-    "Approved - Work Not Started": 9,
-    "Completed": 24,
-    "Delayed": 25,
-    "Under Scrutiny": 4
+    "In Progress": 97,
+    "Delayed": 4,
+    "Under Scrutiny": 1,
+    "Completed": 22
   },
   "sectorExpenditureDistribution": [
     {
@@ -10160,6 +10159,10 @@ export function getSharedAlertsViewHtml(filterType = 'ALL', activeSubFilter = 'A
 
   const alertCardsHtml = alerts.map(renderAlertCard).join('');
 
+  if (isDistrictRole) {
+    return getDistrictOperationalCommandHtml(user, projectsToUse, sortedProjects, rowsHtml);
+  }
+
   return `
     <div class="setu-dashboard">
       <div class="setu-page-header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
@@ -10567,6 +10570,656 @@ export function wireDashboardInteractions(container = document) {
 /**
  * Returns HTML string representation of the Dashboard for vanilla layout embedding.
  */
+
+/**
+ * Stitch Material Design 3 - District Authority Operational Command Center
+ * Matches Google Stitch Reference Design for District Authority (Collectorate)
+ */
+export function getDistrictOperationalCommandHtml(user, projectsToUse, sortedProjects = [], rowsHtml = '') {
+  const districtName = user?.district || 'Chennai';
+  const stateName = user?.state || 'Tamil Nadu';
+  const totalSanctioned = projectsToUse.reduce((s, p) => s + (p.sanctionedAmount || 0), 0);
+  const totalExpenditure = projectsToUse.reduce((s, p) => s + (p.expenditure || 0), 0);
+  const totalSanctionedCr = (totalSanctioned / 10000000).toFixed(2);
+  const totalDisbursedCr = (totalExpenditure / 10000000).toFixed(2);
+  const utilRate = totalSanctioned > 0 ? Math.round((totalExpenditure / totalSanctioned) * 100) : 64.2;
+
+  const proposalsPending = (projectsToUse || []).filter(p => p.status === 'Proposed - Under Scrutiny' || (p.status && p.status.toLowerCase().includes('scrutiny')));
+
+  return `
+    <div class="flex flex-col w-full space-y-space-xl">
+      <!-- Top Governance Context Bar -->
+      <div class="bg-surface-container-lowest p-space-lg rounded shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-space-md border border-outline-variant/30">
+        <div class="flex items-center gap-space-md">
+          <div class="w-12 h-12 bg-primary flex items-center justify-center rounded text-on-primary font-bold shadow-sm">
+            <span class="material-symbols-outlined text-[28px]">account_balance</span>
+          </div>
+          <div>
+            <div class="flex items-center gap-space-sm flex-wrap">
+              <span class="font-headline-lg text-headline-lg font-bold text-on-surface">${districtName} District Executive Console</span>
+              <span class="bg-tertiary text-tertiary-fixed font-label-sm text-label-sm px-2 py-0.5 rounded uppercase tracking-wider font-semibold">Live Operational Status</span>
+            </div>
+            <p class="font-body-sm text-body-sm text-on-surface-variant">
+              Nodal Authority: Collectorate of ${districtName} · State: ${stateName} · Fiscal Year 2024–25
+            </p>
+          </div>
+        </div>
+        <div class="flex items-center gap-space-lg self-end md:self-auto bg-surface-container-low px-space-md py-space-sm rounded border border-outline-variant/20">
+          <div class="text-right">
+            <span class="font-label-sm text-label-sm text-on-surface-variant block uppercase">Total Sanctioned</span>
+            <span class="font-headline-md text-headline-md font-bold text-on-surface">₹${totalSanctionedCr > 0 ? totalSanctionedCr : '48.60'} Cr</span>
+          </div>
+          <div class="w-px h-8 bg-outline-variant/40"></div>
+          <div class="text-right">
+            <span class="font-label-sm text-label-sm text-on-surface-variant block uppercase">Total Disbursed</span>
+            <span class="font-headline-md text-headline-md font-bold text-secondary">₹${totalDisbursedCr > 0 ? totalDisbursedCr : '31.20'} Cr</span>
+          </div>
+          <div class="w-px h-8 bg-outline-variant/40"></div>
+          <div class="text-right">
+            <span class="font-label-sm text-label-sm text-on-surface-variant block uppercase">Utilization</span>
+            <span class="font-headline-md text-headline-md font-bold text-on-tertiary-container">${utilRate}%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 1. Top KPI Summary Tiles -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md">
+        <!-- Tile 1: Active Civil Works -->
+        <div class="bg-surface-container-lowest p-space-lg rounded shadow-sm border border-outline-variant/20 flex flex-col justify-between">
+          <div class="flex items-start justify-between">
+            <div>
+              <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">Active MPLADS Works</span>
+              <div class="font-headline-xl text-headline-xl font-bold text-primary mt-1">${projectsToUse.length || 38}</div>
+            </div>
+            <div class="w-10 h-10 rounded bg-primary-fixed flex items-center justify-center text-primary">
+              <span class="material-symbols-outlined text-[24px]">construction</span>
+            </div>
+          </div>
+          <div class="mt-space-md pt-space-xs border-t border-surface-variant flex items-center justify-between font-body-sm text-body-sm text-on-surface-variant">
+            <span>26 In-progress · 12 Pre-tendering</span>
+            <span class="text-primary font-label-sm text-label-sm font-semibold cursor-pointer hover:underline" onclick="document.getElementById('district-registry-table')?.scrollIntoView({ behavior: 'smooth' })">View Registry</span>
+          </div>
+        </div>
+        <!-- Tile 2: Tranches Awaiting Collector Action -->
+        <div class="bg-surface-container-lowest p-space-lg rounded shadow-sm border-l-4 border-l-secondary-container border-y border-r border-outline-variant/20 flex flex-col justify-between">
+          <div class="flex items-start justify-between">
+            <div>
+              <span class="font-label-sm text-label-sm text-secondary font-semibold uppercase tracking-wider">Tranches Pending Release</span>
+              <div class="font-headline-xl text-headline-xl font-bold text-on-surface mt-1">04</div>
+            </div>
+            <div class="w-10 h-10 rounded bg-secondary-fixed flex items-center justify-center text-secondary">
+              <span class="material-symbols-outlined text-[24px]">pending_actions</span>
+            </div>
+          </div>
+          <div class="mt-space-md pt-space-xs border-t border-surface-variant flex items-center justify-between font-body-sm text-body-sm">
+            <span class="text-on-surface-variant">Locked Value: <strong class="text-on-surface font-semibold">₹3.85 Cr</strong></span>
+            <span class="bg-secondary-fixed text-on-secondary-fixed px-1.5 py-0.5 rounded font-label-sm text-label-sm font-semibold">Collector Auth Req.</span>
+          </div>
+        </div>
+        <!-- Tile 3: AI Isolation Forest Anomalies -->
+        <div class="bg-surface-container-lowest p-space-lg rounded shadow-sm border border-outline-variant/20 flex flex-col justify-between">
+          <div class="flex items-start justify-between">
+            <div>
+              <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">Anomaly &amp; Compliance Flags</span>
+              <div class="font-headline-xl text-headline-xl font-bold text-error mt-1">03</div>
+            </div>
+            <div class="w-10 h-10 rounded bg-error-container flex items-center justify-center text-on-error-container">
+              <span class="material-symbols-outlined text-[24px]">security</span>
+            </div>
+          </div>
+          <div class="mt-space-md pt-space-xs border-t border-surface-variant flex items-center justify-between font-body-sm text-body-sm">
+            <span class="text-error font-semibold flex items-center gap-1">
+              <span class="w-2 h-2 rounded-full bg-error"></span> 1 High Risk (SHAP 0.82)
+            </span>
+            <span class="text-on-surface-variant font-label-sm text-label-sm">2 Medium</span>
+          </div>
+        </div>
+        <!-- Tile 4: Citizen Contradictions -->
+        <div class="bg-surface-container-lowest p-space-lg rounded shadow-sm border border-outline-variant/20 flex flex-col justify-between">
+          <div class="flex items-start justify-between">
+            <div>
+              <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">Ground Contradictions</span>
+              <div class="font-headline-xl text-headline-xl font-bold text-secondary mt-1">02</div>
+            </div>
+            <div class="w-10 h-10 rounded bg-surface-container-high flex items-center justify-center text-secondary">
+              <span class="material-symbols-outlined text-[24px]">compare_arrows</span>
+            </div>
+          </div>
+          <div class="mt-space-md pt-space-xs border-t border-surface-variant flex items-center justify-between font-body-sm text-body-sm">
+            <span class="text-on-surface-variant">Geo-verified Crowdsourced</span>
+            <span class="bg-surface-container-highest text-on-surface px-1.5 py-0.5 rounded font-label-sm text-label-sm font-semibold">2 En-route Inspection</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- MP Office Proposals Pending Scrutiny (If Any) -->
+      ${proposalsPending.length > 0 ? `
+        <div class="bg-surface-container-lowest rounded shadow-sm border border-error-container/60 p-space-lg space-y-space-md">
+          <div class="flex items-center justify-between flex-wrap gap-2 pb-space-xs border-b border-outline-variant/20">
+            <div class="flex items-center gap-space-sm">
+              <span class="material-symbols-outlined text-secondary text-[22px]">assignment_turned_in</span>
+              <div>
+                <h2 class="font-headline-md text-headline-md font-bold text-on-surface">MP Office Scheme Proposals Under Scrutiny (${proposalsPending.length})</h2>
+                <p class="font-body-sm text-body-sm text-on-surface-variant">Statutory scrutiny required under MPLADS guidelines: Grant administrative sanction with line agency allocation or reject with mandatory justification.</p>
+              </div>
+            </div>
+            <span class="bg-secondary-container text-on-secondary-container font-label-sm font-bold px-2 py-0.5 rounded">Scrutiny Required</span>
+          </div>
+          <div class="space-y-space-sm">
+            ${proposalsPending.map(prop => `
+              <div class="p-space-md bg-surface-container-low rounded border border-outline-variant/30 flex flex-col md:flex-row justify-between items-start md:items-center gap-space-md">
+                <div class="space-y-1 max-w-xl">
+                  <div class="flex items-center gap-2">
+                    <span class="font-label-lg font-bold text-primary">${prop.name}</span>
+                    <span class="font-mono text-[11px] text-on-surface-variant bg-surface px-1.5 py-0.5 rounded border border-outline-variant/30">${prop.id}</span>
+                  </div>
+                  <p class="font-body-sm text-on-surface-variant line-clamp-2">${prop.workDescription || prop.description || 'Public utility infrastructure scheme recommended for administrative sanction.'}</p>
+                  <div class="font-label-sm text-[12px] text-on-surface-variant">
+                    Recommended by: <strong class="text-on-surface">${prop.mpName || prop.recommendedBy || 'MP Office'}</strong> (${prop.constituency || prop.district}) · Outlay: <strong class="text-tertiary-container font-mono font-bold">₹${Number(prop.sanctionedAmount || prop.estimatedCost || 0).toLocaleString('en-IN')}</strong>
+                  </div>
+                </div>
+                <div class="flex items-center gap-space-sm shrink-0">
+                  <button type="button" class="px-4 py-2 rounded bg-tertiary-container text-on-tertiary font-label-sm font-semibold hover:bg-tertiary transition-colors shadow-sm flex items-center gap-1" onclick="window.setuOpenProposalApprovalModal && window.setuOpenProposalApprovalModal('${prop.id}', '${(prop.name || '').replace(/'/g, "\\'")}')">
+                    <span class="material-symbols-outlined text-[16px]">verified</span> Approve &amp; Sanction
+                  </button>
+                  <button type="button" class="px-4 py-2 rounded bg-surface border border-error text-error font-label-sm font-semibold hover:bg-error-container hover:text-on-error-container transition-colors" onclick="window.setuOpenProposalRejectionModal && window.setuOpenProposalRejectionModal('${prop.id}', '${(prop.name || '').replace(/'/g, "\\'")}')">
+                    <span class="material-symbols-outlined text-[16px]">cancel</span> Reject
+                  </button>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      ` : ''}
+
+      <!-- 2. Interactive Operational Table: Milestone-Gated Tranche Approvals & Evidence Review -->
+      <div class="bg-surface-container-lowest rounded shadow-sm border border-outline-variant/30 flex flex-col">
+        <div class="p-space-lg border-b border-outline-variant/20 flex flex-col lg:flex-row lg:items-center justify-between gap-space-md bg-surface-container-low">
+          <div>
+            <div class="flex items-center gap-space-sm">
+              <span class="material-symbols-outlined text-primary text-[20px]">fact_check</span>
+              <h2 class="font-headline-md text-headline-md font-bold text-on-surface">Milestone-Gated Tranche Approvals &amp; Evidence Review</h2>
+              <span class="bg-primary text-on-primary font-label-sm text-label-sm px-2 py-0.5 rounded font-bold">L3 District Collector Quorum</span>
+            </div>
+            <p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+              Validation of computer vision geo-tagged progress reports against physical bill submissions prior to PFMS automated fund release.
+            </p>
+          </div>
+          <div class="flex items-center gap-space-sm">
+            <span class="font-body-sm text-body-sm text-on-surface-variant">Displaying 4 Tranche Invoices</span>
+            <button class="bg-surface border border-outline-variant text-on-surface hover:bg-surface-container px-3 py-1.5 rounded font-label-md text-label-md flex items-center gap-1 shadow-sm" type="button">
+              <span class="material-symbols-outlined text-[16px]">tune</span> Filter Critical
+            </button>
+          </div>
+        </div>
+        <!-- Table Container -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-surface-container text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider border-b border-outline-variant/20">
+                <th class="py-3 px-space-md">Work ID / Scheme</th>
+                <th class="py-3 px-space-md">Project Title &amp; Implementing Agency</th>
+                <th class="py-3 px-space-md">Claimed Milestone</th>
+                <th class="py-3 px-space-md">Geo-Evidence &amp; CV Metric</th>
+                <th class="py-3 px-space-md text-right">Tranche Amount</th>
+                <th class="py-3 px-space-md text-center">Collector Action</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-outline-variant/20 font-body-sm text-body-sm text-on-surface">
+              <!-- Row 1 -->
+              <tr class="hover:bg-surface-container-low transition-colors">
+                <td class="py-3.5 px-space-md align-top">
+                  <span class="font-label-md text-label-md font-bold text-primary block">CHN-2024-0412</span>
+                  <span class="font-label-sm text-label-sm text-on-surface-variant">MPLADS/2023-24</span>
+                  <span class="inline-block mt-1 px-1.5 py-0.2 rounded bg-surface-container-high text-on-surface font-label-sm text-label-sm">Ward 114, T. Nagar</span>
+                </td>
+                <td class="py-3.5 px-space-md align-top max-w-xs">
+                  <span class="font-label-md text-label-md font-semibold text-on-surface block">Sub-Surface Stormwater Culvert &amp; Drain Reinforcement</span>
+                  <span class="text-on-surface-variant block text-body-sm font-body-sm">Vendor: M/s Saravana Infrastructure Ltd</span>
+                  <span class="font-label-sm text-label-sm text-tertiary font-medium">PFMS Vendor Code: V-TN884129</span>
+                </td>
+                <td class="py-3.5 px-space-md align-top">
+                  <div class="flex flex-col">
+                    <span class="font-label-md text-label-md font-semibold text-on-surface">Milestone 3: Slab Laying</span>
+                    <span class="text-on-surface-variant font-body-sm text-body-sm">Claimed: 75% Physical</span>
+                    <div class="w-32 bg-surface-variant h-1.5 rounded-full mt-1.5 overflow-hidden">
+                      <div class="bg-tertiary h-full" style="width: 75%;"></div>
+                    </div>
+                  </div>
+                </td>
+                <td class="py-3.5 px-space-md align-top">
+                  <div class="flex items-center gap-space-sm">
+                    <div class="relative w-16 h-12 rounded overflow-hidden bg-surface-container border border-outline-variant/30 flex-shrink-0">
+                      <img class="w-full h-full object-cover" data-alt="Clear site audit photo of pre-cast concrete slab installation" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDz9boBjV7FIZFdtcLfmSPx4Wguzg1A0PIzp6XkHNOcu9IbjZQhqFRmS6R4le-wcfSTSJ5J4cLrQoyjHWWvjEAFF3RtZ_lWO-d30qfGOYF4zhM7Btl89rfxBXlsGhjL_bUQjVELu8OBAyBbCQPzapou5AxoyJeQb9RIRjel8rdQoxdO8B8_D_SWssQP8siGMJEhUFw3ZAaiPadaML142LQ1_7pnxn06FBzHBbT8DNahwEiB890qvg1p"/>
+                      <span class="absolute bottom-0 right-0 bg-primary/90 text-on-primary text-[9px] px-1 font-mono">GPS OK</span>
+                    </div>
+                    <div class="flex flex-col">
+                      <span class="bg-tertiary-fixed text-on-tertiary-fixed px-1.5 py-0.5 rounded font-label-sm text-label-sm font-bold w-fit">CV Match: 94.2%</span>
+                      <span class="text-on-surface-variant text-label-sm text-[11px] mt-0.5">13.0418° N, 80.2341° E</span>
+                      <span class="text-on-surface-variant text-[10px]">Photo captured: 28-Mar 10:14 AM</span>
+                    </div>
+                  </div>
+                </td>
+                <td class="py-3.5 px-space-md align-top text-right whitespace-nowrap">
+                  <span class="font-headline-md text-headline-md font-bold text-on-surface block">₹1,12,50,000</span>
+                  <span class="text-label-sm font-label-sm text-on-surface-variant">Tranche 3 of 4</span>
+                </td>
+                <td class="py-3.5 px-space-md align-top">
+                  <div class="flex items-center justify-center gap-space-xs">
+                    <button class="bg-primary hover:bg-primary-container text-on-primary px-3 py-1.5 rounded font-label-sm text-label-sm font-semibold transition-colors flex items-center gap-1 shadow-sm setu-release-btn" type="button" onclick="const btn = this; btn.innerHTML = 'Releasing...'; setTimeout(() => { btn.className = 'bg-tertiary text-tertiary-fixed px-3 py-1.5 rounded font-label-sm text-label-sm font-semibold flex items-center gap-1'; btn.innerHTML = '✓ Tranche Released'; }, 800);">
+                      <span class="material-symbols-outlined text-[16px]">lock_open</span> Accept &amp; Release
+                    </button>
+                    <button class="bg-surface-container-lowest border border-outline hover:bg-surface-container text-on-surface px-2 py-1.5 rounded font-label-sm text-label-sm font-medium transition-colors" type="button" onclick="alert('Query registered for CHN-2024-0412. Agency notified.')">
+                      Query
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <!-- Row 2: Anomaly Flagged Row -->
+              <tr class="bg-error-container/20 hover:bg-error-container/30 transition-colors">
+                <td class="py-3.5 px-space-md align-top">
+                  <span class="font-label-md text-label-md font-bold text-error block">CHN-2024-0388</span>
+                  <span class="font-label-sm text-label-sm text-on-surface-variant">MPLADS/2023-24</span>
+                  <span class="inline-block mt-1 px-1.5 py-0.2 rounded bg-error-container text-on-error-container font-label-sm text-label-sm font-semibold">AI Flagged (0.82)</span>
+                </td>
+                <td class="py-3.5 px-space-md align-top max-w-xs">
+                  <span class="font-label-md text-label-md font-semibold text-on-surface block">Community Health Extension Unit, Perambur</span>
+                  <span class="text-on-surface-variant block text-body-sm font-body-sm">Vendor: Sri Balaji BuildTech Pvt</span>
+                  <span class="font-label-sm text-label-sm text-error font-medium">Citizen Ground Protest Logged</span>
+                </td>
+                <td class="py-3.5 px-space-md align-top">
+                  <div class="flex flex-col">
+                    <span class="font-label-md text-label-md font-semibold text-error">Milestone 2: Plinth &amp; Columns</span>
+                    <span class="text-on-surface-variant font-body-sm text-body-sm">Claimed: 50% Physical</span>
+                    <div class="w-32 bg-surface-variant h-1.5 rounded-full mt-1.5 overflow-hidden">
+                      <div class="bg-error h-full" style="width: 50%;"></div>
+                    </div>
+                  </div>
+                </td>
+                <td class="py-3.5 px-space-md align-top">
+                  <div class="flex items-center gap-space-sm">
+                    <div class="relative w-16 h-12 rounded overflow-hidden bg-surface-container border border-error flex-shrink-0">
+                      <img class="w-full h-full object-cover" data-alt="Empty vacant lot showing unfulfilled construction claim" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCLJ9q7Oj0CHNaiciSx_X_38Zp3TYEj8nVwgw1dliW2TiTAMaHVgA0IqZI758O2o7fvWmXnanVnTyJcQIbqfGaU9ICW8ucFdQvsr1AG3VnrMEG4t01I0-SBw_mAnvlhvHq3QekPSB-PhuiSLNKQcxO_gUaxTulMIo9MR3R3iwoz7avCtQhFOpU_QOqGSxZSpAxgiFrMjh9U54Ux0l6bCXYUnRc9fvXtyBtNGNZkxEcrNQw-DDE9N2HJ"/>
+                      <span class="absolute bottom-0 right-0 bg-error text-on-error text-[9px] px-1 font-mono">MISMATCH</span>
+                    </div>
+                    <div class="flex flex-col">
+                      <span class="bg-error-container text-on-error-container px-1.5 py-0.5 rounded font-label-sm text-label-sm font-bold w-fit">CV Match: 31.8%</span>
+                      <span class="text-error text-label-sm font-label-sm font-bold mt-0.5">Discrepancy: Foundation Missing</span>
+                      <span class="text-on-surface-variant text-[10px]">Photo captured: 26-Mar 04:30 PM</span>
+                    </div>
+                  </div>
+                </td>
+                <td class="py-3.5 px-space-md align-top text-right whitespace-nowrap">
+                  <span class="font-headline-md text-headline-md font-bold text-error block">₹84,00,000</span>
+                  <span class="text-label-sm font-label-sm text-on-surface-variant">Tranche 2 of 4</span>
+                </td>
+                <td class="py-3.5 px-space-md align-top">
+                  <div class="flex items-center justify-center gap-space-xs">
+                    <button class="bg-error hover:bg-on-error-container text-on-error px-3 py-1.5 rounded font-label-sm text-label-sm font-semibold transition-colors flex items-center gap-1 shadow-sm" type="button" onclick="alert('Tranche frozen for CHN-2024-0388. Show Cause notice served to Sri Balaji BuildTech Pvt under Rule 12.')">
+                      <span class="material-symbols-outlined text-[16px]">gavel</span> Freeze &amp; Show Cause
+                    </button>
+                    <button class="bg-surface-container-lowest border border-outline hover:bg-surface-container text-on-surface px-2 py-1.5 rounded font-label-sm text-label-sm font-medium transition-colors" type="button" onclick="window.location.hash='#/project/CHN-2024-0388'">
+                      Audit Logs
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <!-- Row 3 -->
+              <tr class="hover:bg-surface-container-low transition-colors">
+                <td class="py-3.5 px-space-md align-top">
+                  <span class="font-label-md text-label-md font-bold text-primary block">CHN-2024-0401</span>
+                  <span class="font-label-sm text-label-sm text-on-surface-variant">MPLADS/2023-24</span>
+                  <span class="inline-block mt-1 px-1.5 py-0.2 rounded bg-surface-container-high text-on-surface font-label-sm text-label-sm">Ward 082, Royapuram</span>
+                </td>
+                <td class="py-3.5 px-space-md align-top max-w-xs">
+                  <span class="font-label-md text-label-md font-semibold text-on-surface block">Smart Classroom &amp; STEM Lab Complex in Model Govt HSS</span>
+                  <span class="text-on-surface-variant block text-body-sm font-body-sm">Vendor: Tamil Nadu Educational Supply Corp</span>
+                  <span class="font-label-sm text-label-sm text-tertiary font-medium">PFMS Vendor Code: V-TN109384</span>
+                </td>
+                <td class="py-3.5 px-space-md align-top">
+                  <div class="flex flex-col">
+                    <span class="font-label-md text-label-md font-semibold text-on-surface">Milestone 4: Commissioning &amp; Handover</span>
+                    <span class="text-on-surface-variant font-body-sm text-body-sm">Claimed: 100% Final</span>
+                    <div class="w-32 bg-surface-variant h-1.5 rounded-full mt-1.5 overflow-hidden">
+                      <div class="bg-tertiary h-full" style="width: 100%;"></div>
+                    </div>
+                  </div>
+                </td>
+                <td class="py-3.5 px-space-md align-top">
+                  <div class="flex items-center gap-space-sm">
+                    <div class="relative w-16 h-12 rounded overflow-hidden bg-surface-container border border-outline-variant/30 flex-shrink-0">
+                      <img class="w-full h-full object-cover" data-alt="School computer room verified through audit camera" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDF0tFxAwFZi8SF7IiIwKg--BJsbYRmt2rxj6rJDJSxciWIC9f2Iz7v0Jn8Hwlu_Femz01mQHe4RroRPdLUKCSo4ccxPudHoFmN57gu8rtGEBRdJ2M-nRfrcKSZbtBYUUTQPkUOUjtyVSvN08ILsn_uvMJFBeEP4_Fsxgk77T5Cr-dVfbTueqY_rEckFmjkVoahY9FTdWfsx3zL1LOUbz7LkpDDYIyaVuUSyFaNUmJDFE3d7QchT3Xu"/>
+                      <span class="absolute bottom-0 right-0 bg-primary/90 text-on-primary text-[9px] px-1 font-mono">GPS OK</span>
+                    </div>
+                    <div class="flex flex-col">
+                      <span class="bg-tertiary-fixed text-on-tertiary-fixed px-1.5 py-0.5 rounded font-label-sm text-label-sm font-bold w-fit">CV Match: 98.1%</span>
+                      <span class="text-on-surface-variant text-label-sm text-[11px] mt-0.5">13.1120° N, 80.2974° E</span>
+                      <span class="text-on-surface-variant text-[10px]">Headmaster Co-Signed (Bio-Auth)</span>
+                    </div>
+                  </div>
+                </td>
+                <td class="py-3.5 px-space-md align-top text-right whitespace-nowrap">
+                  <span class="font-headline-md text-headline-md font-bold text-on-surface block">₹46,20,000</span>
+                  <span class="text-label-sm font-label-sm text-on-surface-variant">Final Tranche (100%)</span>
+                </td>
+                <td class="py-3.5 px-space-md align-top">
+                  <div class="flex items-center justify-center gap-space-xs">
+                    <button class="bg-primary hover:bg-primary-container text-on-primary px-3 py-1.5 rounded font-label-sm text-label-sm font-semibold transition-colors flex items-center gap-1 shadow-sm setu-release-btn" type="button" onclick="const btn = this; btn.innerHTML = 'Releasing...'; setTimeout(() => { btn.className = 'bg-tertiary text-tertiary-fixed px-3 py-1.5 rounded font-label-sm text-label-sm font-semibold flex items-center gap-1'; btn.innerHTML = '✓ Final Released'; }, 800);">
+                      <span class="material-symbols-outlined text-[16px]">lock_open</span> Accept &amp; Release
+                    </button>
+                    <button class="bg-surface-container-lowest border border-outline hover:bg-surface-container text-on-surface px-2 py-1.5 rounded font-label-sm text-label-sm font-medium transition-colors" type="button" onclick="alert('Utilization Certificate generation workflow initialized.')">
+                      Issue UC
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              <!-- Row 4 -->
+              <tr class="hover:bg-surface-container-low transition-colors">
+                <td class="py-3.5 px-space-md align-top">
+                  <span class="font-label-md text-label-md font-bold text-primary block">CHN-2024-0435</span>
+                  <span class="font-label-sm text-label-sm text-on-surface-variant">MPLADS/2023-24</span>
+                  <span class="inline-block mt-1 px-1.5 py-0.2 rounded bg-surface-container-high text-on-surface font-label-sm text-label-sm">Ward 170, Velachery</span>
+                </td>
+                <td class="py-3.5 px-space-md align-top max-w-xs">
+                  <span class="font-label-md text-label-md font-semibold text-on-surface block">Installation of 200 Klpd Solar RO Community Drinking Water Hub</span>
+                  <span class="text-on-surface-variant block text-body-sm font-body-sm">Vendor: GreenHydro Infra Systems</span>
+                  <span class="font-label-sm text-label-sm text-tertiary font-medium">PFMS Vendor Code: V-TN726190</span>
+                </td>
+                <td class="py-3.5 px-space-md align-top">
+                  <div class="flex flex-col">
+                    <span class="font-label-md text-label-md font-semibold text-on-surface">Milestone 2: Membrane Unit &amp; Civil Pad</span>
+                    <span class="text-on-surface-variant font-body-sm text-body-sm">Claimed: 45% Physical</span>
+                    <div class="w-32 bg-surface-variant h-1.5 rounded-full mt-1.5 overflow-hidden">
+                      <div class="bg-tertiary h-full" style="width: 45%;"></div>
+                    </div>
+                  </div>
+                </td>
+                <td class="py-3.5 px-space-md align-top">
+                  <div class="flex items-center gap-space-sm">
+                    <div class="relative w-16 h-12 rounded overflow-hidden bg-surface-container border border-outline-variant/30 flex-shrink-0">
+                      <img class="w-full h-full object-cover" data-alt="Solar powered water purification plant foundation" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCeRwI6X0Jmr9zk5WUMAKAzclbdQUhOJUEOZDWRJUsb1kO660oNw4VBdimH4d9jf1pyramueN_Nmu2y-xbIFulJfO262WchAH6MG_P1tXAEYlajwqXE4Blt14K4i_o2jUV-ZX06idafH2i_yhvkE5DL_SXednQwl3ScDZIY-bxiBsEOAZeDg5O91sQqvSkrmFeM15hcmmLgX5w2PWq8u21ZECxw8kLJwEEOWiEq82aGx_RbJRiLOZKk"/>
+                      <span class="absolute bottom-0 right-0 bg-primary/90 text-on-primary text-[9px] px-1 font-mono">GPS OK</span>
+                    </div>
+                    <div class="flex flex-col">
+                      <span class="bg-secondary-fixed text-on-secondary-fixed px-1.5 py-0.5 rounded font-label-sm text-label-sm font-bold w-fit">CV Match: 88.5%</span>
+                      <span class="text-on-surface-variant text-label-sm text-[11px] mt-0.5">12.9815° N, 80.2180° E</span>
+                      <span class="text-on-surface-variant text-[10px]">Photo captured: 27-Mar 02:15 PM</span>
+                    </div>
+                  </div>
+                </td>
+                <td class="py-3.5 px-space-md align-top text-right whitespace-nowrap">
+                  <span class="font-headline-md text-headline-md font-bold text-on-surface block">₹1,42,30,000</span>
+                  <span class="text-label-sm font-label-sm text-on-surface-variant">Tranche 2 of 3</span>
+                </td>
+                <td class="py-3.5 px-space-md align-top">
+                  <div class="flex items-center justify-center gap-space-xs">
+                    <button class="bg-primary hover:bg-primary-container text-on-primary px-3 py-1.5 rounded font-label-sm text-label-sm font-semibold transition-colors flex items-center gap-1 shadow-sm setu-release-btn" type="button" onclick="const btn = this; btn.innerHTML = 'Releasing...'; setTimeout(() => { btn.className = 'bg-tertiary text-tertiary-fixed px-3 py-1.5 rounded font-label-sm text-label-sm font-semibold flex items-center gap-1'; btn.innerHTML = '✓ Tranche Released'; }, 800);">
+                      <span class="material-symbols-outlined text-[16px]">lock_open</span> Accept &amp; Release
+                    </button>
+                    <button class="bg-surface-container-lowest border border-outline hover:bg-surface-container text-on-surface px-2 py-1.5 rounded font-label-sm text-label-sm font-medium transition-colors" type="button" onclick="alert('Query registered for CHN-2024-0435. Executive Engineer notified.')">
+                      Query
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <!-- Table Pagination / Footer -->
+        <div class="p-space-md bg-surface-container-low border-t border-outline-variant/20 flex flex-col sm:flex-row items-center justify-between text-body-sm font-body-sm text-on-surface-variant gap-space-sm">
+          <div class="flex items-center gap-space-sm">
+            <span class="material-symbols-outlined text-primary text-[18px]">verified_user</span>
+            <span>Every disbursement approval triggers an automated digital voucher signature (e-Sign) under IT Act Section 3A.</span>
+          </div>
+          <div class="flex items-center gap-space-sm">
+            <button class="px-3 py-1 rounded border border-outline-variant bg-surface text-label-sm font-label-sm disabled:opacity-50" disabled type="button">Previous</button>
+            <span class="font-label-sm text-label-sm text-on-surface font-bold">1 of 1</span>
+            <button class="px-3 py-1 rounded border border-outline-variant bg-surface text-label-sm font-label-sm disabled:opacity-50" disabled type="button">Next</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Two Columns: Risk & Anomaly Assessment Panel + Citizen Contradiction Dispatch -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-xl">
+        <!-- Left Column: 3. Risk & Anomaly Assessment Panel (Isolation Forest + SHAP) -->
+        <div class="lg:col-span-6 bg-surface-container-lowest rounded shadow-sm border border-outline-variant/30 flex flex-col">
+          <div class="p-space-lg border-b border-outline-variant/20 bg-surface-container-low flex items-center justify-between">
+            <div class="flex items-center gap-space-sm">
+              <div class="w-8 h-8 rounded bg-error-container text-on-error-container flex items-center justify-center font-bold">
+                <span class="material-symbols-outlined text-[18px]">psychology</span>
+              </div>
+              <div>
+                <h3 class="font-headline-md text-headline-md font-bold text-on-surface">Predictive Risk &amp; SHAP Anomaly Engine</h3>
+                <span class="text-body-sm font-body-sm text-on-surface-variant">MoSPI ML-SIH26102 Auditing Module</span>
+              </div>
+            </div>
+            <span class="bg-error text-on-error font-label-sm text-label-sm px-2 py-0.5 rounded font-bold">1 Outlier Detected</span>
+          </div>
+          <div class="p-space-lg flex-1 flex flex-col justify-between space-y-space-lg">
+            <!-- Target Project Overview -->
+            <div class="bg-surface-container-low p-space-md rounded border-l-4 border-l-error">
+              <div class="flex items-center justify-between">
+                <span class="font-label-md text-label-md font-bold text-on-surface">CHN-2024-0388: Perambur Health Unit</span>
+                <span class="bg-error-container text-on-error-container text-label-sm font-label-sm font-bold px-2 py-0.5 rounded">Score: 0.82 High Risk</span>
+              </div>
+              <p class="text-body-sm font-body-sm text-on-surface-variant mt-1">
+                Algorithm flagged: <strong class="text-on-surface">Expenditure Velocity Anomaly</strong>. Claimed fiscal tranche drawdown rate exceeds physical asset realization by 3.4 standard deviations.
+              </p>
+            </div>
+            <!-- SHAP Value Contribution Breakdown -->
+            <div class="space-y-space-md">
+              <div class="flex items-center justify-between text-label-sm font-label-sm">
+                <span class="font-bold text-on-surface uppercase">SHAP Feature Attribution Breakdown</span>
+                <span class="text-on-surface-variant">Relative Impact to Anomaly Score</span>
+              </div>
+              <!-- Feature 1 -->
+              <div>
+                <div class="flex justify-between text-body-sm font-body-sm mb-1">
+                  <span class="font-medium text-on-surface">Drawdown Velocity vs. Physical Milestone</span>
+                  <span class="text-error font-bold">+0.46 (Primary Driver)</span>
+                </div>
+                <div class="w-full bg-surface-variant h-2.5 rounded-full overflow-hidden flex">
+                  <div class="bg-error h-full" style="width: 56%;"></div>
+                </div>
+                <span class="text-[11px] text-on-surface-variant mt-0.5 block">Vendor requested ₹84L advance within 14 days of prior tranche disbursement</span>
+              </div>
+              <!-- Feature 2 -->
+              <div>
+                <div class="flex justify-between text-body-sm font-body-sm mb-1">
+                  <span class="font-medium text-on-surface">Citizen Geo-Audit Contradiction Weight</span>
+                  <span class="text-error font-bold">+0.24 (High Divergence)</span>
+                </div>
+                <div class="w-full bg-surface-variant h-2.5 rounded-full overflow-hidden flex">
+                  <div class="bg-secondary h-full" style="width: 32%;"></div>
+                </div>
+                <span class="text-[11px] text-on-surface-variant mt-0.5 block">8 distinct citizen geo-submissions claim site is completely vacant</span>
+              </div>
+              <!-- Feature 3 -->
+              <div>
+                <div class="flex justify-between text-body-sm font-body-sm mb-1">
+                  <span class="font-medium text-on-surface">Vendor Historical Milestone Slippage Rate</span>
+                  <span class="text-on-surface font-semibold">+0.12 (Moderate)</span>
+                </div>
+                <div class="w-full bg-surface-variant h-2.5 rounded-full overflow-hidden flex">
+                  <div class="bg-primary-container h-full" style="width: 18%;"></div>
+                </div>
+                <span class="text-[11px] text-on-surface-variant mt-0.5 block">Prior delay of 68 days on adjacent Tiruvallur district project</span>
+              </div>
+            </div>
+            <!-- Metric Sparkline -->
+            <div class="p-space-md bg-surface rounded border border-outline-variant/30 flex items-center justify-between">
+              <div>
+                <span class="font-label-sm text-label-sm text-on-surface-variant block uppercase">Velocity Threshold</span>
+                <span class="font-headline-md text-headline-md font-bold text-error">4.2x Expected Rate</span>
+              </div>
+              <svg class="w-36 h-10 text-error" fill="none" viewBox="0 0 144 40" xmlns="http://www.w3.org/2000/svg">
+                <path d="M0 35L24 32L48 30L72 26L96 22L120 12L144 2" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+                <path d="M0 35L24 32L48 30L72 26L96 22L120 12L144 2V40H0Z" fill="currentColor" fill-opacity="0.1"></path>
+                <circle cx="144" cy="2" fill="currentColor" r="3"></circle>
+              </svg>
+            </div>
+            <!-- Direct Actions -->
+            <div class="flex items-center gap-space-sm pt-space-xs">
+              <button class="flex-1 bg-primary text-on-primary py-2 px-space-md rounded font-label-md text-label-md font-semibold hover:bg-primary-container transition-colors flex items-center justify-center gap-1 shadow-sm" type="button" onclick="alert('SHAP Audit Dossier exported as PDF.')">
+                <span class="material-symbols-outlined text-[18px]">download</span> Export Audit Dossier (PDF)
+              </button>
+              <button class="bg-surface-container border border-outline-variant text-on-surface hover:bg-surface-variant py-2 px-space-md rounded font-label-md text-label-md font-semibold transition-colors" type="button" onclick="alert('Audit parameter sensitivity modal opened.')">
+                Audit Parameter Tuning
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: 4. Citizen Contradiction Dispatch Queue -->
+        <div class="lg:col-span-6 bg-surface-container-lowest rounded shadow-sm border border-outline-variant/30 flex flex-col">
+          <div class="p-space-lg border-b border-outline-variant/20 bg-surface-container-low flex items-center justify-between">
+            <div class="flex items-center gap-space-sm">
+              <div class="w-8 h-8 rounded bg-secondary-fixed text-secondary flex items-center justify-center font-bold">
+                <span class="material-symbols-outlined text-[18px]">campaign</span>
+              </div>
+              <div>
+                <h3 class="font-headline-md text-headline-md font-bold text-on-surface">Citizen Contradiction Dispatch Queue</h3>
+                <span class="text-body-sm font-body-sm text-on-surface-variant">Ground Crowdsourced Verification Stream</span>
+              </div>
+            </div>
+            <span class="bg-secondary text-on-secondary font-label-sm text-label-sm px-2 py-0.5 rounded font-bold">2 Live Escalations</span>
+          </div>
+          <div class="p-space-lg flex-1 flex flex-col justify-between space-y-space-md">
+            <p class="font-body-sm text-body-sm text-on-surface-variant">
+              Citizen reports flagged when geo-tagged user photos contradict contractor completion filings by over 40% threshold.
+            </p>
+            <!-- Queue Item 1 -->
+            <div class="p-space-md bg-surface-container-low rounded border border-outline-variant/20 flex flex-col space-y-space-sm">
+              <div class="flex items-start justify-between">
+                <div>
+                  <span class="font-label-md text-label-md font-bold text-on-surface">Perambur Health Unit (CHN-2024-0388)</span>
+                  <span class="text-body-sm font-body-sm text-error block font-medium">Contradiction: Contractor claims 50% Plinth · Citizen shows empty ditch</span>
+                </div>
+                <span class="bg-error-container text-on-error-container font-label-sm text-label-sm px-1.5 py-0.5 rounded font-semibold">Priority 1</span>
+              </div>
+              <!-- Comparison Micro-View -->
+              <div class="grid grid-cols-2 gap-space-sm pt-space-xs">
+                <div class="bg-surface p-2 rounded border border-outline-variant/30">
+                  <span class="font-label-sm text-label-sm text-on-surface-variant block mb-1">Contractor Submission</span>
+                  <div class="h-20 rounded bg-surface-variant overflow-hidden relative">
+                    <img class="w-full h-full object-cover" data-alt="Contractor submitted photo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAEsWNcgjptVH5g34sJmGKi7EqJ0gSQWPqeYUbmNBE0PHc09lrItbYQElD-5hlDI5Pa1jsOdN0KvOrzWclyp4cwuKOTh64YSiWKuoTp0MpwKmuDqJ9ABrAI-23XU2gYlH0KOKyFkMFAOvV6Poby5I8Ga50X2GfIT9NxUNCsllC-sVhHSynjQZdNycYQWqzgPZ3FXGf2aHWcK4GH4N2mS2ns3PrCrG5IrYbdAFltV2OWXbTyHKinrhM6"/>
+                    <span class="absolute bottom-1 left-1 bg-surface/90 text-on-surface text-[10px] px-1 font-semibold">24-Mar · 50%</span>
+                  </div>
+                </div>
+                <div class="bg-surface p-2 rounded border border-outline-variant/30">
+                  <span class="font-label-sm text-label-sm text-error font-semibold block mb-1">Citizen Ground Report</span>
+                  <div class="h-20 rounded bg-surface-variant overflow-hidden relative">
+                    <img class="w-full h-full object-cover" data-alt="Citizen smartphone photo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBF1mzfzwP_eRH-HeZb1jQz5-nnyiK0eJMKewABmSqQZgcZuJ6nR5w9OKzUY_rOaucIqGEvYLdf3M73DNLBdf-5b085qObjbMVeamsNWV7JTeozN_DVb6s0wyGggbNkDmwI-_6UgaDVJXf-MUxAi1-7aaHXlqQPt2jzKuideX8PL-jw3UOL_7jEzjWMFke00OpZsZgq68Vg9uKAgG9JvGGtSj6kRW9cJiU9epXzG-k-SyFnBdGFtobv"/>
+                    <span class="absolute bottom-1 left-1 bg-error text-on-error text-[10px] px-1 font-semibold">27-Mar · 0%</span>
+                  </div>
+                </div>
+              </div>
+              <div class="flex items-center justify-between pt-space-xs">
+                <div class="flex items-center gap-1 text-label-sm font-label-sm text-on-surface-variant">
+                  <span class="material-symbols-outlined text-[16px] text-primary">person_pin_circle</span>
+                  <span>Reported by 8 Residents · Verified Aadhar Auth</span>
+                </div>
+                <button class="bg-secondary text-on-secondary hover:bg-secondary-container px-3 py-1.5 rounded font-label-sm text-label-sm font-bold flex items-center gap-1 transition-colors shadow-sm setu-dispatch-btn" type="button" onclick="const btn = this; btn.innerHTML = 'Dispatched'; btn.className = 'bg-surface-variant text-on-surface-variant px-3 py-1.5 rounded font-label-sm text-label-sm font-semibold cursor-default'; btn.disabled = true;">
+                  <span class="material-symbols-outlined text-[16px]">directions_run</span> Dispatch Technical Inspector
+                </button>
+              </div>
+            </div>
+            <!-- Queue Item 2 -->
+            <div class="p-space-md bg-surface-container-low rounded border border-outline-variant/20 flex flex-col space-y-space-sm">
+              <div class="flex items-start justify-between">
+                <div>
+                  <span class="font-label-md text-label-md font-bold text-on-surface">Community Center Solar RO Plant (CHN-2024-0435)</span>
+                  <span class="text-body-sm font-body-sm text-secondary block font-medium">Contradiction: Contractor claims filter operational · Resident reports locked facility</span>
+                </div>
+                <span class="bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm px-1.5 py-0.5 rounded font-semibold">Priority 2</span>
+              </div>
+              <div class="flex items-center justify-between pt-space-xs">
+                <div class="flex items-center gap-1 text-label-sm font-label-sm text-on-surface-variant">
+                  <span class="material-symbols-outlined text-[16px] text-primary">person_pin_circle</span>
+                  <span>Reported by 3 Ward Council Members · Geo-Fence Tagged</span>
+                </div>
+                <button class="bg-secondary text-on-secondary hover:bg-secondary-container px-3 py-1.5 rounded font-label-sm text-label-sm font-bold flex items-center gap-1 transition-colors shadow-sm setu-dispatch-btn" type="button" onclick="const btn = this; btn.innerHTML = 'Dispatched'; btn.className = 'bg-surface-variant text-on-surface-variant px-3 py-1.5 rounded font-label-sm text-label-sm font-semibold cursor-default'; btn.disabled = true;">
+                  <span class="material-symbols-outlined text-[16px]">directions_run</span> Dispatch Technical Inspector
+                </button>
+              </div>
+            </div>
+            <!-- Collectorate Direct Directive -->
+            <div class="p-space-md bg-surface-container-high rounded flex items-center justify-between">
+              <div class="flex items-center gap-space-sm">
+                <span class="material-symbols-outlined text-primary text-[20px]">badge</span>
+                <div>
+                  <span class="font-label-md text-label-md font-bold text-on-surface block">Sub-Divisional Magistrate (${districtName} South)</span>
+                  <span class="font-body-sm text-body-sm text-on-surface-variant">Duty Officer: District Revenue Officer (DRO)</span>
+                </div>
+              </div>
+              <button class="bg-primary text-on-primary px-3 py-1.5 rounded font-label-sm text-label-sm font-semibold hover:bg-primary-container transition-colors shadow-sm" type="button" onclick="alert('District Executive Officers summoned to Collectorate chambers.')">
+                Summon Officers
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- District Audited Projects Registry Table -->
+      <div class="bg-surface-container-lowest rounded shadow-sm border border-outline-variant/30 p-space-lg space-y-space-md" id="district-registry-table">
+        <div class="flex justify-between items-center flex-wrap gap-2 pb-space-xs border-b border-outline-variant/20">
+          <div>
+            <h2 class="font-headline-md text-headline-md font-bold text-primary">District Public Works Registry (${projectsToUse.length} Works)</h2>
+            <span class="font-body-sm text-body-sm text-on-surface-variant">Comprehensive portfolio of sanctioned works under ${districtName} District Authority oversight</span>
+          </div>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left">
+            <thead>
+              <tr class="bg-surface-container text-on-surface-variant font-label-sm uppercase tracking-wider">
+                <th class="py-2.5 px-3">Project Name &amp; ID</th>
+                <th class="py-2.5 px-3">Category</th>
+                <th class="py-2.5 px-3">Implementing Agency</th>
+                <th class="py-2.5 px-3">Physical Progress</th>
+                <th class="py-2.5 px-3">Status</th>
+                <th class="py-2.5 px-3">Risk Tier</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-surface-variant font-body-sm">
+              ${projectsToUse.map(p => {
+                const isHigh = p.riskLevel === 'HIGH' || (p.riskScore && p.riskScore >= 60);
+                const isCritical = p.riskLevel === 'CRITICAL' || (p.riskScore && p.riskScore >= 80);
+                const sevBadge = isCritical
+                  ? '<span class="px-2 py-0.5 rounded bg-error-container text-on-error-container text-[10px] font-bold">CRITICAL</span>'
+                  : isHigh
+                  ? '<span class="px-2 py-0.5 rounded bg-secondary-container text-on-secondary-container text-[10px] font-bold">HIGH</span>'
+                  : '<span class="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant text-[10px] font-semibold">LOW</span>';
+
+                return `
+                  <tr class="hover:bg-surface-container-low transition-colors cursor-pointer" onclick="window.location.hash='#/project/${p.id}'">
+                    <td class="py-3 px-3">
+                      <a href="#/project/${p.id}" class="font-bold text-primary hover:underline block leading-tight">${p.name}</a>
+                      <span class="font-mono text-[11px] text-on-surface-variant">${p.id}</span>
+                    </td>
+                    <td class="py-3 px-3"><span class="px-2 py-0.5 rounded bg-surface-container text-on-surface text-[11px] font-semibold">${p.category}</span></td>
+                    <td class="py-3 px-3 text-on-surface-variant text-[12px]">${p.implementingAgency || 'District Authority'}</td>
+                    <td class="py-3 px-3">
+                      <div class="flex items-center gap-2">
+                        <div class="w-24 h-2 bg-surface-container rounded-full overflow-hidden">
+                          <div class="bg-primary-container h-full rounded-full" style="width: ${p.physicalProgress || 0}%;"></div>
+                        </div>
+                        <span class="font-mono text-[11px] font-bold">${p.physicalProgress || 0}%</span>
+                      </div>
+                    </td>
+                    <td class="py-3 px-3"><span class="px-2 py-0.5 rounded bg-surface-container-high text-on-surface text-[11px] font-semibold">${p.status}</span></td>
+                    <td class="py-3 px-3">${sevBadge}</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+
 export function getDashboardHtml(customUser = null, customProjects = null) {
   let user = customUser;
   if (!user) {
@@ -10983,6 +11636,10 @@ export function getDashboardHtml(customUser = null, customProjects = null) {
       </tr>`;
     })
     .join('');
+
+  if (isDistrictRole) {
+    return getDistrictOperationalCommandHtml(user, projectsToUse, sortedProjects, rowsHtml);
+  }
 
   return `
     <div class="setu-dashboard">
@@ -11635,384 +12292,9 @@ export function getEvidenceAndTrancheViewHtml(activeSubTab = 'all') {
     return true;
   });
 
-  const allEvidence = [];
-  const allInvoices = [];
-  const trancheGatedProjects = [];
-
-  projects.forEach((p) => {
-    const hasAcceptedEv = (p.evidenceArtifacts || []).some(ev => ev.reviewStatus === 'ACCEPTED' || ev.status === 'ACCEPTED');
-    trancheGatedProjects.push({
-      ...p,
-      hasAcceptedEvidence: hasAcceptedEv,
-    });
-
-    (p.evidenceArtifacts || []).forEach((ev) => {
-      allEvidence.push({
-        ...ev,
-        projectId: p.id,
-        projectName: p.name,
-        district: p.district,
-        implementingAgency: p.implementingAgency,
-        vendorName: p.vendorName || 'Assigned Line Agency Vendor',
-      });
-    });
-
-    (p.invoices || []).forEach((inv) => {
-      allInvoices.push({
-        ...inv,
-        projectId: p.id,
-        projectName: p.name,
-        district: p.district,
-        implementingAgency: p.implementingAgency,
-        vendorName: p.vendorName || inv.vendorName || 'Contractor',
-      });
-    });
-  });
-
-  if (allEvidence.length === 0) {
-    projects.slice(0, 5).forEach((p, idx) => {
-      const isAcc = idx === 0;
-      allEvidence.push({
-        id: `EVD-${p.id}-001`,
-        projectId: p.id,
-        projectName: p.name,
-        district: p.district,
-        implementingAgency: p.implementingAgency,
-        vendorName: p.vendorName || 'Civil Construction Line Agency',
-        milestoneStage: idx === 0 ? 'Foundation & Excavation' : idx === 1 ? 'Superstructure & Column Cast' : 'Finishing & Fittings',
-        description: 'Geo-tagged site inspection photo artifact with Junior Engineer measurement book signoff.',
-        imageUrl: '',
-        gpsLat: '13.0827',
-        gpsLng: '80.2707',
-        timestamp: '2026-02-14T10:30:00Z',
-        reviewStatus: isAcc ? 'ACCEPTED' : 'PENDING',
-        status: isAcc ? 'ACCEPTED' : 'Submitted',
-      });
-      if (isAcc) {
-        const targetProj = trancheGatedProjects.find(tp => tp.id === p.id);
-        if (targetProj) targetProj.hasAcceptedEvidence = true;
-      }
-    });
-  }
-
-  if (allInvoices.length === 0) {
-    projects.slice(0, 4).forEach((p, idx) => {
-      allInvoices.push({
-        invoiceNumber: `INV-2026-${p.id.slice(-4)}-01`,
-        projectId: p.id,
-        projectName: p.name,
-        district: p.district,
-        implementingAgency: p.implementingAgency,
-        vendorName: p.vendorName || 'Registered Works Contractor',
-        claimedAmount: Math.round((p.sanctionedAmount || 5000000) * 0.25),
-        invoiceDate: '2026-02-18',
-        gstin: '33AAACB1234F1Z5',
-        itemsSummary: 'Reinforced concrete, masonry materials & lab test cube certs',
-        reviewStatus: idx === 0 ? 'ACCEPTED' : 'PENDING',
-        status: idx === 0 ? 'ACCEPTED' : 'Submitted',
-      });
-    });
-  }
-
-  const pendingEvidenceCount = allEvidence.filter(e => e.reviewStatus === 'PENDING' || !e.reviewStatus || e.status === 'Submitted').length;
-  const pendingInvoiceCount = allInvoices.filter(i => i.reviewStatus === 'PENDING' || !i.reviewStatus || i.status === 'Submitted').length;
-  const readyTrancheCount = trancheGatedProjects.filter(p => p.hasAcceptedEvidence && p.status !== 'Completed' && (p.expenditure || 0) < (p.sanctionedAmount || 0)).length;
-  const totalSanctioned = projects.reduce((s, p) => s + (p.sanctionedAmount || 0), 0);
-  const totalDisbursed = projects.reduce((s, p) => s + (p.expenditure || 0), 0);
-
-  const evidenceCardsHtml = allEvidence.map((ev) => {
-    const status = ev.reviewStatus || ev.status || 'PENDING';
-    const isAccepted = status === 'ACCEPTED';
-    const isRejected = status === 'REJECTED' || status === 'REJECTED_RESUBMISSION_REQUIRED';
-    const isPending = !isAccepted && !isRejected;
-
-    const statusBadge = isAccepted
-      ? `<span class="setu-badge" style="background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; font-size: 11px; font-weight: 700;">✓ ACCEPTED</span>`
-      : isRejected
-      ? `<span class="setu-badge" style="background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; font-size: 11px; font-weight: 700;">✕ RESUBMISSION REQUIRED</span>`
-      : `<span class="setu-badge" style="background: #fef3c7; color: #92400e; border: 1px solid #fde68a; font-size: 11px; font-weight: 700;">⏳ PENDING REVIEW</span>`;
-
-    return `
-      <div class="setu-card" style="padding: 20px; background: white; border: 1px solid var(--setu-color-border-subtle); margin-bottom: 16px; border-left: 4px solid ${isAccepted ? '#059669' : isRejected ? '#dc2626' : '#d97706'};">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 12px;">
-          <div>
-            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-              <span class="setu-detail-id-tag">${ev.id || 'EV-001'}</span>
-              <span style="font-weight: 700; color: var(--setu-color-primary-navy); font-size: 14px;">${ev.milestoneStage || 'Stage Milestone'}</span>
-              ${statusBadge}
-              <span class="setu-badge" style="background: #e0e7ff; color: #3730a3; border: 1px solid #c7d2fe; font-size: 10px;">Simulated CV</span>
-            </div>
-            <a href="#/project/${ev.projectId}" style="font-size: 13px; font-weight: 600; color: var(--setu-color-primary-navy); text-decoration: none;">
-              ${ev.projectName} (${ev.projectId}) →
-            </a>
-          </div>
-          <div style="text-align: right; font-size: 12px; color: var(--setu-color-text-muted);">
-            Submitted: <strong>${ev.timestamp ? ev.timestamp.split('T')[0] : '2026-02'}</strong>
-          </div>
-        </div>
-
-        <div style="display: grid; grid-template-columns: 140px 1fr; gap: 16px; align-items: center;">
-          <div style="width: 140px; height: 95px; background: #f1f5f9; border-radius: 4px; overflow: hidden; border: 1px solid var(--setu-color-border-subtle); display: flex; align-items: center; justify-content: center; position: relative;">
-            ${ev.imageUrl ? `
-              <img src="${ev.imageUrl}" alt="Site Photo" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.onerror=null; this.parentElement.innerHTML='<div style=\'padding:8px;font-size:11px;color:#64748b;text-align:center;\'>📷 Site Inspection Artifact</div>';" />
-            ` : `
-              <div style="font-size: 11px; color: #64748b; text-align: center; padding: 6px;">📷 On-Site Photo Artifact</div>
-            `}
-            <span style="position: absolute; bottom: 2px; right: 2px; background: rgba(0,0,0,0.65); color: white; font-size: 9px; padding: 1px 4px; border-radius: 2px;">
-              GPS Tagged
-            </span>
-          </div>
-
-          <div>
-            <p style="margin: 0 0 8px 0; font-size: 13px; color: var(--setu-color-text-primary); line-height: 1.5;">
-              ${ev.description || 'Physical work verification inspection photograph submitted by site junior engineer.'}
-            </p>
-            <div style="font-size: 12px; color: var(--setu-color-text-secondary); display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 12px;">
-              <span>Agency: <strong>${ev.implementingAgency}</strong></span>
-              <span>Vendor: <strong>${ev.vendorName}</strong></span>
-              <span>GPS: <code style="font-size: 11px;">${ev.gpsLat || '13.0827'}°N, ${ev.gpsLng || '80.2707'}°E</code></span>
-              <span>AI Site Confidence: <strong style="color: #059669;">94.2%</strong></span>
-            </div>
-
-            <!-- Review Actions -->
-            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-              ${isPending ? `
-                <button type="button" class="setu-btn-primary" onclick="window.setuReviewEvidence && window.setuReviewEvidence('${ev.projectId}', '${ev.id}', 'ACCEPTED')" style="padding: 6px 14px; font-size: 12px; background: #059669; border: none; border-radius: 4px; cursor: pointer; color: white; font-weight: 600;">
-                  ✓ Accept Evidence
-                </button>
-                <button type="button" class="setu-btn-secondary" onclick="window.setuReviewEvidence && window.setuReviewEvidence('${ev.projectId}', '${ev.id}', 'REJECTED_RESUBMISSION_REQUIRED')" style="padding: 6px 14px; font-size: 12px; background: white; border: 1px solid #f87171; color: #dc2626; border-radius: 4px; cursor: pointer; font-weight: 600;">
-                  ✕ Reject (Resubmit)
-                </button>
-              ` : isAccepted ? `
-                <span style="font-size: 12px; color: #059669; font-weight: 600;">✓ Formally Accepted by District Authority — Milestone Gating Cleared</span>
-              ` : `
-                <span style="font-size: 12px; color: #dc2626; font-weight: 600;">✕ Resubmission Required — Notified to Implementing Line Agency</span>
-              `}
-              <a href="#/project/${ev.projectId}" class="setu-btn-secondary" style="padding: 6px 12px; font-size: 12px; text-decoration: none; margin-left: auto;">
-                Inspect Project →
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-    `;
-  }).join('');
-
-  const invoiceCardsHtml = allInvoices.map((inv) => {
-    const status = inv.reviewStatus || inv.status || 'PENDING';
-    const isAccepted = status === 'ACCEPTED';
-    const isRejected = status === 'REJECTED' || status === 'REJECTED_RESUBMISSION_REQUIRED';
-    const isPending = !isAccepted && !isRejected;
-
-    const statusBadge = isAccepted
-      ? `<span class="setu-badge" style="background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; font-size: 11px; font-weight: 700;">✓ AUDITED & ACCEPTED</span>`
-      : isRejected
-      ? `<span class="setu-badge" style="background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; font-size: 11px; font-weight: 700;">✕ REJECTED</span>`
-      : `<span class="setu-badge" style="background: #fef3c7; color: #92400e; border: 1px solid #fde68a; font-size: 11px; font-weight: 700;">⏳ AUDIT PENDING</span>`;
-
-    return `
-      <div class="setu-card" style="padding: 20px; background: white; border: 1px solid var(--setu-color-border-subtle); margin-bottom: 16px; border-left: 4px solid ${isAccepted ? '#059669' : isRejected ? '#dc2626' : '#0284c7'};">
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 12px;">
-          <div>
-            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
-              <span class="setu-detail-id-tag">INV: ${inv.invoiceNumber || 'INV-2026-001'}</span>
-              <span style="font-weight: 700; color: var(--setu-color-primary-navy); font-size: 14px;">₹${Number(inv.claimedAmount || inv.amount || 250000).toLocaleString('en-IN')}</span>
-              ${statusBadge}
-              <span class="setu-badge" style="background: #e0e7ff; color: #3730a3; border: 1px solid #c7d2fe; font-size: 10px;">Simulated GST OCR</span>
-            </div>
-            <a href="#/project/${inv.projectId}" style="font-size: 13px; font-weight: 600; color: var(--setu-color-primary-navy); text-decoration: none;">
-              ${inv.projectName} (${inv.projectId}) →
-            </a>
-          </div>
-          <div style="text-align: right; font-size: 12px; color: var(--setu-color-text-muted);">
-            Invoice Date: <strong>${inv.invoiceDate || '2026-02-14'}</strong>
-          </div>
-        </div>
-
-        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; padding: 12px; margin-bottom: 14px;">
-          <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-size: 12px;">
-            <span>Vendor: <strong>${inv.vendorName}</strong></span>
-            <span>GSTIN: <code style="font-family: var(--setu-font-mono); color: #0284c7;">${inv.gstin || '33AAACB1234F1Z5'}</code> (Verified Active)</span>
-            <span>Items: <strong>${inv.itemsSummary || 'Civil work materials & concrete casting'}</strong></span>
-          </div>
-        </div>
-
-        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-          ${isPending ? `
-            <button type="button" class="setu-btn-primary" onclick="window.setuReviewInvoice && window.setuReviewInvoice('${inv.projectId}', '${inv.invoiceNumber}', 'ACCEPTED')" style="padding: 6px 14px; font-size: 12px; background: #059669; border: none; border-radius: 4px; cursor: pointer; color: white; font-weight: 600;">
-              ✓ Accept & Audit Clear
-            </button>
-            <button type="button" class="setu-btn-secondary" onclick="window.setuReviewInvoice && window.setuReviewInvoice('${inv.projectId}', '${inv.invoiceNumber}', 'REJECTED_RESUBMISSION_REQUIRED')" style="padding: 6px 14px; font-size: 12px; background: white; border: 1px solid #f87171; color: #dc2626; border-radius: 4px; cursor: pointer; font-weight: 600;">
-              ✕ Reject Invoice
-            </button>
-          ` : isAccepted ? `
-            <span style="font-size: 12px; color: #059669; font-weight: 600;">✓ Tax Invoice Audited & Passed</span>
-          ` : `
-            <span style="font-size: 12px; color: #dc2626; font-weight: 600;">✕ Invoice Rejected — Resubmission Required</span>
-          `}
-          <a href="#/project/${inv.projectId}" class="setu-btn-secondary" style="padding: 6px 12px; font-size: 12px; text-decoration: none; margin-left: auto;">
-            Inspect Project Record →
-          </a>
-        </div>
-      </div>
-    `;
-  }).join('');
-
-  const trancheRowsHtml = trancheGatedProjects.map((p) => {
-    const sanctionedFormatted = `₹${Number(p.sanctionedAmount).toLocaleString('en-IN')}`;
-    const expenditureFormatted = `₹${Number(p.expenditure).toLocaleString('en-IN')}`;
-    const isDone = p.status === 'Completed' || (p.physicalProgress || 0) >= 100;
-
-    return `
-      <tr>
-        <td>
-          <a href="#/project/${p.id}" style="color: inherit; text-decoration: none;">
-            <div style="font-weight: 600; color: var(--setu-color-primary-navy);">${p.name}</div>
-            <div style="font-family: var(--setu-font-mono); font-size: 11px; color: var(--setu-color-text-muted);">${p.id} • ${p.category}</div>
-          </a>
-        </td>
-        <td>
-          <div style="font-size: 12px;">Sanctioned: <strong>${sanctionedFormatted}</strong></div>
-          <div style="font-size: 11px; color: var(--setu-color-text-muted);">Disbursed: ${expenditureFormatted}</div>
-        </td>
-        <td>
-          <div style="display: flex; align-items: center; gap: 6px;">
-            <div style="width: 70px; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden;">
-              <div style="width: ${p.physicalProgress || 0}%; height: 100%; background: ${p.physicalProgress === 100 ? '#059669' : 'var(--setu-color-primary-navy)'};"></div>
-            </div>
-            <span style="font-size: 12px; font-weight: 600;">${p.physicalProgress || 0}%</span>
-          </div>
-        </td>
-        <td>
-          ${p.hasAcceptedEvidence ? `
-            <span class="setu-badge" style="background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; font-size: 11px; font-weight: 600;">
-              ✓ Evidence Accepted
-            </span>
-          ` : `
-            <span class="setu-badge" style="background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0; font-size: 11px;">
-              🔒 Gate Locked
-            </span>
-          `}
-        </td>
-        <td>
-          ${isDone ? `
-            <span style="font-size: 12px; color: #059669; font-weight: 600;">✓ Fully Disbursed & Completed</span>
-          ` : p.hasAcceptedEvidence ? `
-            <button type="button" class="setu-btn-primary" onclick="if(window.setuOpenTrancheReleaseModal) window.setuOpenTrancheReleaseModal('${p.id}', ${p.sanctionedAmount || 5000000}, ${p.expenditure || 0});" style="padding: 6px 14px; font-size: 12px; background: #059669; border: none; border-radius: 4px; cursor: pointer; color: white; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
-              <span>💳</span> Release Next Tranche
-            </button>
-          ` : `
-            <button type="button" disabled title="Locked: Milestone evidence must be ACCEPTED first" style="padding: 6px 12px; font-size: 11px; border-radius: 4px; background: #f1f5f9; color: #94a3b8; border: 1px solid #e2e8f0; cursor: not-allowed; display: inline-flex; align-items: center; gap: 4px; font-weight: 600;">
-              <span>🔒</span> Tranche Locked
-            </button>
-          `}
-        </td>
-      </tr>
-    `;
-  }).join('');
-
-  return `
-    <div class="setu-dashboard">
-      <div class="setu-page-header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
-        <div>
-          <h1 class="setu-page-title">Evidence & Tranche Review Queue</h1>
-          <p class="setu-page-desc">District Authority one-stop operational queue for inspecting milestone photo artifacts, auditing contractor tax invoices, and releasing milestone fund tranches.</p>
-        </div>
-        <div style="display: flex; gap: 8px;">
-          <span class="setu-badge" style="background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; font-size: 11px;">
-            Statutory Milestone Gating Enforced
-          </span>
-        </div>
-      </div>
-
-      <!-- Operational Queue KPI Cards -->
-      <div class="setu-stat-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-bottom: 24px;">
-        <div class="setu-card">
-          <span class="setu-card-label">Pending Photo Evidence</span>
-          <span class="setu-card-value ${pendingEvidenceCount > 0 ? 'setu-card-value-accent' : ''}">${pendingEvidenceCount}</span>
-          <span class="setu-card-meta">Awaiting site verification</span>
-        </div>
-        <div class="setu-card">
-          <span class="setu-card-label">Pending GST Invoices</span>
-          <span class="setu-card-value ${pendingInvoiceCount > 0 ? 'setu-card-value-accent' : ''}">${pendingInvoiceCount}</span>
-          <span class="setu-card-meta">Contractor bills to audit</span>
-        </div>
-        <div class="setu-card">
-          <span class="setu-card-label">Gating Clearance Ready</span>
-          <span class="setu-card-value" style="color: #059669;">${readyTrancheCount}</span>
-          <span class="setu-card-meta">Evidence accepted for release</span>
-        </div>
-        <div class="setu-card">
-          <span class="setu-card-label">Total Disbursed Funds</span>
-          <span class="setu-card-value" style="color: var(--setu-color-primary-navy);">₹${(totalDisbursed / 10000000).toFixed(2)} Cr</span>
-          <span class="setu-card-meta">of ₹${(totalSanctioned / 10000000).toFixed(2)} Cr Sanctioned</span>
-        </div>
-      </div>
-
-      <!-- Section 1: Pending Photo Evidence Queue -->
-      <div class="setu-alert-section" style="margin-bottom: 24px;">
-        <div class="setu-alert-section-header">
-          <div>
-            <h2 class="setu-table-title">📸 Milestone Physical Evidence Submissions (${allEvidence.length})</h2>
-            <span class="setu-table-subtitle">Inspect geo-tagged site photographs and Junior Engineer verification artifacts submitted by Implementing Line Agencies</span>
-          </div>
-        </div>
-        <div style="margin-top: 16px;">
-          ${evidenceCardsHtml.length > 0 ? evidenceCardsHtml : `
-            <div class="setu-empty-state" style="background: white; border: 1px solid var(--setu-color-border-subtle); padding: 32px; border-radius: 6px; text-align: center;">
-              <p style="margin: 0; color: var(--setu-color-text-secondary);">No pending photo evidence submissions for your district.</p>
-            </div>
-          `}
-        </div>
-      </div>
-
-      <!-- Section 2: Contractor Tax Invoices Queue -->
-      <div class="setu-alert-section" style="margin-bottom: 24px;">
-        <div class="setu-alert-section-header">
-          <div>
-            <h2 class="setu-table-title">📄 Contractor Tax Invoices & GST Vouchers (${allInvoices.length})</h2>
-            <span class="setu-table-subtitle">Audit contractor bills, verify active GSTIN registrations, and approve expenditure before disbursement</span>
-          </div>
-        </div>
-        <div style="margin-top: 16px;">
-          ${invoiceCardsHtml.length > 0 ? invoiceCardsHtml : `
-            <div class="setu-empty-state" style="background: white; border: 1px solid var(--setu-color-border-subtle); padding: 32px; border-radius: 6px; text-align: center;">
-              <p style="margin: 0; color: var(--setu-color-text-secondary);">No contractor invoices submitted for audit.</p>
-            </div>
-          `}
-        </div>
-      </div>
-
-      <!-- Section 3: Milestone Fund Tranche Release Control Table -->
-      <div class="setu-table-container" style="background: white; border: 1px solid var(--setu-color-border-subtle); border-radius: 8px; padding: 20px;">
-        <div style="margin-bottom: 16px;">
-          <h2 class="setu-table-title">💳 Milestone Tranche Disbursement Control & Gating Status</h2>
-          <span class="setu-table-subtitle">Tranche release is strictly locked until current milestone evidence and invoices are formally marked ACCEPTED</span>
-        </div>
-        <div class="setu-table-wrapper">
-          <table class="setu-table">
-            <thead>
-              <tr>
-                <th>Project Scheme</th>
-                <th>Sanction / Disbursed</th>
-                <th>Physical Progress</th>
-                <th>Evidence Gate</th>
-                <th>Tranche Disbursement Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${trancheRowsHtml}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  `;
+  return getDistrictOperationalCommandHtml(user, projects, projects);
 }
 
-/**
- * 3. Risk Assessment View for District Authority
- */
 export function getRiskAssessmentViewHtml() {
   let user = null;
   if (typeof sessionStorage !== 'undefined') {
@@ -15330,46 +15612,46 @@ export function getMospiCommandOverviewHtml(stateFilter = 'ALL') {
     const isFiltered = stateFilter.toLowerCase() === s.state.toLowerCase();
     const hasEscalations = s.escalatedFlagsCount > 0;
     return `
-      <tr style="${isFiltered ? 'background-color: #eff6ff;' : ''}">
-        <td style="font-weight: 700; color: var(--setu-color-primary-navy);">
-          🏛️ ${s.state}
-          ${isFiltered ? '<span class="setu-badge" style="background:#bfdbfe; color:#1e3a8a; margin-left:6px; font-size:10px;">FILTERED</span>' : ''}
+      <tr class="hover:bg-surface-container-low/60 transition-colors ${isFiltered ? 'bg-primary-container/10 font-semibold' : ''}">
+        <td class="py-space-sm px-space-md font-semibold text-primary">
+          ${s.state}
+          ${isFiltered ? '<span class="px-1.5 py-0.5 rounded bg-primary-container text-on-primary text-[10px] font-bold ml-1.5">FILTERED</span>' : ''}
         </td>
-        <td style="font-weight: 600; font-family: var(--setu-font-mono); text-align: center;">${s.projectCount}</td>
-        <td style="font-family: var(--setu-font-mono);">₹${(s.totalSanctioned / 10000000).toFixed(2)} Cr</td>
-        <td style="font-family: var(--setu-font-mono); color: #047857;">₹${(s.totalExpenditure / 10000000).toFixed(2)} Cr</td>
-        <td style="font-weight: 600; font-family: var(--setu-font-mono);">${s.utilizationRate}%</td>
-        <td>
-          <div style="display: flex; align-items: center; gap: 6px;">
-            <div style="flex: 1; height: 6px; background: #e2e8f0; border-radius: 3px; min-width: 50px;">
-              <div style="width: ${s.avgPhysicalProgress}%; height: 100%; background: var(--setu-color-primary-navy); border-radius: 3px;"></div>
+        <td class="py-space-sm px-space-md text-center font-mono">${s.projectCount}</td>
+        <td class="py-space-sm px-space-md font-mono">₹${(s.totalSanctioned / 10000000).toFixed(2)} Cr</td>
+        <td class="py-space-sm px-space-md font-mono text-tertiary-container font-semibold">₹${(s.totalExpenditure / 10000000).toFixed(2)} Cr</td>
+        <td class="py-space-sm px-space-md font-mono font-semibold">${s.utilizationRate}%</td>
+        <td class="py-space-sm px-space-md">
+          <div class="flex items-center gap-2">
+            <div class="flex-1 h-2 bg-surface-container rounded-full overflow-hidden min-w-[50px]">
+              <div class="h-full bg-primary-container rounded-full" style="width: ${s.avgPhysicalProgress}%;"></div>
             </div>
-            <span style="font-family: var(--setu-font-mono); font-size: 11px;">${s.avgPhysicalProgress}%</span>
+            <span class="font-mono text-label-sm font-semibold">${s.avgPhysicalProgress}%</span>
           </div>
         </td>
-        <td>
-          <div style="display: flex; gap: 4px; flex-wrap: wrap;">
-            ${s.criticalAlertsCount > 0 ? `<span class="setu-badge setu-severity-critical" style="font-size: 10px;">${s.criticalAlertsCount} CRIT</span>` : ''}
-            ${s.highAlertsCount > 0 ? `<span class="setu-badge setu-severity-high" style="font-size: 10px;">${s.highAlertsCount} HIGH</span>` : ''}
-            ${s.criticalAlertsCount === 0 && s.highAlertsCount === 0 ? `<span style="color: #059669; font-size: 11px; font-weight: 600;">✓ Clear</span>` : ''}
+        <td class="py-space-sm px-space-md">
+          <div class="flex gap-1 flex-wrap">
+            ${s.criticalAlertsCount > 0 ? `<span class="px-1.5 py-0.5 rounded bg-error-container text-on-error-container text-[10px] font-bold">${s.criticalAlertsCount} CRIT</span>` : ''}
+            ${s.highAlertsCount > 0 ? `<span class="px-1.5 py-0.5 rounded bg-secondary-container text-on-secondary-container text-[10px] font-bold">${s.highAlertsCount} HIGH</span>` : ''}
+            ${s.criticalAlertsCount === 0 && s.highAlertsCount === 0 ? `<span class="text-tertiary-container font-semibold text-label-sm flex items-center gap-0.5"><span class="material-symbols-outlined text-[13px]">check_circle</span> Clear</span>` : ''}
           </div>
         </td>
-        <td>
+        <td class="py-space-sm px-space-md">
           ${hasEscalations ? `
-            <span class="setu-badge" style="background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5; font-size: 10px; font-weight: 700;">
-              ⚠️ ${s.escalatedFlagsCount} Escalated
+            <span class="px-2 py-0.5 rounded bg-error-container text-on-error-container text-[11px] font-bold inline-flex items-center gap-1">
+              <span class="material-symbols-outlined text-[13px]">warning</span> ${s.escalatedFlagsCount} Escalated
             </span>
           ` : `
-            <span style="color: #64748b; font-size: 11px;">Normal</span>
+            <span class="text-on-surface-variant text-label-sm">Normal</span>
           `}
         </td>
-        <td>
-          <div style="display: flex; gap: 6px; flex-wrap: wrap;">
-            <button type="button" class="setu-btn-secondary" onclick="window.setuFilterMospiState && window.setuFilterMospiState('${s.state}')" style="padding: 4px 8px; font-size: 11px; border-radius: 3px; background: white; cursor: pointer;">
-              ${isFiltered ? 'Reset Filter' : '🔍 View Works'}
+        <td class="py-space-sm px-space-md">
+          <div class="flex gap-1.5 flex-wrap">
+            <button type="button" class="px-2.5 py-1 text-label-sm rounded bg-surface-container text-primary hover:bg-surface-container-high transition-colors font-medium" onclick="window.setuFilterMospiState && window.setuFilterMospiState('${s.state}')">
+              ${isFiltered ? 'Reset' : 'View Works'}
             </button>
-            <button type="button" class="setu-btn-secondary" onclick="window.setuOpenStateReviewModal && window.setuOpenStateReviewModal('${s.state}')" style="padding: 4px 8px; font-size: 11px; border-radius: 3px; color: #7c2d12; background: #ffedd5; border: 1px solid #fed7aa; cursor: pointer; font-weight: 600;" title="Initiate formal MoSPI State Performance Review">
-              ⚖️ State Review
+            <button type="button" class="px-2.5 py-1 text-label-sm rounded bg-secondary-fixed text-on-secondary-fixed font-semibold hover:bg-secondary-container transition-colors" onclick="window.setuOpenStateReviewModal && window.setuOpenStateReviewModal('${s.state}')" title="Initiate formal MoSPI State Performance Review">
+              Review
             </button>
           </div>
         </td>
@@ -15381,183 +15663,670 @@ export function getMospiCommandOverviewHtml(stateFilter = 'ALL') {
   const projectTableRowsHtml = filteredProjects.map((p) => {
     const isHigh = p.riskLevel === 'HIGH' || (p.riskScore && p.riskScore >= 60);
     const isCritical = p.riskLevel === 'CRITICAL' || (p.riskScore && p.riskScore >= 80);
-    const sevBadgeClass = isCritical ? 'setu-severity-critical' : isHigh ? 'setu-severity-high' : 'setu-severity-low';
+    const sevBadge = isCritical
+      ? '<span class="px-2 py-0.5 rounded bg-error-container text-on-error-container text-[10px] font-bold">CRITICAL</span>'
+      : isHigh
+      ? '<span class="px-2 py-0.5 rounded bg-secondary-container text-on-secondary-container text-[10px] font-bold">HIGH</span>'
+      : '<span class="px-2 py-0.5 rounded bg-surface-container text-on-surface-variant text-[10px] font-semibold">LOW</span>';
 
     return `
-      <tr class="setu-clickable-row" onclick="window.location.hash='#/project/${p.id}'">
-        <td>
-          <a href="#/project/${p.id}" style="color: inherit; text-decoration: none;">
-            <div class="setu-project-name" style="font-weight: 600; color: var(--setu-color-primary-navy);">${p.name}</div>
-            <div class="setu-project-id" style="font-family: var(--setu-font-mono); font-size: 11px; color: var(--setu-color-text-muted);">${p.id}</div>
-          </a>
+      <tr class="hover:bg-surface-container-low/60 transition-colors cursor-pointer" onclick="window.location.hash='#/project/${p.id}'">
+        <td class="py-space-sm px-space-md">
+          <a href="#/project/${p.id}" class="font-semibold text-primary hover:underline block leading-tight">${p.name}</a>
+          <span class="font-mono text-[11px] text-on-surface-variant">${p.id}</span>
         </td>
-        <td><span style="font-weight: 600;">${p.state}</span></td>
-        <td><span style="font-size: 12px;">${p.district}</span></td>
-        <td><span style="font-size: 12px;">${p.category}</span></td>
-        <td>
-          <div style="font-size: 11px; color: #334155; line-height: 1.3;">
-            ${p.implementingAgency || 'District Authority'}
-          </div>
+        <td class="py-space-sm px-space-md font-semibold text-on-surface">${p.state}</td>
+        <td class="py-space-sm px-space-md text-on-surface-variant">${p.district}</td>
+        <td class="py-space-sm px-space-md"><span class="px-2 py-0.5 rounded bg-surface-container text-on-surface font-label-sm text-[11px]">${p.category}</span></td>
+        <td class="py-space-sm px-space-md text-on-surface-variant text-[12px] max-w-xs truncate">${p.implementingAgency || 'District Authority'}</td>
+        <td class="py-space-sm px-space-md font-mono">
+          <div>₹${((p.sanctionedAmount || p.estimatedCost || 0) / 100000).toFixed(1)} L</div>
+          <div class="text-[11px] text-tertiary-container font-semibold">Disb: ₹${((p.expenditure || 0) / 100000).toFixed(1)} L</div>
         </td>
-        <td>
-          <div style="font-family: var(--setu-font-mono); font-size: 12px;">
-            <div>₹${((p.sanctionedAmount || p.estimatedCost || 0) / 100000).toFixed(1)} L</div>
-            <div style="font-size: 11px; color: #059669;">Exp: ₹${((p.expenditure || 0) / 100000).toFixed(1)} L</div>
-          </div>
-        </td>
-        <td>
-          <div style="display: flex; align-items: center; gap: 6px;">
-            <div style="flex: 1; height: 5px; background: #e2e8f0; border-radius: 3px; min-width: 50px;">
-              <div style="width: ${p.physicalProgress || 0}%; height: 100%; background: var(--setu-color-primary-navy); border-radius: 3px;"></div>
+        <td class="py-space-sm px-space-md">
+          <div class="flex items-center gap-2">
+            <div class="flex-1 h-2 bg-surface-container rounded-full overflow-hidden min-w-[50px]">
+              <div class="h-full bg-primary-container rounded-full" style="width: ${p.physicalProgress || 0}%;"></div>
             </div>
-            <span style="font-family: var(--setu-font-mono); font-size: 11px;">${p.physicalProgress || 0}%</span>
+            <span class="font-mono text-label-sm font-semibold">${p.physicalProgress || 0}%</span>
           </div>
         </td>
-        <td>
-          <span class="setu-badge ${sevBadgeClass}" style="font-size: 10px;">
-            ${p.riskScore || 20}/100
-          </span>
-        </td>
-        <td>
-          <span class="setu-status-tag" style="font-size: 11px;">${p.status}</span>
-        </td>
+        <td class="py-space-sm px-space-md">${sevBadge}</td>
+        <td class="py-space-sm px-space-md"><span class="px-2 py-0.5 rounded bg-surface-container-high text-on-surface font-label-sm text-[11px] font-semibold">${p.status}</span></td>
       </tr>
     `;
   }).join('');
 
   return `
-    <div class="setu-dashboard">
-      <!-- National Apex Command Header -->
-      <div class="setu-page-header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
-        <div>
-          <h1 class="setu-page-title">Central Nodal Agency (MoSPI) — National Command Overview</h1>
-          <p class="setu-page-desc">
-            Executive national rollup, state-wise developmental resource allocations, and cross-state statutory directives across all 20 States & Union Territories (124 Public Works).
+    <div class="flex flex-col w-full space-y-space-xl">
+      <!-- Header / Executive Meta Banner -->
+      <div class="bg-surface-container-lowest p-space-xl rounded-xl shadow-sm flex flex-col xl:flex-row xl:items-center justify-between gap-space-lg">
+        <div class="space-y-space-xs max-w-3xl">
+          <div class="flex items-center gap-space-sm flex-wrap">
+            <span class="bg-primary text-on-primary text-[10px] font-bold px-2 py-0.5 rounded tracking-widest uppercase font-label-sm">MoSPI Apex Surveillance</span>
+            <span class="bg-error-container text-on-error-container text-label-sm font-semibold px-2 py-0.5 rounded">STATUTORY ALERT: 07 ADJUDICATIONS REQ.</span>
+            <span class="text-on-surface-variant font-label-sm">SIH26102 · Financial Year 2024–25</span>
+          </div>
+          <h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight font-bold">National Apex Command &amp; Anomaly Surveillance Console</h1>
+          <p class="font-body-md text-on-surface-variant leading-relaxed">
+            Central Nodal Agency (MoSPI) multi-jurisdiction intelligence mesh. Integrated monitoring across 28 States &amp; UTs, combining cross-border geospatial reconciliation, PFMS fund velocity vectors, and NLP civic feedback triangulation.
           </p>
         </div>
-        <div style="display: flex; gap: 8px; align-items: center;">
-          <span class="setu-badge" style="background: #1e1b4b; color: #e0e7ff; font-weight: 700; font-size: 12px; padding: 5px 12px; border: 1px solid #4338ca;">
-            👑 National Apex Authority (MoSPI HQ)
-          </span>
+        <!-- Right KPI Cluster -->
+        <div class="bg-surface-container-low p-space-md rounded-lg flex flex-wrap sm:flex-nowrap items-stretch gap-space-md shrink-0">
+          <div class="px-space-md py-space-xs bg-surface-container-lowest rounded flex flex-col justify-between">
+            <span class="font-label-sm text-on-surface-variant uppercase tracking-wider">Sanctioned Outlay</span>
+            <div class="flex items-baseline gap-1 mt-1">
+              <span class="font-headline-md text-primary font-bold">₹${(totalSanctioned / 10000000).toFixed(2)}</span>
+              <span class="font-label-sm text-on-surface-variant font-medium">Cr</span>
+            </div>
+            <span class="font-body-sm text-on-surface-variant mt-1">${totalWorks} Civil Works Active</span>
+          </div>
+          <div class="px-space-md py-space-xs bg-surface-container-lowest rounded flex flex-col justify-between">
+            <span class="font-label-sm text-on-surface-variant uppercase tracking-wider">Disbursed (PFMS)</span>
+            <div class="flex items-baseline gap-1 mt-1">
+              <span class="font-headline-md text-tertiary-container font-bold">₹${(totalExpenditure / 10000000).toFixed(2)}</span>
+              <span class="font-label-sm text-on-tertiary-container font-medium">Cr</span>
+            </div>
+            <div class="flex items-center gap-1 mt-1">
+              <div class="w-12 h-1.5 bg-surface-container rounded-full overflow-hidden">
+                <div class="bg-on-tertiary-container h-full" style="width: ${nationalUtilization}%;"></div>
+              </div>
+              <span class="font-label-sm text-on-surface-variant font-semibold">${nationalUtilization}%</span>
+            </div>
+          </div>
+          <div class="px-space-md py-space-xs bg-surface-container-lowest rounded flex flex-col justify-between">
+            <span class="font-label-sm text-error uppercase tracking-wider">Unspent Chronic</span>
+            <div class="flex items-baseline gap-1 mt-1">
+              <span class="font-headline-md text-error font-bold">₹142.10</span>
+              <span class="font-label-sm text-error font-medium">Cr</span>
+            </div>
+            <span class="font-body-sm text-on-surface-variant mt-1">90+ Days Dormant</span>
+          </div>
         </div>
       </div>
 
-      <!-- National KPI Stat Cards -->
-      <div class="setu-stat-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 24px;">
-        <div class="setu-card">
-          <span class="setu-card-label">Total Monitored Works</span>
-          <span class="setu-card-value">${totalWorks}</span>
-          <span class="setu-card-meta">Across 20 States & Union Territories</span>
+      <!-- Row 1: Macro KPI Surveillance Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-space-lg">
+        <!-- Card 1 -->
+        <div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col justify-between space-y-space-md">
+          <div class="flex items-start justify-between">
+            <div class="space-y-space-xs">
+              <span class="font-label-sm text-on-surface-variant uppercase font-semibold tracking-wider">National Sanction Outlay</span>
+              <div class="font-headline-lg text-primary font-bold tracking-tight">₹${(totalSanctioned / 10000000).toFixed(2)} Cr</div>
+            </div>
+            <div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+              <span class="material-symbols-outlined text-[24px]">account_balance</span>
+            </div>
+          </div>
+          <div class="space-y-space-xs">
+            <div class="flex justify-between font-label-sm text-on-surface-variant">
+              <span>State Allocations Active</span>
+              <span class="font-semibold text-on-surface">28 States / UTs</span>
+            </div>
+            <div class="w-full bg-surface-container h-2 rounded-full overflow-hidden flex">
+              <div class="bg-primary-container h-full w-[55%]" title="Tier-1 States 55%"></div>
+              <div class="bg-secondary-container h-full w-[25%]" title="Special Category 25%"></div>
+              <div class="bg-outline-variant h-full w-[20%]" title="UTs 20%"></div>
+            </div>
+            <div class="flex items-center gap-space-xs font-body-sm text-on-surface-variant pt-1">
+              <span class="material-symbols-outlined text-primary-container text-[14px]">check_circle</span>
+              <span>100% PFMS mapped via E-Gram Swaraj link</span>
+            </div>
+          </div>
         </div>
-        <div class="setu-card">
-          <span class="setu-card-label">Total Sanctioned Outlay</span>
-          <span class="setu-card-value">₹${(totalSanctioned / 10000000).toFixed(2)} Cr</span>
-          <span class="setu-card-meta">National MPLADS budget envelope</span>
+        <!-- Card 2 -->
+        <div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col justify-between space-y-space-md">
+          <div class="flex items-start justify-between">
+            <div class="space-y-space-xs">
+              <span class="font-label-sm text-error uppercase font-semibold tracking-wider">Inter-State Duplicates</span>
+              <div class="font-headline-lg text-error font-bold tracking-tight">07 Pending</div>
+            </div>
+            <div class="w-10 h-10 rounded-lg bg-error-container flex items-center justify-center text-error">
+              <span class="material-symbols-outlined text-[24px]">difference</span>
+            </div>
+          </div>
+          <div class="space-y-1">
+            <div class="bg-surface-container-low p-space-xs px-space-sm rounded font-body-sm text-on-surface flex justify-between items-center">
+              <span>Cross-Border Duplicate Works:</span>
+              <span class="font-semibold text-error">03 Sites</span>
+            </div>
+            <div class="bg-surface-container-low p-space-xs px-space-sm rounded font-body-sm text-on-surface flex justify-between items-center">
+              <span>Unexplained Velocity Spikes:</span>
+              <span class="font-semibold text-secondary">04 Dist.</span>
+            </div>
+            <div class="font-label-sm text-on-surface-variant flex items-center gap-1 pt-1">
+              <span class="material-symbols-outlined text-[14px]">sensors</span>
+              <span>Haversine spatial overlap &lt; 500m radius</span>
+            </div>
+          </div>
         </div>
-        <div class="setu-card">
-          <span class="setu-card-label">Cumulative National Outlay</span>
-          <span class="setu-card-value" style="color: #059669;">₹${(totalExpenditure / 10000000).toFixed(2)} Cr</span>
-          <span class="setu-card-meta">National fund utilization: ${nationalUtilization}%</span>
+        <!-- Card 3 -->
+        <div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col justify-between space-y-space-md">
+          <div class="flex items-start justify-between">
+            <div class="space-y-space-xs">
+              <span class="font-label-sm text-secondary uppercase font-semibold tracking-wider">Fund Dumping / March Rush</span>
+              <div class="font-headline-lg text-secondary font-bold tracking-tight">14 Districts</div>
+            </div>
+            <div class="w-10 h-10 rounded-lg bg-secondary-fixed flex items-center justify-center text-secondary">
+              <span class="material-symbols-outlined text-[24px]">trending_up</span>
+            </div>
+          </div>
+          <div class="space-y-space-xs">
+            <div class="flex justify-between items-center font-label-sm">
+              <span class="text-on-surface-variant">Velocity Anomaly Level</span>
+              <span class="text-secondary font-bold">&gt; 3.5x Baseline</span>
+            </div>
+            <div class="w-full bg-surface-container h-2 rounded-full overflow-hidden">
+              <div class="bg-secondary-container h-full w-[78%]"></div>
+            </div>
+            <p class="font-body-sm text-on-surface-variant pt-1">
+              Surge in bill clearances without verified drone/GIS milestones in Bihar &amp; WB borders.
+            </p>
+          </div>
         </div>
-        <div class="setu-card">
-          <span class="setu-card-label">Actionable Escalated Dossiers</span>
-          <span class="setu-card-value ${mospiEscalatedFlags.length > 0 ? 'setu-card-value-accent' : ''}">${mospiEscalatedFlags.length}</span>
-          <span class="setu-card-meta">Requiring MoSPI Central Directives</span>
-        </div>
-        <div class="setu-card">
-          <span class="setu-card-label">High & Critical Anomalies</span>
-          <span class="setu-card-value" style="color: #ea580c;">${highRiskCount}</span>
-          <span class="setu-card-meta">Nationwide risk watch list</span>
-        </div>
-        <div class="setu-card">
-          <span class="setu-card-label">Inter-State Duplicate Matches</span>
-          <span class="setu-card-value" style="color: #7c3aed;">${crossStateDuplicatePairs.length}</span>
-          <span class="setu-card-meta">Direct MoSPI Adjudication</span>
+        <!-- Card 4 -->
+        <div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col justify-between space-y-space-md">
+          <div class="flex items-start justify-between">
+            <div class="space-y-space-xs">
+              <span class="font-label-sm text-on-surface-variant uppercase font-semibold tracking-wider">Citizen Contradictions</span>
+              <div class="font-headline-lg text-on-surface font-bold tracking-tight">18 Flagged</div>
+            </div>
+            <div class="w-10 h-10 rounded-lg bg-surface-container-high flex items-center justify-center text-primary">
+              <span class="material-symbols-outlined text-[24px]">psychology</span>
+            </div>
+          </div>
+          <div class="space-y-space-xs">
+            <div class="flex items-center justify-between font-label-sm">
+              <span class="text-on-surface-variant">NLP Disparity Index</span>
+              <span class="bg-error-container text-on-error-container font-bold px-1.5 py-0.5 rounded text-[11px]">HIGH 0.89</span>
+            </div>
+            <p class="font-body-sm text-on-surface-variant leading-snug">
+              18 projects claimed complete with 100% bills paid where verified citizen feedback reports zero utility.
+            </p>
+            <div class="flex items-center gap-1 font-label-sm text-primary font-semibold pt-1">
+              <span>CAG Action Trigger Active</span>
+              <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- State-by-State Allocation Table -->
-      <div class="setu-table-card" style="margin-bottom: 24px;">
-        <div class="setu-table-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+      <!-- Row 2: Inter-State Duplicate Work Registry & Cross-Border Adjudication Console -->
+      <div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-xl space-y-space-lg">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md pb-space-sm">
+          <div class="space-y-0.5">
+            <div class="flex items-center gap-space-sm flex-wrap">
+              <h2 class="font-headline-lg text-headline-lg text-on-surface font-semibold">Inter-State Duplicate Work Registry &amp; Cross-Border Adjudication</h2>
+              <span class="bg-primary-container text-on-primary font-label-sm text-label-sm px-2 py-0.5 rounded font-mono">Levenshtein + Haversine ≤500m Engine</span>
+            </div>
+            <p class="font-body-md text-on-surface-variant">Autonomous cross-referencing of sanctioned DPR titles against bilateral geofenced spatial buffers.</p>
+          </div>
+          <div class="flex items-center gap-space-sm">
+            <button class="h-9 px-3 bg-primary text-on-primary font-label-md text-label-md rounded flex items-center gap-1 hover:bg-primary-container transition-colors shadow-sm" type="button" onclick="alert('Official CAG Statutory Dossier generated for all 3 cross-border cases.')">
+              <span class="material-symbols-outlined text-[16px]">file_download</span>
+              <span>CAG Dossier</span>
+            </button>
+          </div>
+        </div>
+        <!-- Case Registry Table -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-left">
+            <thead>
+              <tr class="bg-surface-container-low text-on-surface-variant font-label-md text-label-md uppercase tracking-wider">
+                <th class="py-space-sm px-space-md">Work Identifier &amp; Description</th>
+                <th class="py-space-sm px-space-md">Border Jurisdictions</th>
+                <th class="py-space-sm px-space-md">Anomaly Vector</th>
+                <th class="py-space-sm px-space-md">Vendor Audit Flag</th>
+                <th class="py-space-sm px-space-md">Severity / Status</th>
+                <th class="py-space-sm px-space-md text-right">Adjudication Action</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-surface-container">
+              <!-- Item 1: Critical Duplicate -->
+              <tr class="bg-surface-container-lowest hover:bg-surface-container-low/60 transition-colors">
+                <td class="py-space-md px-space-md align-top max-w-sm">
+                  <div class="space-y-1">
+                    <span class="font-mono text-[11px] text-on-surface-variant uppercase font-semibold">REC-TNAP-2024-881</span>
+                    <div class="font-headline-md text-body-md font-semibold text-on-surface">Construction of Interstate Link Bridge over Palar River</div>
+                    <div class="font-body-sm text-on-surface-variant">Central Sanction: ₹14.80 Cr across two parallel DPR entries with inverted chainages.</div>
+                  </div>
+                </td>
+                <td class="py-space-md px-space-md align-top">
+                  <div class="space-y-1">
+                    <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-primary"></span><span class="font-label-md text-on-surface">Vellore (Tamil Nadu)</span></div>
+                    <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-secondary"></span><span class="font-label-md text-on-surface">Chittoor (Andhra Pradesh)</span></div>
+                    <div class="font-label-sm text-on-surface-variant font-mono">Lat: 12.9165° N · Long: 79.1325° E</div>
+                  </div>
+                </td>
+                <td class="py-space-md px-space-md align-top">
+                  <div class="space-y-1">
+                    <div class="flex items-center gap-2"><span class="font-label-sm text-on-surface-variant">Haversine Gap:</span><span class="font-mono font-bold text-error text-label-md">42 meters</span></div>
+                    <div class="flex items-center gap-2"><span class="font-label-sm text-on-surface-variant">NLP Similarity:</span><span class="font-mono font-bold text-error text-label-md">94.2%</span></div>
+                    <span class="inline-block bg-error-container text-on-error-container text-[10px] font-bold px-1.5 py-0.5 rounded">EXACT GEO-COORDINATE COLLISION</span>
+                  </div>
+                </td>
+                <td class="py-space-md px-space-md align-top">
+                  <div class="space-y-0.5">
+                    <div class="font-label-md text-on-surface font-semibold">M/s Krishna Infratech</div>
+                    <div class="font-body-sm text-on-surface-variant">Common PAN/GSTIN linked to both TN &amp; AP state contracts</div>
+                    <span class="text-error text-label-sm font-semibold flex items-center gap-1">
+                      <span class="material-symbols-outlined text-[14px]">warning</span> Duplicate Billing Suspected
+                    </span>
+                  </div>
+                </td>
+                <td class="py-space-md px-space-md align-top">
+                  <div class="inline-flex items-center gap-1 bg-error-container text-on-error-container px-2.5 py-1 rounded text-label-sm font-bold">
+                    <span class="material-symbols-outlined text-[14px]">cancel</span>
+                    <span>CRITICAL OVERLAP</span>
+                  </div>
+                </td>
+                <td class="py-space-md px-space-md align-top text-right">
+                  <div class="flex flex-col items-end gap-1.5">
+                    <button class="px-3 py-1 bg-error text-on-error text-label-sm font-semibold rounded hover:bg-on-error-container transition-colors shadow-sm" type="button" onclick="alert('Central Tranche Frozen for REC-TNAP-2024-881. Statutory notice dispatched.')">Freeze Central Tranche</button>
+                    <button class="px-3 py-1 bg-surface-container text-primary font-label-sm rounded hover:bg-surface-container-high transition-colors" type="button" onclick="alert('Joint Inquiry directed between Tamil Nadu and Andhra Pradesh Nodal Officers.')">Direct Joint Inquiry</button>
+                  </div>
+                </td>
+              </tr>
+              <!-- Item 2: Medium Overlap -->
+              <tr class="bg-surface-container-low/30 hover:bg-surface-container-low/60 transition-colors">
+                <td class="py-space-md px-space-md align-top max-w-sm">
+                  <div class="space-y-1">
+                    <span class="font-mono text-[11px] text-on-surface-variant uppercase font-semibold">REC-KAAP-2024-402</span>
+                    <div class="font-headline-md text-body-md font-semibold text-on-surface">Multipurpose Community Hall &amp; Skill Center, Bellary Border</div>
+                    <div class="font-body-sm text-on-surface-variant">Separate MP recommendation allocations filed simultaneously under differing sub-heads.</div>
+                  </div>
+                </td>
+                <td class="py-space-md px-space-md align-top">
+                  <div class="space-y-1">
+                    <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-primary"></span><span class="font-label-md text-on-surface">Ballari (Karnataka)</span></div>
+                    <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-secondary"></span><span class="font-label-md text-on-surface">Ananthapuramu (Andhra)</span></div>
+                    <div class="font-label-sm text-on-surface-variant font-mono">Lat: 15.1394° N · Long: 76.9214° E</div>
+                  </div>
+                </td>
+                <td class="py-space-md px-space-md align-top">
+                  <div class="space-y-1">
+                    <div class="flex items-center gap-2"><span class="font-label-sm text-on-surface-variant">Haversine Gap:</span><span class="font-mono font-bold text-secondary text-label-md">110 meters</span></div>
+                    <div class="flex items-center gap-2"><span class="font-label-sm text-on-surface-variant">NLP Similarity:</span><span class="font-mono font-bold text-secondary text-label-md">88.4%</span></div>
+                    <span class="inline-block bg-secondary-fixed text-on-secondary-fixed text-[10px] font-bold px-1.5 py-0.5 rounded">SAME PLOT PARCEL CLASH</span>
+                  </div>
+                </td>
+                <td class="py-space-md px-space-md align-top">
+                  <div class="space-y-0.5">
+                    <div class="font-label-md text-on-surface font-semibold">Sri Lakshmi Builders (AP) / KRDCL Subcon (KA)</div>
+                    <div class="font-body-sm text-on-surface-variant">Two distinct vendors for single physical plot boundary</div>
+                  </div>
+                </td>
+                <td class="py-space-md px-space-md align-top">
+                  <div class="inline-flex items-center gap-1 bg-secondary-fixed text-on-secondary-fixed px-2.5 py-1 rounded text-label-sm font-bold">
+                    <span class="material-symbols-outlined text-[14px]">schedule</span>
+                    <span>INVESTIGATION QUEUED</span>
+                  </div>
+                </td>
+                <td class="py-space-md px-space-md align-top text-right">
+                  <div class="flex flex-col items-end gap-1.5">
+                    <button class="px-3 py-1 bg-primary text-on-primary text-label-sm font-semibold rounded hover:bg-primary-container transition-colors shadow-sm" type="button" onclick="alert('Genuine project adjudicated. Duplicate recommendation marked void.')">Adjudicate Genuine Work</button>
+                    <button class="px-3 py-1 bg-surface-container text-primary font-label-sm rounded hover:bg-surface-container-high transition-colors" type="button" onclick="alert('Formal audit request forwarded to CAG Field Unit.')">Request CAG Audit</button>
+                  </div>
+                </td>
+              </tr>
+              <!-- Item 3: Bilateral Verification -->
+              <tr class="bg-surface-container-lowest hover:bg-surface-container-low/60 transition-colors">
+                <td class="py-space-md px-space-md align-top max-w-sm">
+                  <div class="space-y-1">
+                    <span class="font-mono text-[11px] text-on-surface-variant uppercase font-semibold">REC-ODWB-2024-119</span>
+                    <div class="font-headline-md text-body-md font-semibold text-on-surface">Border Rural Solar Micro-Grid Installation</div>
+                    <div class="font-body-sm text-on-surface-variant">Bilateral electrification project across Jaleswar border zone with disparate vendor milestones.</div>
+                  </div>
+                </td>
+                <td class="py-space-md px-space-md align-top">
+                  <div class="space-y-1">
+                    <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-primary"></span><span class="font-label-md text-on-surface">Balasore (Odisha)</span></div>
+                    <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-secondary"></span><span class="font-label-md text-on-surface">Paschim Medinipur (WB)</span></div>
+                    <div class="font-label-sm text-on-surface-variant font-mono">Lat: 21.8129° N · Long: 87.2144° E</div>
+                  </div>
+                </td>
+                <td class="py-space-md px-space-md align-top">
+                  <div class="space-y-1">
+                    <div class="flex items-center gap-2"><span class="font-label-sm text-on-surface-variant">Haversine Gap:</span><span class="font-mono font-semibold text-on-surface text-label-md">310 meters</span></div>
+                    <div class="flex items-center gap-2"><span class="font-label-sm text-on-surface-variant">NLP Similarity:</span><span class="font-mono font-semibold text-on-surface text-label-md">71.0%</span></div>
+                    <span class="inline-block bg-surface-container-high text-on-surface-variant text-[10px] font-semibold px-1.5 py-0.5 rounded">BUFFER PERIPHERY MATCH</span>
+                  </div>
+                </td>
+                <td class="py-space-md px-space-md align-top">
+                  <div class="space-y-0.5">
+                    <div class="font-label-md text-on-surface font-semibold">GreenPower Infra Consortium</div>
+                    <div class="font-body-sm text-on-surface-variant">Divergent feeder line geo-tags registered under review</div>
+                  </div>
+                </td>
+                <td class="py-space-md px-space-md align-top">
+                  <div class="inline-flex items-center gap-1 bg-surface-container-high text-on-surface-variant px-2.5 py-1 rounded text-label-sm font-semibold">
+                    <span class="material-symbols-outlined text-[14px]">sync</span>
+                    <span>BILATERAL VERIFICATION</span>
+                  </div>
+                </td>
+                <td class="py-space-md px-space-md align-top text-right">
+                  <div class="flex flex-col items-end gap-1.5">
+                    <button class="px-3 py-1 bg-surface-container text-on-surface font-label-sm rounded hover:bg-surface-container-high transition-colors" type="button" onclick="alert('Nodal confirmation request transmitted to Balasore and Medinipur Collectorates.')">Request Nodal Confirmation</button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <!-- Micro summary bar below table -->
+        <div class="bg-surface-container-low p-space-md rounded-lg flex flex-col md:flex-row items-center justify-between gap-space-sm font-body-sm text-on-surface-variant">
+          <div class="flex items-center gap-space-md">
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-error"></span><strong class="text-on-surface">1 Critical Duplication:</strong> Immediate withholding recommended</span>
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-secondary-container"></span><strong class="text-on-surface">2 Bilateral Cases:</strong> Under field triangulation</span>
+          </div>
+          <div class="font-label-sm text-primary font-semibold">Autonomous Reconciliation Engine Version: Haversine-Levenshtein 3.1</div>
+        </div>
+      </div>
+
+      <!-- Row 3: Two Column Layout -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg">
+        <!-- Left Column: National Predictive Risk & State Utilization Index (7 cols) -->
+        <div class="lg:col-span-7 bg-surface-container-lowest rounded-xl shadow-sm p-space-xl flex flex-col justify-between space-y-space-lg">
+          <div class="space-y-space-xs">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-space-sm">
+                <span class="material-symbols-outlined text-primary text-[24px]">analytics</span>
+                <h2 class="font-headline-lg text-headline-lg text-on-surface font-semibold">Predictive Risk &amp; State Utilization Index</h2>
+              </div>
+              <span class="text-label-sm bg-surface-container px-2.5 py-1 rounded font-mono text-on-surface font-semibold">MoSPI Algorithmic Benchmark</span>
+            </div>
+            <p class="font-body-md text-on-surface-variant">
+              Correlating expenditure velocity, chronic balances, and geo-milestone validation coefficients across key state treasuries.
+            </p>
+          </div>
+          <!-- State Utilization Index Stack -->
+          <div class="space-y-space-md">
+            <div class="p-space-md bg-surface-container-low rounded-lg space-y-space-xs">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-space-sm">
+                  <span class="font-label-lg text-label-lg font-bold text-on-surface">Tamil Nadu</span>
+                  <span class="bg-tertiary-fixed text-on-tertiary-fixed text-[11px] font-bold px-2 py-0.5 rounded">BENCHMARK LEADER</span>
+                </div>
+                <div class="flex items-center gap-space-md">
+                  <span class="font-body-sm text-on-surface-variant">Risk Index: <strong class="text-tertiary-container font-mono">0.18</strong> (Low)</span>
+                  <span class="font-label-md text-primary font-bold">91.4% Disbursed</span>
+                </div>
+              </div>
+              <div class="w-full bg-surface-container h-2.5 rounded-full overflow-hidden">
+                <div class="bg-tertiary-container h-full rounded-full w-[91.4%]"></div>
+              </div>
+              <div class="flex justify-between items-center font-label-sm text-on-surface-variant">
+                <span>Allocated: ₹210.00 Cr · Tracked: 24 Works</span>
+                <span class="text-on-surface">Unspent: ₹18.06 Cr · Zero Anomaly Incurred</span>
+              </div>
+            </div>
+            <div class="p-space-md bg-surface-container-low rounded-lg space-y-space-xs">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-space-sm">
+                  <span class="font-label-lg text-label-lg font-bold text-on-surface">Maharashtra</span>
+                  <span class="bg-surface-container text-on-surface-variant text-[11px] font-bold px-2 py-0.5 rounded">OPTIMAL CADENCE</span>
+                </div>
+                <div class="flex items-center gap-space-md">
+                  <span class="font-body-sm text-on-surface-variant">Risk Index: <strong class="text-tertiary-container font-mono">0.22</strong> (Low)</span>
+                  <span class="font-label-md text-primary font-bold">84.2% Disbursed</span>
+                </div>
+              </div>
+              <div class="w-full bg-surface-container h-2.5 rounded-full overflow-hidden">
+                <div class="bg-tertiary-container h-full rounded-full w-[84.2%]"></div>
+              </div>
+              <div class="flex justify-between items-center font-label-sm text-on-surface-variant">
+                <span>Allocated: ₹185.50 Cr · Tracked: 19 Works</span>
+                <span class="text-on-surface">Unspent: ₹29.30 Cr · Minor delay in Konkan division</span>
+              </div>
+            </div>
+            <div class="p-space-md bg-surface-container-low rounded-lg space-y-space-xs">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-space-sm">
+                  <span class="font-label-lg text-label-lg font-bold text-on-surface">Uttar Pradesh</span>
+                  <span class="bg-secondary-fixed text-on-secondary-fixed text-[11px] font-bold px-2 py-0.5 rounded">WATCHLIST STATUS</span>
+                </div>
+                <div class="flex items-center gap-space-md">
+                  <span class="font-body-sm text-on-surface-variant">Risk Index: <strong class="text-secondary font-mono">0.49</strong> (Moderate)</span>
+                  <span class="font-label-md text-primary font-bold">72.1% Disbursed</span>
+                </div>
+              </div>
+              <div class="w-full bg-surface-container h-2.5 rounded-full overflow-hidden">
+                <div class="bg-secondary-container h-full rounded-full w-[72.1%]"></div>
+              </div>
+              <div class="flex justify-between items-center font-label-sm text-on-surface-variant">
+                <span>Allocated: ₹340.00 Cr · Tracked: 32 Works</span>
+                <span class="text-secondary font-semibold">14 Civic Discrepancy Contradictions logged</span>
+              </div>
+            </div>
+            <div class="p-space-md bg-error-container/20 rounded-lg space-y-space-xs">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-space-sm">
+                  <span class="font-label-lg text-label-lg font-bold text-on-surface">Bihar</span>
+                  <span class="bg-error text-on-error text-[11px] font-bold px-2 py-0.5 rounded">CHRONIC UNDER-UTILIZATION</span>
+                </div>
+                <div class="flex items-center gap-space-md">
+                  <span class="font-body-sm text-on-surface-variant">Risk Index: <strong class="text-error font-mono font-bold">0.74</strong> (High)</span>
+                  <span class="font-label-md text-error font-bold">54.0% Disbursed</span>
+                </div>
+              </div>
+              <div class="w-full bg-surface-container h-2.5 rounded-full overflow-hidden">
+                <div class="bg-error h-full rounded-full w-[54%]"></div>
+              </div>
+              <div class="flex justify-between items-center font-label-sm text-on-surface-variant">
+                <span>Allocated: ₹162.00 Cr · Tracked: 18 Works</span>
+                <span class="text-error font-bold">₹74.52 Cr Idle Fund Accumulation (180+ Days)</span>
+              </div>
+            </div>
+            <div class="p-space-md bg-secondary-fixed/20 rounded-lg space-y-space-xs">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-space-sm">
+                  <span class="font-label-lg text-label-lg font-bold text-on-surface">West Bengal</span>
+                  <span class="bg-secondary text-on-secondary text-[11px] font-bold px-2 py-0.5 rounded">MARCH-RUSH / FUND DUMPING</span>
+                </div>
+                <div class="flex items-center gap-space-md">
+                  <span class="font-body-sm text-on-surface-variant">Risk Index: <strong class="text-secondary font-mono font-bold">0.81</strong> (Critical)</span>
+                  <span class="font-label-md text-secondary font-bold">58.3% Disbursed</span>
+                </div>
+              </div>
+              <div class="w-full bg-surface-container h-2.5 rounded-full overflow-hidden">
+                <div class="bg-secondary h-full rounded-full w-[58.3%]"></div>
+              </div>
+              <div class="flex justify-between items-center font-label-sm text-on-surface-variant">
+                <span>Allocated: ₹144.20 Cr · Tracked: 14 Works</span>
+                <span class="text-secondary font-bold">Velocity anomaly: 3.8x baseline in 4 border blocks</span>
+              </div>
+            </div>
+          </div>
+          <!-- Action Footer for Left Column -->
+          <div class="pt-space-md flex flex-wrap items-center justify-between gap-space-sm">
+            <div class="flex items-center gap-space-xs text-body-sm text-on-surface-variant">
+              <span class="material-symbols-outlined text-[16px] text-primary">policy</span>
+              <span>Central Directives automatically synced to State Chief Secretaries via e-Cabinet API.</span>
+            </div>
+            <div class="flex items-center gap-space-sm">
+              <button class="px-4 py-2 bg-primary text-on-primary text-label-md rounded font-semibold hover:bg-primary-container transition-colors shadow-sm" type="button" onclick="alert('Central MoSPI Directive dispatched across State Principal Secretaries.')">Issue Central MoSPI Directive</button>
+              <button class="px-4 py-2 bg-surface-container text-primary text-label-md rounded font-semibold hover:bg-surface-container-high transition-colors" type="button" onclick="alert('CAG Field Unit tasked for comprehensive ground verification audit.')">Task CAG Field Unit</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: National Citizen NLP Ground Truth Intelligence Heatmap (5 cols) -->
+        <div class="lg:col-span-5 bg-surface-container-lowest rounded-xl shadow-sm p-space-xl flex flex-col justify-between space-y-space-lg">
+          <div class="space-y-space-xs">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-space-sm">
+                <span class="material-symbols-outlined text-secondary text-[24px]">satellite_alt</span>
+                <h2 class="font-headline-lg text-headline-lg text-on-surface font-semibold">NLP Ground Truth Intelligence</h2>
+              </div>
+              <span class="bg-error text-on-error text-[10px] font-bold px-2 py-0.5 rounded tracking-wider uppercase">18 Active Alerts</span>
+            </div>
+            <p class="font-body-md text-on-surface-variant">Automated semantic discordance between contractor milestone claims and geolocated citizen field submissions.</p>
+          </div>
+          <!-- Visual Feed: Satellite Inspection Sample -->
+          <div class="relative rounded-lg overflow-hidden bg-surface-container-high h-44">
+            <div class="bg-cover bg-center w-full h-full" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuACBv6HI2c7lBpxaQgVc6Xbh1Qtwca-RkPphMl4BeRd0vkH6FB3tMDZ169UXzUShqKDerdNQGty2XfV9ZibJTN2ix7DyAdh-9CzGKZ4msyWWC92Y-WgYJNi_HvwyfCuvP6gBmph4GqRNeVGNuMW77f5lfYUThBpsN4inYMVCnaGN7IbdkKEuubKOknggJQ3Z-AJLwj89HSjLjRj4s1SxUCFhEc_aDrY1opmHGDoyJgSSXQatlMBnk2w')"></div>
+            <div class="absolute inset-0 bg-primary/40 flex flex-col justify-between p-space-md text-on-primary">
+              <div class="flex justify-between items-start">
+                <span class="bg-primary/80 backdrop-blur-sm px-2 py-0.5 rounded text-[11px] font-mono">Geo-Tag: 26.4499° N, 80.3319° E</span>
+                <span class="bg-error text-on-error px-2 py-0.5 rounded text-[10px] font-bold">100% CLAIM / 22% ACTUAL</span>
+              </div>
+              <div class="space-y-0.5">
+                <div class="font-headline-md text-body-md font-bold">Ward 12 Primary Health Center, Kanpur (UP)</div>
+                <p class="font-body-sm text-surface-container-low line-clamp-1">Contractor Claim: 100% Physical Completion &amp; Final Bill Disbursed.</p>
+              </div>
+            </div>
+          </div>
+          <!-- Deep Dive Contradiction Card -->
+          <div class="bg-error-container/15 p-space-md rounded-lg space-y-space-sm">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-space-xs text-error font-semibold font-label-md">
+                <span class="material-symbols-outlined text-[18px]">gavel</span>
+                <span>Critical NLP Contradiction Dossier</span>
+              </div>
+              <span class="font-mono text-[11px] text-error font-bold">DISPARITY: 0.89</span>
+            </div>
+            <div class="space-y-space-xs font-body-sm">
+              <div class="flex items-start gap-2 text-on-surface">
+                <span class="material-symbols-outlined text-error text-[16px] shrink-0 mt-0.5">report</span>
+                <span><strong>Contractor Claim:</strong> "Fully furnished operational 30-bed healthcare unit with functional diagnostic equipment, electrification, and water connection."</span>
+              </div>
+              <div class="flex items-start gap-2 text-on-surface">
+                <span class="material-symbols-outlined text-primary text-[16px] shrink-0 mt-0.5">forum</span>
+                <span><strong>Citizen Ground Truth (14 Reports):</strong> "Only concrete structural columns erected. No walls, roof slab incomplete, grazing cattle inside plot. No electrical wiring installed."</span>
+              </div>
+            </div>
+            <div class="pt-space-xs flex items-center justify-between font-label-sm text-on-surface-variant">
+              <span>Gram Sabha Validation: <strong>Failed (0/3 Quorums)</strong></span>
+              <span class="text-error font-semibold">Vendor: Jai Hind Civil Infra</span>
+            </div>
+          </div>
+          <!-- Discrepancy Metrics Grid -->
+          <div class="grid grid-cols-2 gap-space-sm">
+            <div class="bg-surface-container-low p-space-sm rounded">
+              <span class="font-label-sm text-on-surface-variant uppercase">Crowdsourced Geotags</span>
+              <div class="font-headline-md text-on-surface font-bold mt-0.5">1,429</div>
+              <span class="font-body-sm text-on-surface-variant">98.1% Geo-Accuracy</span>
+            </div>
+            <div class="bg-surface-container-low p-space-sm rounded">
+              <span class="font-label-sm text-on-surface-variant uppercase">Verified False Claims</span>
+              <div class="font-headline-md text-error font-bold mt-0.5">18 Projects</div>
+              <span class="font-body-sm text-error font-medium">₹46.8 Cr Frozen</span>
+            </div>
+          </div>
+          <!-- Action Buttons -->
+          <div class="pt-space-sm flex flex-col sm:flex-row items-center gap-space-sm">
+            <button class="w-full sm:w-1/2 px-3 py-2 bg-error text-on-error font-label-md rounded font-semibold hover:bg-on-error-container transition-colors shadow-sm flex items-center justify-center gap-1" type="button" onclick="alert('CAG Inspection Order generated under SIH26102 protocol.')">
+              <span class="material-symbols-outlined text-[16px]">assignment_late</span>
+              <span>Order CAG Inspection</span>
+            </button>
+            <button class="w-full sm:w-1/2 px-3 py-2 bg-surface-container text-primary font-label-md rounded font-semibold hover:bg-surface-container-high transition-colors flex items-center justify-center gap-1" type="button" onclick="alert('District Collector summoned for explanation within 7 working days.')">
+              <span class="material-symbols-outlined text-[16px]">person_alert</span>
+              <span>Summon District Collector</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- State / UT Allocation & Performance Breakdown Table -->
+      <div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-xl space-y-space-md">
+        <div class="flex justify-between items-center flex-wrap gap-2 pb-space-sm border-b border-outline-variant/20">
           <div>
-            <h2 class="setu-table-title">State / UT Allocation & Performance Breakdown Table</h2>
-            <span class="setu-table-subtitle">Pan-India state-by-state performance rollup showing financial absorption, developmental pace, and escalated directives</span>
+            <h2 class="font-headline-lg text-headline-lg text-on-surface font-semibold">State / UT Allocation &amp; Performance Breakdown</h2>
+            <p class="font-body-sm text-on-surface-variant">Pan-India state-by-state performance rollup showing financial absorption, developmental pace, and escalated directives</p>
           </div>
           ${stateFilter !== 'ALL' ? `
-            <button type="button" class="setu-btn-secondary" onclick="window.setuFilterMospiState && window.setuFilterMospiState('ALL')" style="font-size: 11px; padding: 4px 10px;">
+            <button type="button" class="px-3 py-1 bg-surface-container text-primary font-label-sm rounded hover:bg-surface-container-high transition-colors" onclick="window.setuFilterMospiState && window.setuFilterMospiState('ALL')">
               ✕ Reset State Filter (${stateFilter})
             </button>
           ` : ''}
         </div>
-        <div class="setu-table-container">
-          <table class="setu-table">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left">
             <thead>
-              <tr>
-                <th>State / Union Territory</th>
-                <th style="text-align: center;">Works</th>
-                <th>Sanctioned Outlay</th>
-                <th>Actual Outlay</th>
-                <th>Utilization</th>
-                <th>Avg Physical %</th>
-                <th>Active Flags</th>
-                <th>Escalation State</th>
-                <th>Central Actions</th>
+              <tr class="bg-surface-container-low text-on-surface-variant font-label-md text-label-md uppercase tracking-wider">
+                <th class="py-space-sm px-space-md">State / Union Territory</th>
+                <th class="py-space-sm px-space-md text-center">Works</th>
+                <th class="py-space-sm px-space-md">Sanctioned Outlay</th>
+                <th class="py-space-sm px-space-md">Actual Outlay</th>
+                <th class="py-space-sm px-space-md">Utilization</th>
+                <th class="py-space-sm px-space-md">Avg Physical %</th>
+                <th class="py-space-sm px-space-md">Active Flags</th>
+                <th class="py-space-sm px-space-md">Escalation State</th>
+                <th class="py-space-sm px-space-md">Central Actions</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody class="divide-y divide-surface-container font-body-sm text-body-sm">
               ${stateTableRowsHtml}
             </tbody>
             <tfoot>
-              <tr style="background: #f8fafc; font-weight: 700; border-top: 2px solid #cbd5e1;">
-                <td>National Rollup (20 States/UTs)</td>
-                <td style="text-align: center; font-family: var(--setu-font-mono);">${totalWorks}</td>
-                <td style="font-family: var(--setu-font-mono);">₹${(totalSanctioned / 10000000).toFixed(2)} Cr</td>
-                <td style="font-family: var(--setu-font-mono); color: #059669;">₹${(totalExpenditure / 10000000).toFixed(2)} Cr</td>
-                <td style="font-family: var(--setu-font-mono);">${nationalUtilization}%</td>
-                <td>—</td>
-                <td>230 Signals</td>
-                <td>${mospiEscalatedFlags.length} Central Dossiers</td>
-                <td>—</td>
+              <tr class="bg-surface-container-low font-bold border-t-2 border-outline-variant text-on-surface">
+                <td class="py-space-sm px-space-md">National Rollup (20 States/UTs)</td>
+                <td class="py-space-sm px-space-md text-center font-mono">${totalWorks}</td>
+                <td class="py-space-sm px-space-md font-mono">₹${(totalSanctioned / 10000000).toFixed(2)} Cr</td>
+                <td class="py-space-sm px-space-md font-mono text-tertiary-container">₹${(totalExpenditure / 10000000).toFixed(2)} Cr</td>
+                <td class="py-space-sm px-space-md font-mono">${nationalUtilization}%</td>
+                <td class="py-space-sm px-space-md">—</td>
+                <td class="py-space-sm px-space-md">230 Signals</td>
+                <td class="py-space-sm px-space-md">${mospiEscalatedFlags.length} Central Dossiers</td>
+                <td class="py-space-sm px-space-md">—</td>
               </tr>
             </tfoot>
           </table>
         </div>
       </div>
 
-      <!-- National Public Works Registry -->
-      <div class="setu-table-card">
-        <div class="setu-table-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+      <!-- National Public Works Scheme Registry -->
+      <div class="bg-surface-container-lowest rounded-xl shadow-sm p-space-xl space-y-space-md">
+        <div class="flex justify-between items-center flex-wrap gap-2 pb-space-sm border-b border-outline-variant/20">
           <div>
-            <h2 class="setu-table-title">
+            <h2 class="font-headline-lg text-headline-lg text-on-surface font-semibold">
               National Public Works Scheme Registry (${filteredProjects.length} ${stateFilter !== 'ALL' ? `in ${stateFilter}` : `Nationwide`})
             </h2>
-            <span class="setu-table-subtitle">Click any project to inspect complete financial milestone breakdowns, vendor audit trails, and statutory compliance history</span>
+            <p class="font-body-sm text-on-surface-variant">Click any project to inspect complete financial milestone breakdowns, vendor audit trails, and statutory compliance history</p>
           </div>
         </div>
-        <div class="setu-table-container">
-          <table class="setu-table">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left">
             <thead>
-              <tr>
-                <th>Scheme Title & ID</th>
-                <th>State</th>
-                <th>District</th>
-                <th>Category</th>
-                <th>Line Department</th>
-                <th>Sanctioned / Outlay</th>
-                <th>Milestone Progress</th>
-                <th>Risk Tier</th>
-                <th>Current Status</th>
+              <tr class="bg-surface-container-low text-on-surface-variant font-label-md text-label-md uppercase tracking-wider">
+                <th class="py-space-sm px-space-md">Scheme Title &amp; ID</th>
+                <th class="py-space-sm px-space-md">State</th>
+                <th class="py-space-sm px-space-md">District</th>
+                <th class="py-space-sm px-space-md">Category</th>
+                <th class="py-space-sm px-space-md">Line Department</th>
+                <th class="py-space-sm px-space-md">Sanctioned / Outlay</th>
+                <th class="py-space-sm px-space-md">Milestone Progress</th>
+                <th class="py-space-sm px-space-md">Risk Tier</th>
+                <th class="py-space-sm px-space-md">Current Status</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody class="divide-y divide-surface-container font-body-sm text-body-sm">
               ${projectTableRowsHtml}
             </tbody>
           </table>
         </div>
       </div>
+
+      <!-- Bottom Regulatory Verification Trail & Status Ticker -->
+      <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col md:flex-row items-center justify-between gap-space-md">
+        <div class="flex items-center gap-space-md flex-wrap">
+          <div class="flex items-center gap-space-xs font-label-md text-primary font-bold">
+            <span class="material-symbols-outlined text-[20px] text-tertiary-container">verified_user</span>
+            <span>SETU Immutable Audit Hash:</span>
+          </div>
+          <code class="font-mono text-body-sm bg-surface-container-low px-2 py-1 rounded text-on-surface-variant">0x8F94D2...B7E19 (Block #194,821 / MoSPI NIC Hyperledger)</code>
+        </div>
+        <div class="flex items-center gap-space-lg text-label-sm text-on-surface-variant font-medium">
+          <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-tertiary-container"></span><span>PFMS API: Online</span></div>
+          <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-tertiary-container"></span><span>Bhuvan GIS Sync: Normal</span></div>
+          <div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-secondary"></span><span>NLP Engine: 18 In-Flight Queues</span></div>
+        </div>
+      </div>
     </div>
   `;
 }
+
 
 /**
  * 2. Escalation & Directives View:
@@ -17019,66 +17788,467 @@ export function getAuditorStatutoryRegisterHtml(stateFilter = 'ALL', catFilter =
   }).join('');
 
   return `
-    <div class="setu-dashboard">
-      <!-- Statutory Audit Header -->
-      <div class="setu-page-header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px;">
-        <div>
-          <h1 class="setu-page-title">Statutory Audit Register & National Compliance Audit</h1>
-          <p class="setu-page-desc">
-            Independent statutory audit oversight across all 124 public works in 20 States/UTs. Complete violation history, financial absorption integrity, and forensic risk modeling.
-          </p>
+    <div class="flex flex-col w-full space-y-space-xl">
+      <!-- Constitutional Article 149 Banner -->
+      <div class="bg-surface-container-lowest p-space-lg md:p-space-xl rounded-lg shadow-sm border-l-4 border-primary">
+        <div class="flex flex-wrap items-center justify-between gap-space-md mb-space-sm">
+          <div class="flex items-center gap-space-sm">
+            <span class="material-symbols-outlined text-primary text-[28px]" style="font-variation-settings: 'FILL' 1;">assured_workload</span>
+            <span class="font-label-sm text-label-sm uppercase tracking-widest text-primary font-bold">Constitutional Statutory Authority • Article 149</span>
+          </div>
+          <div class="flex flex-wrap items-center gap-space-sm">
+            <span class="px-space-sm py-1 bg-surface-container text-primary font-label-sm text-label-sm font-semibold rounded">Independent Constitutional Oversight</span>
+            <span class="px-space-sm py-1 bg-error-container text-on-error-container font-label-sm text-label-sm font-semibold rounded flex items-center gap-1">
+              <span class="inline-block w-1.5 h-1.5 rounded-full bg-error animate-ping"></span>
+              Rule 12 Audit Enforcement Active
+            </span>
+            <span class="px-space-sm py-1 bg-surface-container-high text-on-surface font-label-sm text-label-sm font-semibold rounded">National Audit Ledger: 124 Works</span>
+          </div>
         </div>
-        <div>
-          <button type="button" class="setu-btn-primary" onclick="window.setuOpenAttachObservationModal && window.setuOpenAttachObservationModal()" style="padding: 8px 16px; background: #86198f; border: none; font-weight: 600; font-size: 12px; display: flex; align-items: center; gap: 6px;">
-            + Attach Formal Audit Observation
-          </button>
-        </div>
-      </div>
-
-      <!-- Statutory Metric Cards -->
-      <div class="setu-stat-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 24px;">
-        <div class="setu-card">
-          <span class="setu-card-label">Total Monitored Works</span>
-          <span class="setu-card-value">${nationalProjects.length}</span>
-          <span class="setu-card-meta">National scope (20 States/UTs)</span>
-        </div>
-        <div class="setu-card">
-          <span class="setu-card-label">Flagged Statutory Breaches</span>
-          <span class="setu-card-value" style="color: #dc2626;">${flaggedCount}</span>
-          <span class="setu-card-meta">Active compliance/risk signals</span>
-        </div>
-        <div class="setu-card">
-          <span class="setu-card-label">Formal CAG Observations</span>
-          <span class="setu-card-value" style="color: #86198f;">${formalObservations.length}</span>
-          <span class="setu-card-meta">Statutory findings recorded</span>
-        </div>
-        <div class="setu-card">
-          <span class="setu-card-label">Statutory Overrides Executed</span>
-          <span class="setu-card-value" style="color: #2563eb;">${auditOverrideLog.length}</span>
-          <span class="setu-card-meta">Reopened resolved flags</span>
-        </div>
-        <div class="setu-card">
-          <span class="setu-card-label">Unresolved on Completed</span>
-          <span class="setu-card-value" style="color: #c2410c;">${unresolvedCompletedWorks.length}</span>
-          <span class="setu-card-meta">ROLES.md rule 12 findings</span>
+        <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-space-md">
+          <div>
+            <h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight text-primary font-bold">CAG Statutory Audit & Forensic Oversight Register</h1>
+            <p class="font-body-md text-body-md text-on-surface-variant mt-1">Office of the Comptroller & Auditor General of India · Independent Constitutional Audit · MoSPI SIH26102</p>
+          </div>
+          <div class="flex items-center gap-space-sm shrink-0">
+            <button class="px-space-md py-2 bg-surface-container text-primary font-label-md text-label-md rounded flex items-center gap-2 hover:bg-surface-container-high transition-colors cursor-pointer" type="button" onclick="alert('Exporting official CAG Statutory Audit Dossier (PDF)...')">
+              <span class="material-symbols-outlined text-[18px]">sim_card_download</span>
+              CAG Dossier (PDF)
+            </button>
+            <button class="px-space-md py-2 bg-primary text-on-primary font-label-md text-label-md rounded flex items-center gap-2 shadow-sm hover:bg-primary-container transition-colors cursor-pointer" type="button" onclick="window.setuOpenAttachObservationModal && window.setuOpenAttachObservationModal()">
+              <span class="material-symbols-outlined text-[18px]">verified_user</span>
+              Authorize Mandate
+            </button>
+          </div>
         </div>
       </div>
 
-      <!-- Filter Controls Toolbar -->
-      <div class="setu-table-card" style="margin-bottom: 24px; padding: 16px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
-          <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
-            <label style="font-size: 12px; font-weight: 700; color: #475569;">Filters:</label>
-            <select id="sel-aud-state" onchange="window.setuFilterAuditorRegister && window.setuFilterAuditorRegister(this.value, document.getElementById('sel-aud-cat').value, document.getElementById('sel-aud-status').value)" style="padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px;">
+      <!-- Summary Metrics Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-md">
+        <div class="bg-surface-container-lowest p-space-md rounded-lg shadow-sm flex flex-col justify-between">
+          <div class="flex items-start justify-between">
+            <div>
+              <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">Audited Civil Works</span>
+              <div class="font-headline-xl text-headline-xl text-primary font-bold mt-1">${nationalProjects.length}</div>
+            </div>
+            <div class="p-space-xs bg-surface-container rounded text-primary">
+              <span class="material-symbols-outlined text-[24px]">fact_check</span>
+            </div>
+          </div>
+          <div class="mt-space-md pt-space-xs flex items-center justify-between font-label-sm text-label-sm text-on-surface-variant">
+            <span>20 States / UTs Inspected</span>
+            <span class="text-tertiary-container font-bold">100% Coverage</span>
+          </div>
+        </div>
+
+        <div class="bg-surface-container-lowest p-space-md rounded-lg shadow-sm flex flex-col justify-between border-l-4 border-error">
+          <div class="flex items-start justify-between">
+            <div>
+              <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">Unresolved on Completion</span>
+              <div class="font-headline-xl text-headline-xl text-error font-bold mt-1">${unresolvedCompletedWorks.length.toString().padStart(2, '0')}</div>
+            </div>
+            <div class="p-space-xs bg-error-container rounded text-error">
+              <span class="material-symbols-outlined text-[24px]">warning</span>
+            </div>
+          </div>
+          <div class="mt-space-md pt-space-xs flex items-center justify-between font-label-sm text-label-sm">
+            <span class="text-on-surface-variant">Statutory Rule 12 Breaches</span>
+            <span class="text-error font-bold">Forensic Defect</span>
+          </div>
+        </div>
+
+        <div class="bg-surface-container-lowest p-space-md rounded-lg shadow-sm flex flex-col justify-between border-l-4 border-secondary-container">
+          <div class="flex items-start justify-between">
+            <div>
+              <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">Inaction-Timeout Violations</span>
+              <div class="font-headline-xl text-headline-xl text-secondary font-bold mt-1">12</div>
+            </div>
+            <div class="p-space-xs bg-surface-container-high rounded text-secondary">
+              <span class="material-symbols-outlined text-[24px]">timer_off</span>
+            </div>
+          </div>
+          <div class="mt-space-md pt-space-xs flex items-center justify-between font-label-sm text-label-sm">
+            <span class="text-on-surface-variant">Collectorate Deadlines</span>
+            <span class="text-secondary font-bold">&gt;30 Days Overdue</span>
+          </div>
+        </div>
+
+        <div class="bg-surface-container-lowest p-space-md rounded-lg shadow-sm flex flex-col justify-between border-l-4 border-primary-container">
+          <div class="flex items-start justify-between">
+            <div>
+              <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">CAG Binding Overrides</span>
+              <div class="font-headline-xl text-headline-xl text-primary font-bold mt-1">${auditOverrideLog.length.toString().padStart(2, '0')}</div>
+            </div>
+            <div class="p-space-xs bg-surface-container-high rounded text-primary">
+              <span class="material-symbols-outlined text-[24px]">published_with_changes</span>
+            </div>
+          </div>
+          <div class="mt-space-md pt-space-xs flex items-center justify-between font-label-sm text-label-sm">
+            <span class="text-on-surface-variant">District Approvals Nullified</span>
+            <span class="text-primary font-bold">Statutory Remand</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Rule 12 Audit Violation Queue -->
+      <section class="flex flex-col gap-space-md">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-space-sm">
+          <div class="flex items-center gap-space-sm">
+            <span class="material-symbols-outlined text-error text-[24px]">rule_folder</span>
+            <div>
+              <h2 class="font-headline-md text-headline-md text-on-surface font-bold">Rule 12 Audit Violation Queue — Unresolved Defects on Completed Works</h2>
+              <p class="font-body-sm text-body-sm text-on-surface-variant">Civil works flagged as physically complete but carrying fatal statutory anomalies that preempt mandatory closure</p>
+            </div>
+          </div>
+          <span class="font-label-sm text-label-sm text-on-surface-variant bg-surface-container px-space-sm py-1 rounded font-semibold">
+            3 High-Priority Inquests
+          </span>
+        </div>
+
+        <div class="bg-surface-container-lowest rounded-lg shadow-sm overflow-hidden border border-outline-variant/30">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead class="bg-surface-container-low font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider border-b border-outline-variant/20">
+                <tr>
+                  <th class="py-space-sm px-space-md">Sanction ID & Project Title</th>
+                  <th class="py-space-sm px-space-md">Jurisdiction & Outlay</th>
+                  <th class="py-space-sm px-space-md">Admin Resolution Claimed</th>
+                  <th class="py-space-sm px-space-md">CAG Forensic Finding</th>
+                  <th class="py-space-sm px-space-md text-right">Statutory Action</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-surface-container font-body-md text-body-md text-on-surface">
+                <!-- Case 1 -->
+                <tr class="hover:bg-surface-container-low/60 transition-colors">
+                  <td class="py-space-md px-space-md align-top">
+                    <div class="flex flex-col gap-0.5">
+                      <div class="flex items-center gap-space-xs">
+                        <span class="font-label-md text-label-md font-bold text-primary">MPLADS-2023-0881</span>
+                        <span class="px-1.5 py-0.2 bg-error-container text-on-error-container font-label-sm text-[10px] font-bold rounded">RULE 12 BREACH</span>
+                      </div>
+                      <span class="font-label-lg text-label-lg font-semibold text-on-surface mt-1">High-Yield Drinking Water RO Hub</span>
+                      <span class="font-body-sm text-body-sm text-on-surface-variant">Salem Central, Tamil Nadu</span>
+                    </div>
+                  </td>
+                  <td class="py-space-md px-space-md align-top">
+                    <div class="flex flex-col">
+                      <span class="font-label-lg text-label-lg font-bold text-on-surface">₹85.00 Lakhs</span>
+                      <span class="font-body-sm text-body-sm text-on-surface-variant">Salem (LS) Constituency</span>
+                      <span class="font-label-sm text-label-sm text-on-surface-variant mt-1">TWAD Water Board</span>
+                    </div>
+                  </td>
+                  <td class="py-space-md px-space-md align-top">
+                    <div class="flex flex-col items-start gap-1">
+                      <span class="px-2 py-0.5 bg-surface-container text-on-surface-variant font-label-sm text-label-sm font-semibold rounded flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[14px]">check_circle</span>
+                        Closed by District Collector
+                      </span>
+                      <span class="font-body-sm text-body-sm text-on-surface-variant text-[12px]">Completion signed 14 Jan 2025</span>
+                    </div>
+                  </td>
+                  <td class="py-space-md px-space-md align-top max-w-sm">
+                    <div class="p-space-sm bg-error-container/40 rounded border border-error/20">
+                      <p class="font-body-sm text-body-sm text-error font-medium leading-snug">
+                        "Incomplete filtration membrane; ground test indicates non-potable TDS level 1,420ppm. Closed prematurely without lab certification."
+                      </p>
+                      <div class="mt-1 flex items-center gap-2 font-label-sm text-[11px] text-on-surface-variant">
+                        <span>Sample: LAB-TN-982</span>
+                        <span>•</span>
+                        <span class="text-error font-semibold">TDS Threshold 500ppm Exceeded</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="py-space-md px-space-md align-top text-right">
+                    <div class="flex flex-col items-end gap-space-xs">
+                      <button
+                        class="px-space-sm py-1.5 bg-primary text-on-primary font-label-md text-label-md rounded flex items-center gap-1.5 hover:bg-primary-container transition-colors whitespace-nowrap shadow-sm cursor-pointer"
+                        type="button"
+                        onclick="window.setuOpenAttachObservationModal && window.setuOpenAttachObservationModal('MPLADS-2023-0881', 'High-Yield Drinking Water RO Hub', 'Salem', 'Tamil Nadu', 'ALT-881', 'CRITICAL', true)"
+                      >
+                        <span class="material-symbols-outlined text-[16px]">restart_alt</span>
+                        Binding Override: Reopen & Remand
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- Case 2 -->
+                <tr class="hover:bg-surface-container-low/60 transition-colors">
+                  <td class="py-space-md px-space-md align-top">
+                    <div class="flex flex-col gap-0.5">
+                      <div class="flex items-center gap-space-xs">
+                        <span class="font-label-md text-label-md font-bold text-primary">MPLADS-2022-1402</span>
+                        <span class="px-1.5 py-0.2 bg-secondary-container text-on-secondary-container font-label-sm text-[10px] font-bold rounded">MATERIAL DEFECT</span>
+                      </div>
+                      <span class="font-label-lg text-label-lg font-semibold text-on-surface mt-1">Sub-Divisional Road Overbridge Widening</span>
+                      <span class="font-body-sm text-body-sm text-on-surface-variant">Nagpur Rural, Maharashtra</span>
+                    </div>
+                  </td>
+                  <td class="py-space-md px-space-md align-top">
+                    <div class="flex flex-col">
+                      <span class="font-label-lg text-label-lg font-bold text-on-surface">₹2.10 Crore</span>
+                      <span class="font-body-sm text-body-sm text-on-surface-variant">Nagpur (LS) Constituency</span>
+                      <span class="font-label-sm text-label-sm text-on-surface-variant mt-1">Agency: PWD Maharashtra</span>
+                    </div>
+                  </td>
+                  <td class="py-space-md px-space-md align-top">
+                    <div class="flex flex-col items-start gap-1">
+                      <span class="px-2 py-0.5 bg-surface-container-high text-on-surface font-label-sm text-label-sm font-semibold rounded flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[14px]">task_alt</span>
+                        Physically Completed
+                      </span>
+                      <span class="font-body-sm text-body-sm text-on-surface-variant text-[12px]">PWD Measurement Book Signed</span>
+                    </div>
+                  </td>
+                  <td class="py-space-md px-space-md align-top max-w-sm">
+                    <div class="p-space-sm bg-surface-container-high rounded border border-outline-variant/30">
+                      <p class="font-body-sm text-body-sm text-on-surface font-medium leading-snug">
+                        "Pavement core depth test shows 45mm bitumen vs sanctioned 75mm specification. ₹38 Lakhs unexplained discrepancy in asphalt billing."
+                      </p>
+                      <div class="mt-1 flex items-center gap-2 font-label-sm text-[11px] text-secondary font-semibold">
+                        <span>Core Assay: MH-NGP-11</span>
+                        <span>•</span>
+                        <span>Recovery Recommended</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="py-space-md px-space-md align-top text-right">
+                    <div class="flex flex-col items-end gap-space-xs">
+                      <button
+                        class="px-space-sm py-1.5 bg-primary text-on-primary font-label-md text-label-md rounded flex items-center gap-1.5 hover:bg-primary-container transition-colors whitespace-nowrap shadow-sm cursor-pointer"
+                        type="button"
+                        onclick="window.setuOpenAttachObservationModal && window.setuOpenAttachObservationModal('MPLADS-2022-1402', 'Road Overbridge Widening', 'Nagpur', 'Maharashtra', 'ALT-1402', 'CRITICAL', true)"
+                      >
+                        <span class="material-symbols-outlined text-[16px]">edit_note</span>
+                        Binding Override: Reopen Flag
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- Case 3 -->
+                <tr class="hover:bg-surface-container-low/60 transition-colors">
+                  <td class="py-space-md px-space-md align-top">
+                    <div class="flex flex-col gap-0.5">
+                      <div class="flex items-center gap-space-xs">
+                        <span class="font-label-md text-label-md font-bold text-primary">MPLADS-2023-0194</span>
+                        <span class="px-1.5 py-0.2 bg-error-container text-on-error-container font-label-sm text-[10px] font-bold rounded">INVOICE OCR FRAUD</span>
+                      </div>
+                      <span class="font-label-lg text-label-lg font-semibold text-on-surface mt-1">Anganwadi Early Learning Center</span>
+                      <span class="font-body-sm text-body-sm text-on-surface-variant">Darbhanga Sadar, Bihar</span>
+                    </div>
+                  </td>
+                  <td class="py-space-md px-space-md align-top">
+                    <div class="flex flex-col">
+                      <span class="font-label-lg text-label-lg font-bold text-on-surface">₹42.00 Lakhs</span>
+                      <span class="font-body-sm text-body-sm text-on-surface-variant">Darbhanga (LS) Constituency</span>
+                      <span class="font-label-sm text-label-sm text-on-surface-variant mt-1">Rural Works Dept</span>
+                    </div>
+                  </td>
+                  <td class="py-space-md px-space-md align-top">
+                    <div class="flex flex-col items-start gap-1">
+                      <span class="px-2 py-0.5 bg-surface-container text-on-surface font-label-sm text-label-sm font-semibold rounded flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[14px]">account_balance_wallet</span>
+                        100% Disbursed (PFMS)
+                      </span>
+                      <span class="font-body-sm text-body-sm text-on-surface-variant text-[12px]">Final settlement processed Dec 2024</span>
+                    </div>
+                  </td>
+                  <td class="py-space-md px-space-md align-top max-w-sm">
+                    <div class="p-space-sm bg-error-container/30 rounded border border-error/20">
+                      <p class="font-body-sm text-body-sm text-on-surface font-medium leading-snug">
+                        "Asset transfer certificate missing; contractor GST invoice OCR failed authenticity check against GSTN portal. Cancelled registration."
+                      </p>
+                      <div class="mt-1 flex items-center gap-2 font-label-sm text-[11px] text-error font-semibold">
+                        <span>GSTN Match: 0% Invalid GSTIN</span>
+                        <span>•</span>
+                        <span>Suspected Shell Co.</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="py-space-md px-space-md align-top text-right">
+                    <div class="flex flex-col items-end gap-space-xs">
+                      <button
+                        class="px-space-sm py-1.5 bg-error text-on-error font-label-md text-label-md rounded flex items-center gap-1.5 hover:bg-error-container hover:text-on-error-container transition-colors whitespace-nowrap shadow-sm cursor-pointer"
+                        type="button"
+                        onclick="window.setuOpenAttachObservationModal && window.setuOpenAttachObservationModal('MPLADS-2023-0194', 'Anganwadi Early Learning Center', 'Darbhanga', 'Bihar', 'ALT-0194', 'CRITICAL', true)"
+                      >
+                        <span class="material-symbols-outlined text-[16px]">block</span>
+                        Freeze Asset Transfer
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section: Inaction-Timeout Findings & Override Directive Generator -->
+      <section class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg">
+        <!-- Left: Collectorate Inaction Timers (5 cols) -->
+        <div class="lg:col-span-5 flex flex-col gap-space-md">
+          <div class="bg-surface-container-lowest p-space-md md:p-space-lg rounded-lg shadow-sm border border-outline-variant/30">
+            <div class="flex items-center justify-between pb-space-sm mb-space-sm border-b border-outline-variant/20">
+              <div class="flex items-center gap-space-sm">
+                <span class="material-symbols-outlined text-secondary text-[22px]">hourglass_bottom</span>
+                <div>
+                  <h3 class="font-headline-md text-headline-md text-on-surface font-bold">Collectorate Inaction Timers</h3>
+                  <span class="font-label-sm text-label-sm text-on-surface-variant">Statutory 30-Day Escalation Breaches</span>
+                </div>
+              </div>
+              <span class="px-2 py-0.5 bg-secondary-container text-on-secondary-container font-label-sm text-label-sm font-bold rounded">
+                3 High Breaches
+              </span>
+            </div>
+            <p class="font-body-sm text-body-sm text-on-surface-variant mb-space-md">
+              Section 8(b) of National Audit Protocol mandates District Collectorates resolve or formally rebut CAG audit observations within 30 days. Unanswered items invoke automatic statutory surcharge.
+            </p>
+            <div class="space-y-space-sm">
+              <div class="p-space-sm bg-surface-container-low rounded flex flex-col gap-2 border border-outline-variant/20">
+                <div class="flex items-start justify-between">
+                  <div>
+                    <span class="font-label-lg text-label-lg font-bold text-on-surface">Bareilly District Collectorate</span>
+                    <span class="font-body-sm text-body-sm text-on-surface-variant block">Uttar Pradesh • DM & District Magistrate</span>
+                  </div>
+                  <span class="px-2 py-0.5 bg-error text-on-error font-label-sm text-label-sm font-bold rounded">
+                    48 Days Overdue
+                  </span>
+                </div>
+                <div class="text-on-surface-variant font-body-sm text-[13px]">
+                  <span class="font-semibold text-on-surface">Subject:</span> Unaccounted diversion of ₹1.12 Cr solar street lighting grant under sub-contract.
+                </div>
+                <div class="flex items-center justify-between pt-1">
+                  <span class="font-label-sm text-label-sm text-error font-semibold">Statutory Surcharge Notice Active</span>
+                  <button class="text-primary font-label-sm text-label-sm hover:underline flex items-center gap-0.5 font-bold cursor-pointer" type="button" onclick="alert('Summons served to Bareilly Collectorate under CAG Act.')">
+                    Issue Summons →
+                  </button>
+                </div>
+              </div>
+
+              <div class="p-space-sm bg-surface-container-low rounded flex flex-col gap-2 border border-outline-variant/20">
+                <div class="flex items-start justify-between">
+                  <div>
+                    <span class="font-label-lg text-label-lg font-bold text-on-surface">Varanasi District Administration</span>
+                    <span class="font-body-sm text-body-sm text-on-surface-variant block">Uttar Pradesh • Office of Chief Development Officer</span>
+                  </div>
+                  <span class="px-2 py-0.5 bg-secondary text-on-secondary font-label-sm text-label-sm font-bold rounded">
+                    39 Days Overdue
+                  </span>
+                </div>
+                <div class="text-on-surface-variant font-body-sm text-[13px]">
+                  <span class="font-semibold text-on-surface">Subject:</span> Non-submission of utilization certificate for Community Healthcare Annexe (₹64 Lakhs).
+                </div>
+                <div class="flex items-center justify-between pt-1">
+                  <span class="font-label-sm text-label-sm text-secondary font-semibold">Stage 2 Audit Warning Served</span>
+                  <button class="text-primary font-label-sm text-label-sm hover:underline flex items-center gap-0.5 font-bold cursor-pointer" type="button" onclick="alert('Notice dispatched to Varanasi CDO.')">
+                    Dispatch Notice →
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class="mt-space-md p-space-sm bg-surface-container rounded text-on-surface font-body-sm text-body-sm flex items-center justify-between">
+              <span>Collectorates within deadline:</span>
+              <span class="font-bold text-primary">82% (14 Districts pending response)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Audit Override Directive Generator (7 cols) -->
+        <div class="lg:col-span-7 flex flex-col">
+          <div class="bg-surface-container-lowest p-space-md md:p-space-lg rounded-lg shadow-sm border border-outline-variant/30 h-full flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between pb-space-sm mb-space-md border-b border-outline-variant/20">
+                <div class="flex items-center gap-space-sm">
+                  <span class="material-symbols-outlined text-primary text-[22px]">balance</span>
+                  <div>
+                    <h3 class="font-headline-md text-headline-md text-on-surface font-bold">Audit Override & Forensic Reopening Directive</h3>
+                    <span class="font-label-sm text-label-sm text-on-surface-variant">Statutory Order Formulated Under Rule 12(3) of CAG Audit Manual</span>
+                  </div>
+                </div>
+                <span class="px-2 py-0.5 bg-surface-container-high text-primary font-label-sm text-label-sm font-bold rounded">
+                  DIRECTIVE GEN-2025/09
+                </span>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-space-md mb-space-md">
+                <div>
+                  <label class="block font-label-md text-label-md text-on-surface mb-1" for="sanction-select">
+                    Target Project Sanction Reference <span class="text-error">*</span>
+                  </label>
+                  <select class="w-full bg-surface-container-low text-on-surface font-body-md text-body-md px-space-sm py-2 rounded focus:outline-none focus:ring-2 focus:ring-primary border border-outline-variant/30" id="sanction-select">
+                    <option value="MPLADS-2023-0881">MPLADS-2023-0881 (Water RO Hub, Salem, TN)</option>
+                    <option value="MPLADS-2022-1402">MPLADS-2022-1402 (Overbridge Widening, Nagpur, MH)</option>
+                    <option value="MPLADS-2023-0194">MPLADS-2023-0194 (Anganwadi Center, Darbhanga, BR)</option>
+                  </select>
+                </div>
+                <div>
+                  <label class="block font-label-md text-label-md text-on-surface mb-1" for="statutory-severity">
+                    Statutory Severity Classification <span class="text-error">*</span>
+                  </label>
+                  <select class="w-full bg-surface-container-low text-on-surface font-body-md text-body-md px-space-sm py-2 rounded focus:outline-none focus:ring-2 focus:ring-primary border border-outline-variant/30" id="statutory-severity">
+                    <option value="CRITICAL_FORENSIC">CRITICAL: Forensic Defect / Premature Closure</option>
+                    <option value="HIGH_INVOICE_ANOMALY">HIGH: Tax / Invoice Verification Failure</option>
+                    <option value="SUBSTANTIAL_DEFECT">SUBSTANTIAL: Material Specification Breach</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="space-y-space-md mb-space-md">
+                <div>
+                  <label class="block font-label-md text-label-md text-on-surface mb-1" for="statutory-grounds">
+                    CAG Statutory Grounds & Evidentiary Findings <span class="text-error">*</span>
+                  </label>
+                  <textarea class="w-full bg-surface-container-low text-on-surface font-body-md text-body-md p-space-sm rounded focus:outline-none focus:ring-2 focus:ring-primary border border-outline-variant/30" id="statutory-grounds" rows="3">Premature closure recorded by District Collector without certified water potability report. Lab assay reveals 1,420 ppm Total Dissolved Solids. Membrane unit omitted while 100% payments disbursed. Inquest ordered under Rule 12(3).</textarea>
+                </div>
+
+                <div class="p-space-sm bg-surface-container-low rounded space-y-2 border border-outline-variant/20">
+                  <label class="flex items-start gap-space-sm cursor-pointer">
+                    <input checked class="mt-1 w-4 h-4 rounded text-primary focus:ring-primary" type="checkbox"/>
+                    <span class="font-body-sm text-body-sm text-on-surface">
+                      <strong class="font-semibold text-primary">Overturn Administrative Closure:</strong> Formally nullify completion certificate issued by local district engineer on SETU and PFMS national ledger.
+                    </span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div class="pt-space-md flex flex-wrap items-center justify-between gap-space-sm border-t border-outline-variant/20">
+              <div class="flex items-center gap-space-xs text-on-surface-variant font-label-sm text-label-sm">
+                <span class="material-symbols-outlined text-[18px] text-tertiary-container">fingerprint</span>
+                <span>Cryptographic Key: <span class="font-mono text-on-surface font-semibold">NIC-CAG-092-2025</span></span>
+              </div>
+              <button
+                class="px-space-md py-2 bg-error text-on-error font-label-md text-label-md rounded flex items-center gap-2 hover:bg-error-container hover:text-on-error-container shadow-sm transition-colors cursor-pointer font-bold"
+                type="button"
+                onclick="window.setuOpenAttachObservationModal && window.setuOpenAttachObservationModal('MPLADS-2023-0881', 'High-Yield Drinking Water RO Hub', 'Salem', 'Tamil Nadu', 'ALT-881', 'CRITICAL', true)"
+              >
+                <span class="material-symbols-outlined text-[18px]">verified</span>
+                Issue Legally-Binding Directive
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section: National Public Works Filter & Register Table -->
+      <section class="bg-surface-container-lowest p-space-md md:p-space-lg rounded-lg shadow-sm border border-outline-variant/30">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-space-sm pb-space-sm mb-space-md border-b border-outline-variant/20">
+          <div>
+            <h3 class="font-headline-md text-headline-md text-on-surface font-bold">National Statutory Works Register</h3>
+            <p class="font-body-sm text-body-sm text-on-surface-variant">Forensic catalog across 20 States & Union Territories</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <select id="sel-aud-state" onchange="window.setuFilterAuditorRegister && window.setuFilterAuditorRegister(this.value, document.getElementById('sel-aud-cat').value, document.getElementById('sel-aud-status').value)" class="text-xs py-1 px-2.5 rounded bg-surface-container-low border border-outline-variant text-on-surface">
               <option value="ALL" ${stateFilter === 'ALL' ? 'selected' : ''}>All 20 States/UTs</option>
               <option value="Tamil Nadu" ${stateFilter === 'Tamil Nadu' ? 'selected' : ''}>Tamil Nadu</option>
               <option value="Karnataka" ${stateFilter === 'Karnataka' ? 'selected' : ''}>Karnataka</option>
               <option value="Maharashtra" ${stateFilter === 'Maharashtra' ? 'selected' : ''}>Maharashtra</option>
               <option value="Uttar Pradesh" ${stateFilter === 'Uttar Pradesh' ? 'selected' : ''}>Uttar Pradesh</option>
-              <option value="Delhi (UT)" ${stateFilter === 'Delhi (UT)' ? 'selected' : ''}>Delhi (UT)</option>
               <option value="West Bengal" ${stateFilter === 'West Bengal' ? 'selected' : ''}>West Bengal</option>
             </select>
-            <select id="sel-aud-cat" onchange="window.setuFilterAuditorRegister && window.setuFilterAuditorRegister(document.getElementById('sel-aud-state').value, this.value, document.getElementById('sel-aud-status').value)" style="padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px;">
+            <select id="sel-aud-cat" onchange="window.setuFilterAuditorRegister && window.setuFilterAuditorRegister(document.getElementById('sel-aud-state').value, this.value, document.getElementById('sel-aud-status').value)" class="text-xs py-1 px-2.5 rounded bg-surface-container-low border border-outline-variant text-on-surface">
               <option value="ALL" ${catFilter === 'ALL' ? 'selected' : ''}>All Categories</option>
               <option value="Road" ${catFilter === 'Road' ? 'selected' : ''}>Road</option>
               <option value="Health" ${catFilter === 'Health' ? 'selected' : ''}>Health</option>
@@ -17086,39 +18256,35 @@ export function getAuditorStatutoryRegisterHtml(stateFilter = 'ALL', catFilter =
               <option value="Water" ${catFilter === 'Water' ? 'selected' : ''}>Water</option>
               <option value="Civic" ${catFilter === 'Civic' ? 'selected' : ''}>Civic</option>
             </select>
-            <select id="sel-aud-status" onchange="window.setuFilterAuditorRegister && window.setuFilterAuditorRegister(document.getElementById('sel-aud-state').value, document.getElementById('sel-aud-cat').value, this.value)" style="padding: 6px 10px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 12px;">
+            <select id="sel-aud-status" onchange="window.setuFilterAuditorRegister && window.setuFilterAuditorRegister(document.getElementById('sel-aud-state').value, document.getElementById('sel-aud-cat').value, this.value)" class="text-xs py-1 px-2.5 rounded bg-surface-container-low border border-outline-variant text-on-surface">
               <option value="ALL" ${statusFilter === 'ALL' ? 'selected' : ''}>All Statuses</option>
               <option value="Completed" ${statusFilter === 'Completed' ? 'selected' : ''}>Completed</option>
               <option value="In Progress" ${statusFilter === 'In Progress' ? 'selected' : ''}>In Progress</option>
               <option value="Delayed" ${statusFilter === 'Delayed' ? 'selected' : ''}>Delayed</option>
             </select>
           </div>
-          <span style="font-size: 12px; color: #64748b;">Showing <strong>${filtered.length}</strong> of ${nationalProjects.length} Schemes</span>
         </div>
-      </div>
 
-      <!-- National Public Works Table -->
-      <div class="setu-table-card">
-        <div class="setu-table-container">
-          <table class="setu-table">
-            <thead>
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-body-sm">
+            <thead class="bg-surface-container-low font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider border-b border-outline-variant/20">
               <tr>
-                <th>Scheme Title & ID</th>
-                <th>State & District</th>
-                <th>Category</th>
-                <th>Outlay / Expenditure</th>
-                <th>Progress</th>
-                <th>Risk Score</th>
-                <th>Statutory Flags</th>
-                <th>Actions</th>
+                <th class="py-2.5 px-3">Scheme Title & ID</th>
+                <th class="py-2.5 px-3">State & District</th>
+                <th class="py-2.5 px-3">Category</th>
+                <th class="py-2.5 px-3">Outlay / Exp</th>
+                <th class="py-2.5 px-3">Progress</th>
+                <th class="py-2.5 px-3">Risk Score</th>
+                <th class="py-2.5 px-3">Statutory Flags</th>
+                <th class="py-2.5 px-3 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody class="divide-y divide-outline-variant/20">
               ${rowsHtml}
             </tbody>
           </table>
         </div>
-      </div>
+      </section>
     </div>
   `;
 }
