@@ -43,5 +43,34 @@ def test_district_authority_endpoint():
     assert data["summary"]["totalProjects"] > 0
     print(f"[PASS] District Authority Dashboard: {data['summary']['totalProjects']} projects, {data['summary']['activeAlerts']} active alerts, {data['summary']['fundsUtilizedPct']}% utilized.")
 
+def test_state_nodal_endpoint():
+    print("\n--- Testing State Nodal Authority Dashboard ---")
+    res_login = client.post("/auth/login", json={"username": "ADM-SNA-TN-CHN-005", "password": "StateNodal#Pass2026"})
+    assert res_login.status_code == 200, f"SNA Login failed: {res_login.text}"
+    token = res_login.json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    res = client.get("/dashboard/state-nodal", headers=headers)
+    assert res.status_code == 200, f"SNA Dashboard failed: {res.text}"
+    data = res.json()
+    print("SNA Response keys:", list(data.keys()))
+    print("SNA Summary:", data["summary"])
+
+    assert "summary" in data
+    assert "totalProjects" in data["summary"]
+    assert "activeAlerts" in data["summary"]
+    assert "criticalAlerts" in data["summary"]
+    assert "fundsUtilizedPct" in data["summary"]
+    assert "alertsBySeverity" in data
+    assert "flagsByStatus" in data
+    assert "trendOverTime" in data
+    assert "utilizationByCategory" in data
+    assert data.get("isSimulated") is True
+
+    # State Nodal has statewide projects (Tamil Nadu has 23 projects)
+    assert data["summary"]["totalProjects"] >= 23
+    print(f"[PASS] State Nodal Dashboard: {data['summary']['totalProjects']} projects, {data['summary']['activeAlerts']} alerts, {data['summary']['fundsUtilizedPct']}% utilized.")
+
 if __name__ == "__main__":
     test_district_authority_endpoint()
+    test_state_nodal_endpoint()

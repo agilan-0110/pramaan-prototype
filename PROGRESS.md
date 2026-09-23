@@ -52,3 +52,4 @@
 2026-09-21 21:00 - Resolve authentication failure across all official roles by installing pyjwt in backend venv, making jwt import resilient, and adding localhost multi-endpoint fallback in loginData.js - status: done
 2026-09-23 19:05 - Fix 10 logical defects across backend RBAC enforcement, tranche freeze gating, mathematical forecasting models, citizen NLP bounds, and frontend data sync - status: done
 2026-09-23 20:07 - Build and verify District Authority role-scoped dashboard endpoint GET /dashboard/district-authority - status: done
+2026-09-23 20:10 - Build and verify State Nodal Authority role-scoped dashboard endpoint GET /dashboard/state-nodal - status: done
