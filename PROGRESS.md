@@ -54,3 +54,4 @@
 2026-09-23 20:07 - Build and verify District Authority role-scoped dashboard endpoint GET /dashboard/district-authority - status: done
 2026-09-23 20:10 - Build and verify State Nodal Authority role-scoped dashboard endpoint GET /dashboard/state-nodal - status: done
 2026-09-23 20:11 - Build and verify Central Nodal Agency (MoSPI) role-scoped dashboard endpoint GET /dashboard/central-nodal-agency - status: done
+2026-09-23 20:12 - Build and verify Auditor / CAG role-scoped dashboard endpoint GET /dashboard/auditor-cag - status: done

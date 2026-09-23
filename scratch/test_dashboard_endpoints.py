@@ -99,7 +99,40 @@ def test_central_nodal_endpoint():
     assert data["summary"]["totalProjects"] == 124
     print(f"[PASS] Central Nodal Agency Dashboard: {data['summary']['totalProjects']} projects (all-India), {data['summary']['activeAlerts']} alerts, {data['summary']['fundsUtilizedPct']}% utilized.")
 
+def test_auditor_cag_endpoint():
+    print("\n--- Testing Auditor / CAG Dashboard ---")
+    res_login = client.post("/auth/login", json={"username": "ADM-CAG-AUD-TN-CHN-003", "password": "CAGAudit#Pass2026"})
+    assert res_login.status_code == 200, f"CAG Login failed: {res_login.text}"
+    token = res_login.json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    res = client.get("/dashboard/auditor-cag", headers=headers)
+    assert res.status_code == 200, f"CAG Dashboard failed: {res.text}"
+    data = res.json()
+    print("CAG Response keys:", list(data.keys()))
+    print("CAG Summary:", data["summary"])
+
+    assert "summary" in data
+    assert "totalProjects" in data["summary"]
+    assert "activeAlerts" in data["summary"]
+    assert "criticalAlerts" in data["summary"]
+    assert "fundsUtilizedPct" in data["summary"]
+    assert "alertsBySeverity" in data
+    assert "flagsByStatus" in data
+    assert "trendOverTime" in data
+    assert "utilizationByCategory" in data
+    assert data.get("isSimulated") is True
+
+    # Auditor sees all 124 projects nationally
+    assert data["summary"]["totalProjects"] == 124
+    # Auditor must see flags across statuses (including resolved / open)
+    status_names = [s["name"] for s in data["flagsByStatus"]]
+    print("CAG Flags by status:", status_names)
+    assert len(status_names) > 0
+    print(f"[PASS] Auditor / CAG Dashboard: {data['summary']['totalProjects']} projects (national), {data['summary']['activeAlerts']} alerts, {data['summary']['fundsUtilizedPct']}% utilized.")
+
 if __name__ == "__main__":
     test_district_authority_endpoint()
     test_state_nodal_endpoint()
     test_central_nodal_endpoint()
+    test_auditor_cag_endpoint()
