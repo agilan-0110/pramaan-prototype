@@ -131,8 +131,39 @@ def test_auditor_cag_endpoint():
     assert len(status_names) > 0
     print(f"[PASS] Auditor / CAG Dashboard: {data['summary']['totalProjects']} projects (national), {data['summary']['activeAlerts']} alerts, {data['summary']['fundsUtilizedPct']}% utilized.")
 
+def test_implementing_agency_endpoint():
+    print("\n--- Testing Implementing Agency Dashboard ---")
+    res_login = client.post("/auth/login", json={"username": "ADM-IA-PWD-TN-CHN-008", "password": "PWDWorks#Pass2026"})
+    assert res_login.status_code == 200, f"IA Login failed: {res_login.text}"
+    token = res_login.json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    res = client.get("/dashboard/implementing-agency", headers=headers)
+    assert res.status_code == 200, f"IA Dashboard failed: {res.text}"
+    data = res.json()
+    print("IA Response keys:", list(data.keys()))
+    print("IA Summary:", data["summary"])
+
+    # Strict zero-oversight visibility verification: MUST NOT contain any risk, compliance, or alert fields
+    assert "activeAlerts" not in data["summary"], "Implementing Agency must not see activeAlerts"
+    assert "criticalAlerts" not in data["summary"], "Implementing Agency must not see criticalAlerts"
+    assert "alertsBySeverity" not in data, "Implementing Agency must not see alertsBySeverity"
+    assert "flagsByStatus" not in data, "Implementing Agency must not see flagsByStatus"
+    assert "trendOverTime" not in data, "Implementing Agency must not see trendOverTime"
+    assert "riskScore" not in data, "Implementing Agency must not see riskScore"
+    assert "complianceFlags" not in data, "Implementing Agency must not see complianceFlags"
+
+    # Execution fields MUST be present
+    assert "totalProjects" in data["summary"]
+    assert "fundsUtilizedPct" in data["summary"]
+    assert "utilizationByCategory" in data
+    assert data.get("isSimulated") is True
+
+    print(f"[PASS] Implementing Agency Dashboard: {data['summary']['totalProjects']} assigned works, {data['summary']['fundsUtilizedPct']}% utilized. Zero oversight leakage confirmed.")
+
 if __name__ == "__main__":
     test_district_authority_endpoint()
     test_state_nodal_endpoint()
     test_central_nodal_endpoint()
     test_auditor_cag_endpoint()
+    test_implementing_agency_endpoint()
