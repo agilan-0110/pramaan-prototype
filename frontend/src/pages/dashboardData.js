@@ -9782,6 +9782,7 @@ export const PRIORITY_ALERTS = [
 
 export let liveAlertsCache = null;
 export let liveSummaryCache = null;
+export let liveDashboardStatsCache = null;
 
 export async function fetchLiveAlerts() {
   try {
@@ -9820,10 +9821,27 @@ export async function fetchLiveAlertsSummary() {
   return null;
 }
 
+export async function fetchLiveDashboardStats() {
+  try {
+    const token = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('setu_auth_token') : null;
+    const headers = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    const res = await fetch('http://127.0.0.1:8000/dashboard/me', { headers });
+    if (res.ok) {
+      liveDashboardStatsCache = await res.json();
+      return liveDashboardStatsCache;
+    }
+  } catch (err) {}
+  return null;
+}
+
 // Trigger initial background fetch
 if (typeof window !== 'undefined' && window.fetch) {
   fetchLiveAlerts().catch(() => {});
   fetchLiveAlertsSummary().catch(() => {});
+  fetchLiveDashboardStats().catch(() => {});
 }
 
 export function renderAlertCard(a) {
@@ -10248,7 +10266,10 @@ export async function fetchScopedProjects() {
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
-  fetchLiveAlerts().catch(() => {});
+  await Promise.all([
+    fetchLiveAlerts().catch(() => {}),
+    fetchLiveDashboardStats().catch(() => {}),
+  ]);
   try {
     const res = await fetch('http://127.0.0.1:8000/projects', { headers });
     if (res.ok) {
@@ -10584,6 +10605,13 @@ export function getDistrictOperationalCommandHtml(user, projectsToUse, sortedPro
   const totalDisbursedCr = (totalExpenditure / 10000000).toFixed(2);
   const utilRate = totalSanctioned > 0 ? Math.round((totalExpenditure / totalSanctioned) * 100) : 64.2;
 
+  const serverSummary = liveDashboardStatsCache?.summary;
+  const effectiveTotal = serverSummary?.totalProjects ?? projectsToUse.length;
+  const effectiveActiveAlerts = serverSummary?.activeAlerts ?? 18;
+  const effectiveCriticalAlerts = serverSummary?.criticalAlerts ?? 3;
+  const effectiveUtilRate = serverSummary?.fundsUtilizedPct ?? (totalSanctioned > 0 ? Math.round((totalExpenditure / totalSanctioned) * 100) : 64.2);
+  const isSimulated = liveDashboardStatsCache?.isSimulated ?? false;
+
   const proposalsPending = (projectsToUse || []).filter(p => p.status === 'Proposed - Under Scrutiny' || (p.status && p.status.toLowerCase().includes('scrutiny')));
 
   return `
@@ -10598,6 +10626,7 @@ export function getDistrictOperationalCommandHtml(user, projectsToUse, sortedPro
             <div class="flex items-center gap-space-sm flex-wrap">
               <span class="font-headline-lg text-headline-lg font-bold text-on-surface">${districtName} District Executive Console</span>
               <span class="bg-tertiary text-tertiary-fixed font-label-sm text-label-sm px-2 py-0.5 rounded uppercase tracking-wider font-semibold">Live Operational Status</span>
+              ${isSimulated ? '<span class="bg-surface-variant text-on-surface-variant font-label-sm text-label-sm px-2 py-0.5 rounded uppercase tracking-wider font-semibold border border-outline-variant/40">Simulated</span>' : ''}
             </div>
             <p class="font-body-sm text-body-sm text-on-surface-variant">
               Nodal Authority: Collectorate of ${districtName} · State: ${stateName} · Fiscal Year 2024–25
@@ -10617,7 +10646,7 @@ export function getDistrictOperationalCommandHtml(user, projectsToUse, sortedPro
           <div class="w-px h-8 bg-outline-variant/40"></div>
           <div class="text-right">
             <span class="font-label-sm text-label-sm text-on-surface-variant block uppercase">Utilization</span>
-            <span class="font-headline-md text-headline-md font-bold text-on-tertiary-container">${utilRate}%</span>
+            <span class="font-headline-md text-headline-md font-bold text-on-tertiary-container">${effectiveUtilRate}%</span>
           </div>
         </div>
       </div>
@@ -10629,14 +10658,14 @@ export function getDistrictOperationalCommandHtml(user, projectsToUse, sortedPro
           <div class="flex items-start justify-between">
             <div>
               <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">Active MPLADS Works</span>
-              <div class="font-headline-xl text-headline-xl font-bold text-primary mt-1">${projectsToUse.length || 38}</div>
+              <div class="font-headline-xl text-headline-xl font-bold text-primary mt-1">${effectiveTotal}</div>
             </div>
             <div class="w-10 h-10 rounded bg-primary-fixed flex items-center justify-center text-primary">
               <span class="material-symbols-outlined text-[24px]">construction</span>
             </div>
           </div>
           <div class="mt-space-md pt-space-xs border-t border-surface-variant flex items-center justify-between font-body-sm text-body-sm text-on-surface-variant">
-            <span>26 In-progress · 12 Pre-tendering</span>
+            <span>Scoped for ${districtName}</span>
             <span class="text-primary font-label-sm text-label-sm font-semibold cursor-pointer hover:underline" onclick="document.getElementById('district-registry-table')?.scrollIntoView({ behavior: 'smooth' })">View Registry</span>
           </div>
         </div>
@@ -10661,7 +10690,7 @@ export function getDistrictOperationalCommandHtml(user, projectsToUse, sortedPro
           <div class="flex items-start justify-between">
             <div>
               <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">Anomaly &amp; Compliance Flags</span>
-              <div class="font-headline-xl text-headline-xl font-bold text-error mt-1">03</div>
+              <div class="font-headline-xl text-headline-xl font-bold text-error mt-1">${effectiveCriticalAlerts}</div>
             </div>
             <div class="w-10 h-10 rounded bg-error-container flex items-center justify-center text-on-error-container">
               <span class="material-symbols-outlined text-[24px]">security</span>
@@ -10669,25 +10698,25 @@ export function getDistrictOperationalCommandHtml(user, projectsToUse, sortedPro
           </div>
           <div class="mt-space-md pt-space-xs border-t border-surface-variant flex items-center justify-between font-body-sm text-body-sm">
             <span class="text-error font-semibold flex items-center gap-1">
-              <span class="w-2 h-2 rounded-full bg-error"></span> 1 High Risk (SHAP 0.82)
+              <span class="w-2 h-2 rounded-full bg-error"></span> Critical &amp; High Priority
             </span>
-            <span class="text-on-surface-variant font-label-sm text-label-sm">2 Medium</span>
+            <span class="text-on-surface-variant font-label-sm text-label-sm">Requires Review</span>
           </div>
         </div>
-        <!-- Tile 4: Citizen Contradictions -->
+        <!-- Tile 4: Active Alerts & Contradictions -->
         <div class="bg-surface-container-lowest p-space-lg rounded shadow-sm border border-outline-variant/20 flex flex-col justify-between">
           <div class="flex items-start justify-between">
             <div>
-              <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">Ground Contradictions</span>
-              <div class="font-headline-xl text-headline-xl font-bold text-secondary mt-1">02</div>
+              <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider font-semibold">Active Alerts Total</span>
+              <div class="font-headline-xl text-headline-xl font-bold text-secondary mt-1">${effectiveActiveAlerts}</div>
             </div>
             <div class="w-10 h-10 rounded bg-surface-container-high flex items-center justify-center text-secondary">
               <span class="material-symbols-outlined text-[24px]">compare_arrows</span>
             </div>
           </div>
           <div class="mt-space-md pt-space-xs border-t border-surface-variant flex items-center justify-between font-body-sm text-body-sm">
-            <span class="text-on-surface-variant">Geo-verified Crowdsourced</span>
-            <span class="bg-surface-container-highest text-on-surface px-1.5 py-0.5 rounded font-label-sm text-label-sm font-semibold">2 En-route Inspection</span>
+            <span class="text-on-surface-variant">District Scope Total</span>
+            <span class="bg-surface-container-highest text-on-surface px-1.5 py-0.5 rounded font-label-sm text-label-sm font-semibold">Under Active Handling</span>
           </div>
         </div>
       </div>
@@ -11338,6 +11367,12 @@ export function getDashboardHtml(customUser = null, customProjects = null) {
     }
   }
 
+  const serverSummary = liveDashboardStatsCache?.summary;
+  const effectiveTotalCount = serverSummary?.totalProjects ?? totalCount;
+  const effectiveActiveAlerts = serverSummary?.activeAlerts ?? pendingAlertsCount;
+  const effectiveCriticalAlerts = serverSummary?.criticalAlerts ?? highRiskCount;
+  const effectiveUtilPct = serverSummary?.fundsUtilizedPct;
+
   let dynamicStats = [];
 
   if (isMpRole) {
@@ -11346,19 +11381,21 @@ export function getDashboardHtml(customUser = null, customProjects = null) {
       (p) => p.status === 'In Progress' || p.status?.includes('Progress') || p.status?.includes('Approved') || p.status?.includes('Proposed')
     ).length;
     const completedWorksCount = projectsToUse.filter((p) => p.status === 'Completed').length;
-    const underReviewCount = projectsToUse.filter((p) => p.flagPresent || p.hasOpenFlags || (p.riskScore && p.riskScore >= 60) || p.costOverrun).length;
+    const underReviewCount = (liveDashboardStatsCache?.flagsByStatus && liveDashboardStatsCache.flagsByStatus.find(f => f.name === 'Flag Present'))
+      ? liveDashboardStatsCache.flagsByStatus.find(f => f.name === 'Flag Present').value
+      : projectsToUse.filter((p) => p.flagPresent || p.hasOpenFlags || (p.riskScore && p.riskScore >= 60) || p.costOverrun).length;
 
     dynamicStats = [
       {
         label: isNominated ? 'Nominated Works Portfolio' : 'Constituency Projects',
-        value: String(totalCount),
+        value: String(effectiveTotalCount),
         meta: isNominated ? (user.chosenDistricts ? `${user.chosenDistricts.join(', ')}` : 'Multi-State Districts') : (user.constituency ? `${user.constituency} Parliamentary Works` : 'Constituency Portfolio'),
         isAccent: false,
       },
       {
         label: 'Active Executions',
         value: String(activeWorksCount),
-        meta: 'Ongoing physical works & approvals',
+        meta: effectiveUtilPct != null ? `${effectiveUtilPct}% Fund Utilization` : 'Ongoing physical works & approvals',
         isAccent: false,
       },
       {
@@ -11375,22 +11412,22 @@ export function getDashboardHtml(customUser = null, customProjects = null) {
       },
     ];
   } else if (isAgencyRole) {
-    // Implementing Agency KPI Stat Cards
-    const avgPhysProg = Math.round(projectsToUse.reduce((s, p) => s + (p.physicalProgress || 0), 0) / (totalCount || 1));
+    // Implementing Agency KPI Stat Cards (Strictly Execution Only)
+    const avgPhysProg = Math.round(projectsToUse.reduce((s, p) => s + (p.physicalProgress || 0), 0) / (effectiveTotalCount || 1));
     const activeExecs = projectsToUse.filter((p) => p.status === 'In Progress' || p.status?.includes('Progress')).length;
     const pendingUCs = projectsToUse.filter((p) => p.ucStatus === 'OVERDUE' || (p.status === 'Completed' && p.ucStatus !== 'SUBMITTED')).length;
 
     dynamicStats = [
       {
         label: 'Assigned Works',
-        value: String(totalCount),
+        value: String(effectiveTotalCount),
         meta: user.agency || 'Executing Division Scope',
         isAccent: false,
       },
       {
-        label: 'Avg Completion',
-        value: `${avgPhysProg}%`,
-        meta: 'Physical milestone progress',
+        label: 'Fund Utilization',
+        value: effectiveUtilPct != null ? `${effectiveUtilPct}%` : `${avgPhysProg}%`,
+        meta: effectiveUtilPct != null ? 'Cumulative funds disbursed' : 'Physical milestone progress',
         isAccent: false,
       },
       {
@@ -11410,25 +11447,25 @@ export function getDashboardHtml(customUser = null, customProjects = null) {
     dynamicStats = [
       {
         label: 'Scoped Projects',
-        value: String(totalCount),
+        value: String(effectiveTotalCount),
         meta: user ? (user.district || user.state || 'National Portfolio') : 'All active jurisdictions',
         isAccent: false,
       },
       {
-        label: 'High Risk Count',
-        value: String(highRiskCount),
-        meta: 'Immediate audit review required',
-        isAccent: true,
+        label: 'Critical / High Flags',
+        value: String(effectiveCriticalAlerts),
+        meta: 'Immediate operational review',
+        isAccent: effectiveCriticalAlerts > 0,
       },
       {
-        label: 'Compliance Violations',
-        value: String(complianceViolationsCount),
-        meta: 'Fund-splitting & anomaly flags',
+        label: 'Fund Utilization',
+        value: effectiveUtilPct != null ? `${effectiveUtilPct}%` : '77.6%',
+        meta: 'Sanctioned vs expended outlay',
         isAccent: false,
       },
       {
-        label: 'Pending Alerts',
-        value: String(pendingAlertsCount),
+        label: 'Active Alerts',
+        value: String(effectiveActiveAlerts),
         meta: isMospiRole ? 'Critical severity alerts (National)' : isStateRole ? 'High & Critical flags (State)' : 'Awaiting authority response',
         isAccent: false,
       },
@@ -11645,7 +11682,10 @@ export function getDashboardHtml(customUser = null, customProjects = null) {
     <div class="setu-dashboard">
       <div class="setu-page-header" style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: var(--setu-space-2);">
         <div>
-          <h1 class="setu-page-title">${isMpRole ? 'Constituency Projects & Recommendations' : isAgencyRole ? 'Implementing Agency Execution Workspace' : 'Projects Audit Dashboard'}</h1>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <h1 class="setu-page-title" style="margin: 0;">${isMpRole ? 'Constituency Projects & Recommendations' : isAgencyRole ? 'Implementing Agency Execution Workspace' : 'Projects Audit Dashboard'}</h1>
+            ${liveDashboardStatsCache?.isSimulated ? '<span style="background: #e2e8f0; color: #475569; font-weight: 700; padding: 2px 8px; border-radius: 4px; font-size: 11px; text-transform: uppercase; border: 1px solid #cbd5e1;">Simulated</span>' : ''}
+          </div>
           <p class="setu-page-desc">
             ${user ? `Logged in: <strong>${user.role}</strong> (${user.jurisdiction || user.constituency || user.district || 'National'})` : 'National Monitoring & Risk Engine Overview'}
           </p>

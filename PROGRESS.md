@@ -57,3 +57,4 @@
 2026-09-23 20:12 - Build and verify Auditor / CAG role-scoped dashboard endpoint GET /dashboard/auditor-cag - status: done
 2026-09-23 20:14 - Build and verify Implementing Agency role-scoped dashboard endpoint GET /dashboard/implementing-agency with zero oversight leakage - status: done
 2026-09-23 20:15 - Build and verify MP Office role-scoped dashboard endpoint GET /dashboard/mp-office and contextual GET /dashboard/me with privilege escalation enforcement - status: done
+2026-09-23 20:29 - Wire frontend dashboard UI to live role-scoped statistics endpoints and render Simulated disclosures - status: done

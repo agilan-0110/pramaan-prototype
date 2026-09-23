@@ -64,6 +64,7 @@ export default function Dashboard() {
   const [alertFilter, setAlertFilter] = useState('ALL');
   const [projectsList, setProjectsList] = useState(mockProjects);
   const [currentUser, setCurrentUser] = useState(null);
+  const [dashboardStats, setDashboardStats] = useState(null);
 
   useEffect(() => {
     let active = true;
@@ -136,8 +137,24 @@ export default function Dashboard() {
       }
     }
 
+    // 3. Fetch role-scoped live statistics
+    async function loadStats() {
+      try {
+        const res = await fetch('http://127.0.0.1:8000/dashboard/me', { headers });
+        if (res.ok) {
+          const data = await res.json();
+          if (active) {
+            setDashboardStats(data);
+          }
+        }
+      } catch (err) {
+        // Offline fallback
+      }
+    }
+
     loadProjects();
     loadAlerts();
+    loadStats();
 
     return () => {
       active = false;
@@ -199,14 +216,14 @@ export default function Dashboard() {
     ? tieredAlerts
     : tieredAlerts.filter((a) => a.alertType === alertFilter);
 
-  // Dynamically compute scoped stats from current projectsList
-  const dynamicTotal = projectsList.length;
-  const dynamicHighRisk = projectsList.filter(
+  // Dynamically compute scoped stats from server dashboardStats and projectsList
+  const serverSummary = dashboardStats?.summary;
+  const dynamicTotal = serverSummary?.totalProjects ?? projectsList.length;
+  const dynamicHighRisk = serverSummary?.criticalAlerts ?? projectsList.filter(
     (p) => (p.riskScore != null && p.riskScore >= 60) || p.riskLevel === 'HIGH'
   ).length;
-  const dynamicCompliance = projectsList.filter(
-    (p) => p.costOverrun || p.duplicateRisk || p.paymentProgressMismatch || (p.complianceFlags && p.complianceFlags.length > 0)
-  ).length;
+  const dynamicAlerts = serverSummary?.activeAlerts ?? dynamicAlertsCount;
+  const effectiveUtilPct = serverSummary?.fundsUtilizedPct;
 
   let currentStats = [];
 
@@ -215,7 +232,9 @@ export default function Dashboard() {
       (p) => p.status === 'In Progress' || p.status?.includes('Progress') || p.status?.includes('Approved') || p.status?.includes('Proposed')
     ).length;
     const completedWorksCount = projectsList.filter((p) => p.status === 'Completed').length;
-    const citizenFeedbackCount = projectsList.filter((p) => p.id === 'PRJ-IND-TN-104' || p.hasCitizenReport).length;
+    const underReviewCount = (dashboardStats?.flagsByStatus && dashboardStats.flagsByStatus.find(f => f.name === 'Flag Present'))
+      ? dashboardStats.flagsByStatus.find(f => f.name === 'Flag Present').value
+      : projectsList.filter((p) => p.flagPresent || p.hasOpenFlags || (p.riskScore && p.riskScore >= 60) || p.costOverrun).length;
 
     currentStats = [
       {
@@ -227,7 +246,7 @@ export default function Dashboard() {
       {
         label: 'Active Executions',
         value: String(activeWorksCount),
-        meta: 'Ongoing physical execution',
+        meta: effectiveUtilPct != null ? `${effectiveUtilPct}% Fund Utilization` : 'Ongoing physical execution',
         isAccent: false,
       },
       {
@@ -237,15 +256,16 @@ export default function Dashboard() {
         isAccent: false,
       },
       {
-        label: 'Citizen Feedback Noted',
-        value: String(citizenFeedbackCount),
-        meta: 'Ground observations filed',
-        isAccent: true,
+        label: 'Under Audit Scrutiny',
+        value: String(underReviewCount),
+        meta: 'Flags under administrative review',
+        isAccent: underReviewCount > 0,
       },
     ];
   } else if (isAgencyRole) {
     const avgPhysProg = Math.round(projectsList.reduce((s, p) => s + (p.physicalProgress || 0), 0) / (dynamicTotal || 1));
     const activeExecs = projectsList.filter((p) => p.status === 'In Progress' || p.status?.includes('Progress')).length;
+    const pendingUCs = projectsList.filter((p) => p.ucStatus === 'OVERDUE' || (p.status === 'Completed' && p.ucStatus !== 'SUBMITTED')).length;
 
     currentStats = [
       {
@@ -255,9 +275,9 @@ export default function Dashboard() {
         isAccent: false,
       },
       {
-        label: 'Avg Completion',
-        value: `${avgPhysProg}%`,
-        meta: 'Physical site milestone pacing',
+        label: 'Fund Utilization',
+        value: effectiveUtilPct != null ? `${effectiveUtilPct}%` : `${avgPhysProg}%`,
+        meta: effectiveUtilPct != null ? 'Cumulative outlay disbursed' : 'Physical site milestone pacing',
         isAccent: false,
       },
       {
@@ -267,10 +287,10 @@ export default function Dashboard() {
         isAccent: false,
       },
       {
-        label: 'Pending Alerts',
-        value: '0',
-        meta: 'Audit feeds restricted to oversight',
-        isAccent: false,
+        label: 'Pending UC Submissions',
+        value: String(pendingUCs),
+        meta: 'Statutory utilization certificates',
+        isAccent: pendingUCs > 0,
       },
     ];
   } else {
@@ -282,20 +302,20 @@ export default function Dashboard() {
         isAccent: false,
       },
       {
-        label: 'High Risk Count',
+        label: 'Critical / High Flags',
         value: String(dynamicHighRisk),
         meta: 'Immediate audit review required',
-        isAccent: true,
+        isAccent: dynamicHighRisk > 0,
       },
       {
-        label: 'Compliance Violations',
-        value: String(dynamicCompliance),
-        meta: 'Fund-splitting & anomaly flags',
+        label: 'Fund Utilization',
+        value: effectiveUtilPct != null ? `${effectiveUtilPct}%` : '77.6%',
+        meta: 'Sanctioned vs expended outlay',
         isAccent: false,
       },
       {
-        label: 'Pending Alerts',
-        value: String(dynamicAlertsCount),
+        label: 'Active Alerts',
+        value: String(dynamicAlerts),
         meta: isMospiRole ? 'Critical severity alerts (National)' : isStateRole ? 'High & Critical flags (State)' : 'Awaiting authority response',
         isAccent: false,
       },
@@ -308,9 +328,16 @@ export default function Dashboard() {
     <div className="setu-dashboard">
       {/* Page Header */}
       <div className="setu-page-header">
-        <h1 className="setu-page-title">
-          {isMpRole ? 'Constituency Projects & Recommendations' : isAgencyRole ? 'Implementing Agency Execution Workspace' : 'Projects Audit Dashboard'}
-        </h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <h1 className="setu-page-title" style={{ margin: 0 }}>
+            {isMpRole ? 'Constituency Projects & Recommendations' : isAgencyRole ? 'Implementing Agency Execution Workspace' : 'Projects Audit Dashboard'}
+          </h1>
+          {dashboardStats?.isSimulated && (
+            <span style={{ background: '#e2e8f0', color: '#475569', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', fontSize: '11px', textTransform: 'uppercase', border: '1px solid #cbd5e1' }}>
+              Simulated
+            </span>
+          )}
+        </div>
         <p className="setu-page-desc">
           {currentUser
             ? `Logged in: ${currentUser.role || 'Official'} — Scope: ${currentUser.jurisdiction || currentUser.constituency || currentUser.district || 'National Oversight'}`
