@@ -71,6 +71,35 @@ def test_state_nodal_endpoint():
     assert data["summary"]["totalProjects"] >= 23
     print(f"[PASS] State Nodal Dashboard: {data['summary']['totalProjects']} projects, {data['summary']['activeAlerts']} alerts, {data['summary']['fundsUtilizedPct']}% utilized.")
 
+def test_central_nodal_endpoint():
+    print("\n--- Testing Central Nodal Agency (MoSPI) Dashboard ---")
+    res_login = client.post("/auth/login", json={"username": "ADM-CNA-MOSPI-HQ-002", "password": "CentralApex#Pass2026"})
+    assert res_login.status_code == 200, f"MoSPI Login failed: {res_login.text}"
+    token = res_login.json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    res = client.get("/dashboard/central-nodal-agency", headers=headers)
+    assert res.status_code == 200, f"MoSPI Dashboard failed: {res.text}"
+    data = res.json()
+    print("MoSPI Response keys:", list(data.keys()))
+    print("MoSPI Summary:", data["summary"])
+
+    assert "summary" in data
+    assert "totalProjects" in data["summary"]
+    assert "activeAlerts" in data["summary"]
+    assert "criticalAlerts" in data["summary"]
+    assert "fundsUtilizedPct" in data["summary"]
+    assert "alertsBySeverity" in data
+    assert "flagsByStatus" in data
+    assert "trendOverTime" in data
+    assert "utilizationByCategory" in data
+    assert data.get("isSimulated") is True
+
+    # MoSPI sees all 124 projects nationally
+    assert data["summary"]["totalProjects"] == 124
+    print(f"[PASS] Central Nodal Agency Dashboard: {data['summary']['totalProjects']} projects (all-India), {data['summary']['activeAlerts']} alerts, {data['summary']['fundsUtilizedPct']}% utilized.")
+
 if __name__ == "__main__":
     test_district_authority_endpoint()
     test_state_nodal_endpoint()
+    test_central_nodal_endpoint()
