@@ -22,3 +22,7 @@ env/
 Thumbs.db
 .vscode/
 .idea/
+
+# Scratch and debug test scripts
+scratch/*.py
+scratch/*.js
