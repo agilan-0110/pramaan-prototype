@@ -1,9 +1,9 @@
 ---
 name: roles
-description: Final role/workflow spec for SETU — 7 logins (MP Office, District Authority, State Nodal, Central Nodal Agency/MoSPI, Implementing Agency, Auditor/CAG, Citizen), severity-tiered visibility, single-owner escalation chain, resolution actions per flag type
+description: Final role/workflow spec for PRAMAAN — 7 logins (MP Office, District Authority, State Nodal, Central Nodal Agency/MoSPI, Implementing Agency, Auditor/CAG, Citizen), severity-tiered visibility, single-owner escalation chain, resolution actions per flag type
 ---
 
-# SETU — Final Roles & Workflow Specification
+# PRAMAAN — Final Roles & Workflow Specification
 
 ## Core Principles
 - **Single ownership**: only one role owns an active flag at a time. Every other permitted viewer sees a read-only status line, never a duplicate action control.

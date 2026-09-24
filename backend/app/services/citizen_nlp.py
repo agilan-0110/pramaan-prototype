@@ -1,5 +1,5 @@
 """
-Citizen Ground Truth NLP Service for SETU.
+Citizen Ground Truth NLP Service for PRAMAAN.
 
 Detects discrepancies and contradictions between official institutional reporting
 and citizen on-the-ground observations using a hybrid NLP pipeline:
@@ -511,7 +511,7 @@ def get_citizen_nlp_summary() -> Dict[str, Any]:
 
 if __name__ == "__main__":
     print("=" * 80)
-    print("SETU CITIZEN GROUND TRUTH NLP PIPELINE EVALUATION")
+    print("PRAMAAN CITIZEN GROUND TRUTH NLP PIPELINE EVALUATION")
     print("Model: sentence-transformers/all-MiniLM-L6-v2 + Rule-Based Negation Engine")
     print("=" * 80)
 

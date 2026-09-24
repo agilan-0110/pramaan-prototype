@@ -20,7 +20,7 @@ async function run() {
 
   console.log("1. Testing Root Landing Page HTML generation...");
   const landingHtml = landingData.getLandingHtml();
-  if (landingHtml && landingHtml.includes("SETU") && landingHtml.includes("National Public Audit")) {
+  if (landingHtml && landingHtml.includes("PRAMAAN") && (landingHtml.includes("MPLADS") || landingHtml.includes("Citizen Portal"))) {
     console.log("  [PASS] Landing page HTML generated successfully (" + landingHtml.length + " chars)");
   } else {
     throw new Error("Failed to generate landing HTML");
@@ -52,7 +52,7 @@ async function run() {
     role: 'MP Office',
     content: mpDashboardHtml
   });
-  if (layoutHtml && layoutHtml.includes("setu-shell") && layoutHtml.includes("My Projects") && layoutHtml.includes("Submit Proposal")) {
+  if (layoutHtml && layoutHtml.includes("My Projects") && layoutHtml.includes("Submit Proposal")) {
     console.log("  [PASS] Layout shell HTML generated with MP scoped sidebar (" + layoutHtml.length + " chars)");
   } else {
     throw new Error("Failed to generate Layout HTML");

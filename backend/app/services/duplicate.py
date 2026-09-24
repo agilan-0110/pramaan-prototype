@@ -1,5 +1,5 @@
 """
-Duplicate Work Detection Service for SETU.
+Duplicate Work Detection Service for PRAMAAN.
 
 Detects duplicate infrastructure schemes, reworded cross-year tenders,
 and fraudulent double-billing across MPLADS public works:

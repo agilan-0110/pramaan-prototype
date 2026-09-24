@@ -1,1 +1,1 @@
-"""SETU Services Package."""
+"""PRAMAAN Services Package."""

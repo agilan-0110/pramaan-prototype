@@ -1,5 +1,5 @@
 """
-Financial Risk Engine Service for SETU.
+Financial Risk Engine Service for PRAMAAN.
 
 Detects anomalous expenditure pacing, disbursement-to-milestone gaps,
 and project schedule slippage using:

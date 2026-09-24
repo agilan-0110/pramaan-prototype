@@ -175,14 +175,47 @@ def load_projects_catalog() -> List[Dict[str, Any]]:
                 updated["assetTransferStatus"] = "NOT_APPLICABLE"
 
         # Ensure evidence and invoices have reviewStatus defaults
-        if "evidenceArtifacts" in updated:
+        if "evidenceArtifacts" in updated and updated["evidenceArtifacts"]:
             for ev in updated["evidenceArtifacts"]:
-                if "reviewStatus" not in ev:
-                    ev["reviewStatus"] = "PENDING"
-        if "invoices" in updated:
+                current_st = ev.get("reviewStatus") or ev.get("status") or "PENDING"
+                ev["reviewStatus"] = current_st
+                ev["status"] = current_st
+        elif "evidenceArtifacts" not in updated or not updated["evidenceArtifacts"]:
+            updated["evidenceArtifacts"] = [
+                {
+                    "id": f"EVD-{pid}-01",
+                    "milestoneStage": "Foundation & Sub-structure Inspection",
+                    "description": f"Milestone physical verification photographs and measurement documentation for {updated.get('name', 'Scheme')}.",
+                    "uploadedAt": "2026-01-15T11:30:00Z",
+                    "vendorName": updated.get("vendorName") or "Assigned Contractor",
+                    "fileName": "inspection_site.jpg",
+                    "reviewStatus": "PENDING",
+                    "status": "PENDING",
+                }
+            ]
+
+        if "invoices" in updated and updated["invoices"]:
             for inv in updated["invoices"]:
-                if "reviewStatus" not in inv:
-                    inv["reviewStatus"] = "PENDING"
+                current_inv_st = inv.get("reviewStatus") or inv.get("status") or "PENDING"
+                inv["reviewStatus"] = current_inv_st
+                inv["status"] = current_inv_st
+        elif "invoices" not in updated or not updated["invoices"]:
+            base_inv_num = f"INV-2026-{pid.replace('PRJ-IND-', '')}"
+            updated["invoices"] = [
+                {
+                    "id": f"INV-{pid}-01",
+                    "invoiceNumber": base_inv_num,
+                    "claimedAmount": int(round((updated.get("expenditure", 500000) or 500000) * 0.4)) or 350000,
+                    "gstin": "33AABCT1332L1Z4",
+                    "fileName": f"contractor_bill_{pid.lower()}.pdf",
+                    "milestoneRef": "Stage Milestone Billing",
+                    "vendorName": updated.get("vendorName") or "Assigned Line Department Vendor",
+                    "invoiceDate": "2026-02-14",
+                    "reviewStatus": "PENDING",
+                    "status": "PENDING",
+                    "itemsSummary": "Civil construction materials & stage execution billing",
+                }
+            ]
                     
         final_list.append(updated)
             
@@ -389,7 +422,7 @@ def upload_milestone_evidence(
         "date": now.strftime("%Y-%m-%d"),
         "timestamp": now.isoformat(),
         "action": f"Implementing Agency certified evidence from {vendor_name} for {project.get('name', 'Project')} on {now.strftime('%Y-%m-%d')}",
-        "actor": current_user.get("officialName") or project.get("implementingAgency") or "Implementing Agency",
+        "actor": (current_user.get("officialName") if current_user else None) or project.get("implementingAgency") or "Implementing Agency",
         "category": "EVIDENCE_UPLOAD",
     }
     existing_audit = list(project.get("auditLogs", []))
@@ -490,7 +523,7 @@ def submit_contractor_invoice(
         "date": now.strftime("%Y-%m-%d"),
         "timestamp": now.isoformat(),
         "action": f"Implementing Agency recorded contractor invoice {payload.invoiceNumber} (₹{claimed:,.0f}) from {vendor_name} on {now.strftime('%Y-%m-%d')}",
-        "actor": current_user.get("officialName") or project.get("implementingAgency") or "Implementing Agency",
+        "actor": (current_user.get("officialName") if current_user else None) or project.get("implementingAgency") or "Implementing Agency",
         "category": "INVOICE_SUBMISSION",
     }
     existing_audit = list(project.get("auditLogs", []))
@@ -791,6 +824,7 @@ def review_project_evidence(
         raise HTTPException(status_code=400, detail=f"Invalid review status '{payload.status}'. Must be 'ACCEPTED' or 'REJECTED_RESUBMISSION_REQUIRED'.")
 
     target_ev["reviewStatus"] = st
+    target_ev["status"] = st
     target_ev["reviewedBy"] = (current_user.get("officialName") if current_user else "District Authority") or "District Authority"
     target_ev["reviewedAt"] = now.isoformat()
     if payload.remarks:
@@ -821,7 +855,7 @@ def review_project_evidence(
 
 
 @router.post(
-    "/{id}/invoices/{invoice_number}/review",
+    "/{id}/invoices/{invoice_number:path}/review",
     summary="Review Contractor Invoice (District Authority)",
     description="Accept or require resubmission on submitted contractor tax invoice.",
 )
@@ -852,6 +886,7 @@ def review_project_invoice(
         raise HTTPException(status_code=400, detail=f"Invalid review status '{payload.status}'.")
 
     target_inv["reviewStatus"] = st
+    target_inv["status"] = st
     target_inv["reviewedBy"] = (current_user.get("officialName") if current_user else "District Authority") or "District Authority"
     target_inv["reviewedAt"] = now.isoformat()
     if payload.remarks:

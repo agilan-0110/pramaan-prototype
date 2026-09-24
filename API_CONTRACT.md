@@ -1,7 +1,7 @@
-# SETU API Contract Documentation
+# PRAMAAN API Contract Documentation
 
 ## Overview
-This document specifies the REST API contract for the SETU Institutional Monitoring & Contradiction Detection Platform.
+This document specifies the REST API contract for the PRAMAAN Institutional Monitoring & Contradiction Detection Platform.
 
 ---
 

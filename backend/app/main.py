@@ -1,7 +1,7 @@
 """
-SETU Backend API Application.
+PRAMAAN Backend API Application.
 
-Main entry point for the SETU Institutional Monitoring & Contradiction Detection API.
+Main entry point for the PRAMAAN Institutional Monitoring & Contradiction Detection API.
 """
 
 from fastapi import FastAPI
@@ -20,7 +20,7 @@ from app.routers.audit import router as audit_router
 from app.routers.dashboard import router as dashboard_router
 
 app = FastAPI(
-    title="SETU Compliance & Contradiction Detection Platform API",
+    title="PRAMAAN Compliance & Contradiction Detection Platform API",
     description="Statutory Compliance Rule Engine, Trend Analysis, and Predictive Monitoring for MPLADS Public Works.",
     version="1.0.0",
     docs_url="/docs",
@@ -53,7 +53,7 @@ app.include_router(dashboard_router)
 @app.get("/", tags=["General"])
 def root():
     return {
-        "service": "SETU Compliance & Contradiction Detection API",
+        "service": "PRAMAAN Compliance & Contradiction Detection API",
         "status": "online",
         "version": "1.0.0",
         "endpoints": {

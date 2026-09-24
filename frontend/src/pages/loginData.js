@@ -198,6 +198,6 @@ export async function authenticateOfficial({ username, password, roleId }) {
 
   return {
     success: false,
-    error: 'Authentication failed: Invalid credentials or unable to connect to SETU authentication service.',
+    error: 'Authentication failed: Invalid credentials or unable to connect to PRAMAAN authentication service.',
   };
 }

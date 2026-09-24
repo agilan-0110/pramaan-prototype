@@ -1,5 +1,5 @@
 """
-Predictive Insights Service for SETU.
+Predictive Insights Service for PRAMAAN.
 
 Provides transparent, honestly-labeled empirical projections for project
 schedule slippage and cost escalation:

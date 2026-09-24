@@ -1,13 +1,14 @@
 /**
- * SETU Citizen Portal Data Layer & Interactive UI Generator
+ * PRAMAAN Citizen Portal Data Layer & Interactive UI Generator
  * 
- * Implements modern institutional design conforming to Tailwind CSS & Public Sans:
- * - Top Utility Bar with accessibility controls and prototype notice
- * - Sticky MainHeader with SETU Emblem, Search/Track bar, and Officer Login
+ * Minimal Official Government Design matching Landing and Login Gateway:
+ * - Two-level official Government of India header
+ * - Vertically clean, minimal layout with generous whitespace
  * - Section 1: Location & Jurisdiction with complete address & locality selector
  * - Section 2: Proximity-ranked civil projects showing exact distance (km away)
- * - Section 3: Observation details with COMPULSORY geo-tagged site photo upload & preview gallery
+ * - Section 3: Ground observation with COMPULSORY geo-tagged site photo upload & preview
  * - Official Confirmation Receipt with statutory audit acknowledgment
+ * - Minimal Government Footer
  */
 
 import { allProjects } from './projectDetailData.js';
@@ -138,6 +139,19 @@ export let portalState = {
 
 let hasAutoRequestedGeo = false;
 
+// Helper to synchronize live DOM input values into portalState before any re-render
+export function syncDomToPortalState(appEl) {
+  if (!appEl) return;
+  const textarea = appEl.querySelector('#complaint-text');
+  if (textarea) portalState.complaintText = textarea.value;
+  const nameInput = appEl.querySelector('#contact-name');
+  if (nameInput) portalState.citizenName = nameInput.value;
+  const mobileInput = appEl.querySelector('#contact-mobile');
+  if (mobileInput) portalState.phone = mobileInput.value;
+  const addrInput = appEl.querySelector('#custom-address-input');
+  if (addrInput) portalState.customAddress = addrInput.value;
+}
+
 /**
  * Returns sorted list of projects with calculated Haversine distance
  */
@@ -162,13 +176,187 @@ export function getProjectsWithProximity() {
     };
   });
 
-  // Sort ascending: nearest project first!
+  // Sort ascending: nearest project first
   withDist.sort((a, b) => a._calculatedDistance - b._calculatedDistance);
   return withDist;
 }
 
 /**
- * Generates the complete Citizen Portal HTML string matching the user's reference design
+ * Clean Two-Level Government Header matching Login & Landing Gateway
+ */
+export function getGovernmentHeaderHtml() {
+  return `
+    <header class="w-full select-none">
+      <!-- TOP BAR: Dark navy background -->
+      <div class="w-full bg-[#0a192f] text-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-9 flex items-center justify-between text-xs">
+          <div class="flex items-center gap-2">
+            <svg class="w-4 h-4 text-amber-400 fill-current" viewBox="0 0 24 24">
+              <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 2.18l7 3.12v4.7c0 4.54-3.08 8.84-7 9.95-3.92-1.11-7-5.41-7-9.95V6.3l7-3.12zM12 6a4 4 0 100 8 4 4 0 000-8zm0 2a2 2 0 110 4 2 2 0 010-4z"/>
+            </svg>
+            <span class="font-medium tracking-wide">Government of India</span>
+          </div>
+          <div class="text-slate-300 text-xs tracking-wide hidden sm:block">
+            Ministry of Statistics &amp; Programme Implementation
+          </div>
+        </div>
+      </div>
+
+      <!-- MAIN HEADER: White background, thin border/shadow separating from page -->
+      <div class="w-full bg-white border-b border-gray-200 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+          <a href="#/" class="flex flex-col no-underline text-inherit group shrink-0">
+            <span class="text-xl font-bold tracking-tight text-[#0a192f] font-sans">PRAMAAN</span>
+            <span class="text-xs text-slate-500 font-medium tracking-wide">MPLADS Audit &amp; Monitoring System</span>
+          </a>
+
+          <div class="flex items-center gap-3 sm:gap-6 text-sm font-medium">
+            <!-- Public Track Search Form -->
+            <form class="hidden md:flex items-center" role="search" id="header-track-form">
+              <input
+                id="track-search-input"
+                class="w-56 text-xs bg-slate-50 border border-slate-300 rounded-l px-3 py-1.5 text-slate-800 focus:outline-none focus:border-[#0f2b5c] placeholder-slate-400"
+                placeholder="Track Work ID / Complaint #"
+                type="text"
+                value="${portalState.trackingQuery || ''}"
+              />
+              <button
+                class="bg-[#0f2b5c] hover:bg-[#1e3a8a] text-white text-xs font-semibold px-3 py-1.5 rounded-r border border-[#0f2b5c] transition-colors cursor-pointer"
+                type="submit"
+              >
+                Track
+              </button>
+            </form>
+
+            <a href="#/" class="text-slate-600 hover:text-[#0a192f] transition-colors no-underline">Home</a>
+            <a
+              href="#/login"
+              class="inline-flex items-center gap-1.5 py-1.5 px-3 bg-white border border-[#0f2b5c] text-[#0f2b5c] hover:bg-[#0f2b5c] hover:text-white text-xs font-semibold rounded transition-colors no-underline"
+            >
+              <span class="material-symbols-outlined text-[16px]">lock</span>
+              <span>Official Login</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </header>
+  `;
+}
+
+/**
+ * Minimal Government Footer matching Login & Landing Gateway
+ */
+export function getGovernmentFooterHtml() {
+  return `
+    <footer class="w-full bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500 mt-auto">
+      <div class="max-w-7xl mx-auto px-4 flex flex-col items-center gap-1">
+        <div class="font-bold text-slate-800 text-sm tracking-tight">PRAMAAN</div>
+        <div class="text-slate-600 font-medium">MPLADS Audit &amp; Monitoring System</div>
+        <div class="text-slate-400 mt-1">Government of India | Ministry of Statistics &amp; Programme Implementation</div>
+        <div class="flex items-center justify-center gap-3 text-slate-400 mt-2 text-[11px]">
+          <span class="text-slate-500">Citizen Grievance &amp; Verification Portal</span>
+          <span>•</span>
+          <span>Privacy &amp; Accessibility</span>
+        </div>
+      </div>
+    </footer>
+  `;
+}
+
+/**
+ * Generates the basic project details card shown when a citizen selects a project
+ */
+export function getSelectedProjectDetailsHtml(p, distFormatted) {
+  const sanctionedLakhs = (p.sanctionedAmount / 100000).toFixed(1);
+  const spentLakhs = ((p.expenditure || 0) / 100000).toFixed(1);
+  const mpClean = (p.mpName || 'Constituency MP').replace(' (Fictional)', '');
+  const vendorClean = (p.vendorName || 'Assigned Contractor').replace(' (Fictional)', '');
+  const lat = (p.siteCoordinates?.latitude ?? p.latitude ?? 0).toFixed(4);
+  const lon = (p.siteCoordinates?.longitude ?? p.longitude ?? 0).toFixed(4);
+  const physPct = Math.min(100, Math.max(0, p.physicalProgress || 0));
+  const finPct = Math.min(100, Math.max(0, p.financialProgress || 0));
+
+  return `
+    <div class="setu-project-details-box mt-3 pt-3 border-t border-blue-200 bg-white rounded p-3 border border-blue-100 shadow-2xs text-left" onclick="event.stopPropagation()">
+      <div class="flex items-center justify-between mb-2 pb-1.5 border-b border-slate-100">
+        <div class="flex items-center gap-1.5 text-xs font-bold text-[#0f2b5c]">
+          <span class="material-symbols-outlined text-[16px]">info</span>
+          <span>Basic Project Details</span>
+        </div>
+        <span class="text-[10px] font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+          Official Public Record
+        </span>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 text-xs">
+        <!-- Recommending MP -->
+        <div class="bg-slate-50 p-2 rounded border border-slate-100">
+          <span class="text-[10px] text-slate-500 block font-medium">Recommending MP</span>
+          <strong class="font-semibold text-slate-800 text-[11px] block truncate">${mpClean}</strong>
+          <span class="text-[10px] text-slate-600 block truncate">${p.constituency || p.district} Constituency</span>
+        </div>
+
+        <!-- Implementing Agency & Vendor -->
+        <div class="bg-slate-50 p-2 rounded border border-slate-100">
+          <span class="text-[10px] text-slate-500 block font-medium">Implementing Agency</span>
+          <strong class="font-semibold text-slate-800 text-[11px] block truncate">${p.implementingAgency || 'District Authority'}</strong>
+          <span class="text-[10px] text-slate-600 block truncate">Vendor: ${vendorClean}</span>
+        </div>
+
+        <!-- Sanction & Outlay -->
+        <div class="bg-slate-50 p-2 rounded border border-slate-100">
+          <span class="text-[10px] text-slate-500 block font-medium">Financial Outlay</span>
+          <div class="flex items-center justify-between text-xs mt-0.5">
+            <span class="text-slate-600">Sanctioned:</span>
+            <strong class="font-bold text-[#0f2b5c]">₹${sanctionedLakhs} Lakhs</strong>
+          </div>
+          <div class="flex items-center justify-between text-[11px] text-slate-500 mt-0.5">
+            <span>Disbursed:</span>
+            <span class="font-semibold text-slate-700">₹${spentLakhs} Lakhs</span>
+          </div>
+        </div>
+
+        <!-- Certified Physical Progress -->
+        <div class="bg-slate-50 p-2 rounded border border-slate-100">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] text-slate-500 font-medium">Physical Progress</span>
+            <strong class="text-xs font-bold text-slate-800">${physPct}%</strong>
+          </div>
+          <div class="w-full h-2 bg-slate-200 rounded-full mt-1.5 overflow-hidden">
+            <div class="h-full bg-emerald-600 rounded-full" style="width: ${physPct}%"></div>
+          </div>
+          <span class="text-[10px] text-slate-500 mt-1 block">Status: <strong class="text-[#0f2b5c]">${p.status || 'In Progress'}</strong></span>
+        </div>
+
+        <!-- Financial Progress -->
+        <div class="bg-slate-50 p-2 rounded border border-slate-100">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] text-slate-500 font-medium">Fund Utilization</span>
+            <strong class="text-xs font-bold text-slate-800">${finPct.toFixed(0)}%</strong>
+          </div>
+          <div class="w-full h-2 bg-slate-200 rounded-full mt-1.5 overflow-hidden">
+            <div class="h-full bg-blue-600 rounded-full" style="width: ${finPct}%"></div>
+          </div>
+          <span class="text-[10px] text-slate-500 mt-1 block">FY ${p.financialYear || '2024-25'}</span>
+        </div>
+
+        <!-- GPS Location Coordinates -->
+        <div class="bg-slate-50 p-2 rounded border border-slate-100">
+          <span class="text-[10px] text-slate-500 block font-medium">Site Coordinates &amp; Distance</span>
+          <span class="font-mono text-xs font-semibold text-slate-800 block truncate">
+            ${lat}°N, ${lon}°E
+          </span>
+          <span class="text-[10px] text-emerald-700 font-medium mt-0.5 block truncate">
+            📍 ${distFormatted} from your reference location
+          </span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+/**
+ * Generates the complete Citizen Portal HTML string
  */
 export function getCitizenPortalHtml() {
   const {
@@ -189,90 +377,21 @@ export function getCitizenPortalHtml() {
     isSubmitting,
   } = portalState;
 
-  // If in confirmation receipt mode, render the official receipt
+  // If in confirmation receipt mode, render the official government receipt
   if (submissionConfirmation) {
     return `
-      <div class="bg-govBg text-slate-900 font-sans antialiased min-h-screen flex flex-col">
-        <!-- BEGIN: TopUtilityBar -->
-        <section aria-label="Accessibility & Prototype Notice" class="bg-slate-900 text-slate-300 text-xs border-b border-slate-800">
-          <div class="max-w-6xl mx-auto px-4 py-1.5 flex flex-wrap items-center justify-between gap-2">
-            <div class="flex items-center space-x-2 font-medium">
-              <span class="inline-block w-2 h-2 rounded-full bg-amber-400"></span>
-              <span class="tracking-wide">SMART INDIA HACKATHON 2026 · PROTOTYPE FOR MoSPI PROBLEM STATEMENT SIH26102</span>
-            </div>
-            <div class="flex items-center space-x-4">
-              <div class="flex items-center space-x-1 font-mono">
-                <button class="hover:text-white px-1" title="Decrease Font" type="button" onclick="document.body.style.fontSize='12px'">A-</button>
-                <button class="hover:text-white px-1 font-bold" title="Default Font" type="button" onclick="document.body.style.fontSize='14px'">A</button>
-                <button class="hover:text-white px-1 font-bold" title="Increase Font" type="button" onclick="document.body.style.fontSize='16px'">A+</button>
-              </div>
-              <span class="text-slate-600">|</span>
-              <button class="hover:text-white flex items-center gap-1" type="button">
-                <svg aria-hidden="true" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
-                  <path d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-                </svg>
-                <span>Screen Reader</span>
-              </button>
-              <span class="text-slate-600">|</span>
-              <div class="flex items-center space-x-1">
-                <span class="font-semibold text-white">English</span>
-                <span class="text-slate-600">/</span>
-                <button class="hover:text-white" type="button">हिन्दी</button>
-              </div>
-            </div>
-          </div>
-        </section>
-        <!-- END: TopUtilityBar -->
+      <div class="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-sans antialiased">
+        ${getGovernmentHeaderHtml()}
 
-        <!-- BEGIN: MainHeader -->
-        <header class="bg-white border-b border-govBorder sticky top-0 z-30">
-          <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-4">
-            <div class="flex items-center space-x-3">
-              <div class="h-10 w-10 bg-govNavy text-white rounded flex items-center justify-center font-bold text-base shadow-sm">
-                SETU
-              </div>
-              <div>
-                <div class="flex items-center space-x-2">
-                  <span class="font-bold text-xl text-govNavy tracking-tight">SETU</span>
-                  <span class="bg-blue-50 text-blue-800 text-[11px] font-semibold px-2 py-0.5 rounded border border-blue-200">CITIZEN PORTAL</span>
-                </div>
-                <p class="text-xs text-slate-500 font-medium leading-none mt-0.5">Public Audit & Monitoring Platform</p>
-              </div>
-            </div>
-
-            <div class="flex items-center gap-3 flex-1 justify-end max-w-xl">
-              <a class="inline-flex items-center text-xs font-semibold text-govNavy hover:text-white border border-govNavy hover:bg-govNavy px-3 py-2 rounded transition-colors shrink-0" href="#/login">
-                <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewbox="0 0 24 24">
-                  <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-                </svg>
-                Officer Login
-              </a>
-            </div>
-          </div>
-        </header>
-        <!-- END: MainHeader -->
-
-        <!-- BEGIN: NavigationBanner -->
-        <div class="max-w-6xl mx-auto px-4 pt-6 pb-2 w-full flex items-center justify-between">
-          <a class="inline-flex items-center text-xs font-semibold text-govNavy hover:underline gap-1" href="#/">
-            <span>←</span>
-            <span>Return to Public Home</span>
-          </a>
-          <span class="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 bg-white border border-slate-200 px-2.5 py-1 rounded">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-            Public Access • Verification Acknowledgment
-          </span>
-        </div>
-
-        <main class="max-w-6xl mx-auto px-4 pb-12 w-full flex-grow">
-          <div class="bg-white border border-slate-200 rounded-md p-6 shadow-sm mt-4">
+        <main class="flex-1 max-w-4xl w-full mx-auto px-4 py-8">
+          <div class="bg-white border border-slate-200 rounded p-6 shadow-sm">
             <!-- Receipt Success Banner -->
             <div class="bg-emerald-50 border border-emerald-200 rounded p-4 mb-6 flex items-start gap-3">
-              <div class="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-lg shrink-0">
+              <div class="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-base shrink-0">
                 ✓
               </div>
               <div>
-                <h2 class="text-base font-bold text-emerald-900">Grievance Successfully Registered & Queued for Inspection</h2>
+                <h2 class="text-base font-bold text-emerald-900">Grievance Successfully Registered &amp; Queued for Inspection</h2>
                 <p class="text-xs text-emerald-800 mt-0.5">
                   Your ground observation and mandatory photographic evidence have been officially logged in the national audit registry.
                 </p>
@@ -280,10 +399,10 @@ export function getCitizenPortalHtml() {
             </div>
 
             <!-- Receipt Metadata Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 border border-slate-200 rounded p-4 bg-slate-50/50 mb-6 text-xs">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 border border-slate-200 rounded p-4 bg-slate-50 mb-6 text-xs">
               <div>
                 <span class="text-slate-500 block mb-0.5 font-medium">Grievance Tracking ID</span>
-                <span class="font-mono text-sm font-bold text-govNavy tracking-wide">${submissionConfirmation.id}</span>
+                <span class="font-mono text-sm font-bold text-[#0f2b5c] tracking-wide">${submissionConfirmation.id}</span>
               </div>
               <div>
                 <span class="text-slate-500 block mb-0.5 font-medium">Filing Timestamp</span>
@@ -314,39 +433,37 @@ export function getCitizenPortalHtml() {
                 <span class="text-slate-500 block mb-0.5 font-medium">Photographic Evidence</span>
                 <span class="inline-flex items-center gap-1 text-emerald-700 font-semibold">
                   <span>📷</span>
-                  <span>${submissionConfirmation.photoCount || 1} Site Photo(s) Attached & Encrypted</span>
+                  <span>${submissionConfirmation.photoCount || 1} Site Photo(s) Attached &amp; Encrypted</span>
                 </span>
               </div>
             </div>
 
             <!-- Statutory Notice -->
-            <div class="bg-blue-50/60 border-l-4 border-govNavy p-3 text-xs text-slate-700 leading-relaxed rounded-r mb-6">
-              <strong>Statutory Acknowledgment:</strong> Under Section 12 of the Public Audit & Grievance Guidelines,
+            <div class="bg-blue-50/60 border-l-4 border-[#0f2b5c] p-3 text-xs text-slate-700 leading-relaxed rounded-r mb-6">
+              <strong>Statutory Acknowledgment:</strong> Under Public Audit &amp; Grievance Guidelines,
               your ground-truth observation has been transmitted to the District Authority Collectorate and Central
               Audit Inspection cell. Physical verification and contractor stage reconciliation will be scheduled accordingly.
             </div>
 
             <div class="flex flex-wrap items-center gap-3">
-              <button type="button" class="bg-govNavy hover:bg-govNavy-dark text-white font-semibold text-xs px-5 py-2.5 rounded shadow-sm transition" id="btn-submit-another">
+              <button
+                type="button"
+                class="bg-[#0f2b5c] hover:bg-[#1e3a8a] text-white font-semibold text-xs px-5 py-2.5 rounded shadow-sm transition cursor-pointer"
+                id="btn-submit-another"
+              >
                 Submit Another Report
               </button>
-              <a href="#/" class="bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold text-xs px-5 py-2.5 rounded transition">
-                Return to Public Home
+              <a
+                href="#/"
+                class="bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold text-xs px-5 py-2.5 rounded transition no-underline"
+              >
+                Return to Home
               </a>
             </div>
           </div>
         </main>
 
-        <footer class="bg-white border-t border-govBorder py-6 mt-auto">
-          <div class="max-w-6xl mx-auto px-4 text-center">
-            <p class="text-xs font-semibold text-slate-700 tracking-wide">
-              Official Government Audit Portal • Public Grievance Intake Framework • Governed under MoSPI & CAG Audit Guidelines
-            </p>
-            <p class="text-[11px] text-slate-500 mt-1 max-w-2xl mx-auto">
-              Academic & Research Prototype: This interface is engineered exclusively for Smart India Hackathon 2026 evaluating MoSPI Problem Statement SIH26102. Not an official Government of India portal.
-            </p>
-          </div>
-        </footer>
+        ${getGovernmentFooterHtml()}
       </div>
     `;
   }
@@ -371,7 +488,7 @@ export function getCitizenPortalHtml() {
     .map((loc) => `<option value="${loc.name}" ${loc.name === selectedLocality ? 'selected' : ''}>${loc.name} (${loc.lat.toFixed(3)}°N, ${loc.lon.toFixed(3)}°E)</option>`)
     .join('');
 
-  // Build project cards HTML with prominent distance badges
+  // Build project cards HTML with clean distance badges
   const projectCardsHtml = sortedProjects.map((p) => {
     const isSelected = p.id === (selectedProjectId || sortedProjects[0]?.id);
     const dist = p._calculatedDistance;
@@ -388,11 +505,14 @@ export function getCitizenPortalHtml() {
     }
 
     return `
-      <label class="setu-project-card-label flex items-start p-3.5 rounded border ${isSelected ? 'border-govNavy bg-blue-50/40 ring-1 ring-govNavy' : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50/80'} cursor-pointer transition" data-project-id="${p.id}">
+      <label
+        class="setu-project-card-label flex items-start p-3.5 rounded border ${isSelected ? 'border-[#0f2b5c] bg-blue-50/40 ring-1 ring-[#0f2b5c]' : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50/80'} cursor-pointer transition select-none"
+        data-project-id="${p.id}"
+      >
         <input
           type="radio"
           name="project_selection"
-          class="mt-1 h-4 w-4 text-govNavy border-slate-300 focus:ring-govNavy shrink-0 project-radio-input"
+          class="mt-1 h-4 w-4 text-[#0f2b5c] border-slate-300 focus:ring-[#0f2b5c] shrink-0 project-radio-input"
           value="${p.id}"
           ${isSelected ? 'checked' : ''}
         />
@@ -410,6 +530,7 @@ export function getCitizenPortalHtml() {
             <span class="text-[10px] font-semibold bg-blue-50 text-blue-800 px-2 py-0.5 rounded border border-blue-200">Sanction: ₹${(p.sanctionedAmount / 100000).toFixed(1)} Lakhs</span>
             <span class="text-[10px] text-slate-400 ml-auto font-mono">ID: ${p.id}</span>
           </div>
+          ${isSelected ? getSelectedProjectDetailsHtml(p, distFormatted) : ''}
         </div>
       </label>
     `;
@@ -423,7 +544,12 @@ export function getCitizenPortalHtml() {
         <p class="text-[11px] font-medium text-slate-800 truncate">${photo.name}</p>
         <p class="text-[10px] text-slate-500">${(photo.size / (1024 * 1024)).toFixed(2)} MB • Geo-Tagged</p>
       </div>
-      <button type="button" class="btn-remove-photo text-rose-600 hover:text-rose-800 p-1 text-xs font-bold shrink-0" data-photo-index="${pIdx}" title="Remove Photo">
+      <button
+        type="button"
+        class="btn-remove-photo text-rose-600 hover:text-rose-800 p-1 text-xs font-bold shrink-0 cursor-pointer"
+        data-photo-index="${pIdx}"
+        title="Remove Photo"
+      >
         ✕
       </button>
     </div>
@@ -433,123 +559,32 @@ export function getCitizenPortalHtml() {
   const citizenLon = reportedLocation?.longitude ?? 80.1841;
 
   return `
-    <div class="bg-govBg text-slate-900 font-sans antialiased min-h-screen flex flex-col">
-      <!-- BEGIN: TopUtilityBar -->
-      <section aria-label="Accessibility & Prototype Notice" class="bg-slate-900 text-slate-300 text-xs border-b border-slate-800">
-        <div class="max-w-6xl mx-auto px-4 py-1.5 flex flex-wrap items-center justify-between gap-2">
-          <div class="flex items-center space-x-2 font-medium">
-            <span class="inline-block w-2 h-2 rounded-full bg-amber-400"></span>
-            <span class="tracking-wide">SMART INDIA HACKATHON 2026 · PROTOTYPE FOR MoSPI PROBLEM STATEMENT SIH26102</span>
-          </div>
-          <div class="flex items-center space-x-4">
-            <!-- Text Size Controls -->
-            <div class="flex items-center space-x-1 font-mono">
-              <button class="hover:text-white px-1" title="Decrease Font" type="button" onclick="document.body.style.fontSize='12px'">A-</button>
-              <button class="hover:text-white px-1 font-bold" title="Default Font" type="button" onclick="document.body.style.fontSize='14px'">A</button>
-              <button class="hover:text-white px-1 font-bold" title="Increase Font" type="button" onclick="document.body.style.fontSize='16px'">A+</button>
-            </div>
-            <span class="text-slate-600">|</span>
-            <!-- Screen Reader Toggle -->
-            <button class="hover:text-white flex items-center gap-1" type="button">
-              <svg aria-hidden="true" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
-                <path d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-              </svg>
-              <span>Screen Reader</span>
-            </button>
-            <span class="text-slate-600">|</span>
-            <!-- Language Switcher -->
-            <div class="flex items-center space-x-1">
-              <span class="font-semibold text-white">English</span>
-              <span class="text-slate-600">/</span>
-              <button class="hover:text-white" type="button">हिन्दी</button>
-            </div>
-          </div>
-        </div>
-      </section>
-      <!-- END: TopUtilityBar -->
+    <div class="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-sans antialiased">
+      ${getGovernmentHeaderHtml()}
 
-      <!-- BEGIN: MainHeader -->
-      <header class="bg-white border-b border-govBorder sticky top-0 z-30">
-        <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-4">
-          <!-- SETU Emblem and Identity -->
-          <div class="flex items-center space-x-3">
-            <div class="h-10 w-10 bg-govNavy text-white rounded flex items-center justify-center font-bold text-base shadow-sm">
-              SETU
-            </div>
-            <div>
-              <div class="flex items-center space-x-2">
-                <span class="font-bold text-xl text-govNavy tracking-tight">SETU</span>
-                <span class="bg-blue-50 text-blue-800 text-[11px] font-semibold px-2 py-0.5 rounded border border-blue-200">CITIZEN PORTAL</span>
-              </div>
-              <p class="text-xs text-slate-500 font-medium leading-none mt-0.5">Public Audit & Monitoring Platform</p>
-            </div>
-          </div>
-
-          <!-- Header Action Items: Search & Login -->
-          <div class="flex items-center gap-3 flex-1 justify-end max-w-xl">
-            <!-- Track Work / Grievance Input -->
-            <form class="flex-1 max-w-md hidden sm:flex" role="search" id="header-track-form">
-              <div class="relative w-full">
-                <input
-                  id="track-search-input"
-                  class="w-full text-xs bg-slate-50 border border-slate-300 rounded-l px-3 py-2 text-slate-800 focus:outline-none focus:ring-1 focus:ring-govNavy focus:border-govNavy placeholder-slate-400"
-                  placeholder="Track Sanction / Work ID / Complaint #"
-                  type="text"
-                />
-              </div>
-              <button class="bg-govNavy hover:bg-govNavy-dark text-white text-xs font-semibold px-3.5 py-2 rounded-r border border-govNavy transition-colors flex items-center shrink-0" type="submit">
-                Track
-              </button>
-            </form>
-
-            <!-- Officer Login Button -->
-            <a class="inline-flex items-center text-xs font-semibold text-govNavy hover:text-white border border-govNavy hover:bg-govNavy px-3 py-2 rounded transition-colors shrink-0" href="#/login">
-              <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewbox="0 0 24 24">
-                <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-              </svg>
-              Officer Login
-            </a>
-          </div>
-        </div>
-      </header>
-      <!-- END: MainHeader -->
-
-      <!-- BEGIN: NavigationBanner -->
-      <div class="max-w-6xl mx-auto px-4 pt-6 pb-2 w-full flex items-center justify-between">
-        <a class="inline-flex items-center text-xs font-semibold text-govNavy hover:underline gap-1" href="#/">
-          <span>←</span>
-          <span>Return to Public Home</span>
-        </a>
-        <span class="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 bg-white border border-slate-200 px-2.5 py-1 rounded">
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-          Public Access • No Login Required
-        </span>
-      </div>
-      <!-- END: NavigationBanner -->
-
-      <!-- BEGIN: PageContent -->
-      <main class="max-w-6xl mx-auto px-4 pb-12 w-full flex-grow">
-        <!-- Header Section -->
-        <section aria-labelledby="page-title" class="mb-5">
-          <h1 class="text-2xl font-bold text-slate-900 tracking-tight" id="page-title">
-            Report an Infrastructure Issue or Ground Observation
+      <!-- MAIN CONTENT -->
+      <main class="flex-1 max-w-4xl w-full mx-auto px-4 py-8">
+        <!-- Title and Introduction Header -->
+        <div class="text-center mb-8">
+          <span class="text-xs font-bold tracking-widest uppercase text-slate-500">CITIZEN GRIEVANCE PORTAL</span>
+          <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight mt-1">
+            Report Infrastructure Issue &amp; Ground Reality
           </h1>
-          <p class="text-sm text-slate-600 mt-1">
-            Submit factual ground observations on active MPLADS works in your area. Works are automatically sorted by distance to your address.
+          <p class="text-xs sm:text-sm text-slate-600 mt-1.5 max-w-xl mx-auto">
+            Submit factual ground observations and mandatory photographic evidence on active MPLADS works. Works are automatically ranked by proximity to your selected address.
           </p>
-        </section>
+        </div>
 
         <!-- Citizen Guidelines Notice Box -->
-        <section aria-label="Reporting Guidelines" class="bg-white border-l-4 border-govNavy border-y border-r border-slate-200 p-4 rounded-r shadow-xs mb-6">
-          <h2 class="text-xs font-bold tracking-wider uppercase text-govNavy mb-1">Citizen Grievance Instructions</h2>
-          <p class="text-xs text-slate-600 leading-relaxed">
-            Report factual civil works observations (e.g. stalled machinery, incomplete masonry without roof slabs, dry water taps, unpaved road shoulders). Coordinates verify proximity to registered works. <strong>Attaching at least one photo of the site is compulsory to verify ground reality.</strong>
-          </p>
-        </section>
+        <div class="bg-white border-l-4 border-[#0f2b5c] border-y border-r border-slate-200 p-4 rounded-r shadow-xs mb-6 text-xs text-slate-600 leading-relaxed">
+          <strong class="text-slate-800 font-semibold block mb-0.5">Citizen Reporting Guidelines:</strong>
+          Detail physical on-site conditions (e.g., incomplete masonry without roof slabs, unpaved road shoulders, dry water points, stalled machinery). 
+          <span class="text-[#0f2b5c] font-semibold">Attaching at least one photo of the work site is compulsory to verify ground reality.</span>
+        </div>
 
         <!-- Error Banner (if any) -->
         ${submitErrorMessage ? `
-          <div class="bg-rose-50 border border-rose-300 text-rose-800 text-xs p-3.5 rounded-md mb-6 flex items-start gap-2">
+          <div class="bg-rose-50 border border-rose-300 text-rose-800 text-xs p-3.5 rounded mb-6 flex items-start gap-2">
             <span class="text-rose-600 font-bold text-sm">⚠</span>
             <div>
               <strong class="font-semibold">Action Required:</strong> ${submitErrorMessage}
@@ -559,12 +594,12 @@ export function getCitizenPortalHtml() {
 
         <!-- Grievance Intake Form -->
         <form class="space-y-6" id="citizen-grievance-form">
-          <!-- BEGIN: Section 1 - Location & Complete Address Selection -->
-          <div class="bg-white border border-slate-200 rounded-md p-5 shadow-xs">
+          <!-- SECTION 1: Location & Entire Address Selection -->
+          <div class="bg-white border border-slate-200 rounded p-5 shadow-xs">
             <div class="flex items-center space-x-2.5 mb-4">
-              <span class="flex items-center justify-center w-6 h-6 rounded-full bg-govNavy text-white text-xs font-bold">1</span>
+              <span class="flex items-center justify-center w-6 h-6 rounded-full bg-[#0f2b5c] text-white text-xs font-bold">1</span>
               <div>
-                <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wide">Location & Entire Address</h2>
+                <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wide">Location &amp; Address</h2>
                 <span class="text-[11px] text-slate-500">Select your state, district, and locality to see nearby civil works sorted by proximity.</span>
               </div>
             </div>
@@ -590,13 +625,13 @@ export function getCitizenPortalHtml() {
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
                 <label class="block text-xs font-semibold text-slate-700 mb-1" for="state-select">State / Union Territory *</label>
-                <select class="w-full text-xs rounded border-slate-300 bg-slate-50/50 py-2 px-3 text-slate-800 focus:border-govNavy focus:ring-govNavy" id="state-select">
+                <select class="w-full text-xs rounded border border-slate-300 bg-slate-50/50 py-2 px-3 text-slate-800 focus:outline-none focus:border-[#0f2b5c]" id="state-select">
                   ${stateOptionsHtml}
                 </select>
               </div>
               <div>
                 <label class="block text-xs font-semibold text-slate-700 mb-1" for="district-select">District *</label>
-                <select class="w-full text-xs rounded border-slate-300 bg-slate-50/50 py-2 px-3 text-slate-800 focus:border-govNavy focus:ring-govNavy" id="district-select">
+                <select class="w-full text-xs rounded border border-slate-300 bg-slate-50/50 py-2 px-3 text-slate-800 focus:outline-none focus:border-[#0f2b5c]" id="district-select">
                   ${districtOptionsHtml}
                 </select>
               </div>
@@ -608,17 +643,17 @@ export function getCitizenPortalHtml() {
                 <label class="block text-xs font-semibold text-slate-700 mb-1" for="locality-select">
                   Ward / Locality / Landmark Area *
                 </label>
-                <select class="w-full text-xs rounded border-slate-300 bg-slate-50/50 py-2 px-3 text-slate-800 focus:border-govNavy focus:ring-govNavy" id="locality-select">
+                <select class="w-full text-xs rounded border border-slate-300 bg-slate-50/50 py-2 px-3 text-slate-800 focus:outline-none focus:border-[#0f2b5c]" id="locality-select">
                   ${localityOptionsHtml}
                 </select>
                 <span class="text-[10px] text-slate-500 mt-0.5 block">Select your nearest area in ${selectedDistrict} to compute exact project distance.</span>
               </div>
               <div>
                 <label class="block text-xs font-semibold text-slate-700 mb-1" for="custom-address-input">
-                  Specific Street Address / Building / Mohalla (Optional)
+                  Specific Street Address / Mohalla (Optional)
                 </label>
                 <input
-                  class="w-full text-xs rounded border-slate-300 py-2 px-3 text-slate-800 focus:border-govNavy focus:ring-govNavy"
+                  class="w-full text-xs rounded border border-slate-300 py-2 px-3 text-slate-800 focus:outline-none focus:border-[#0f2b5c]"
                   id="custom-address-input"
                   placeholder="e.g. 14, 2nd Main Road, Near Govt High School"
                   type="text"
@@ -628,22 +663,21 @@ export function getCitizenPortalHtml() {
               </div>
             </div>
           </div>
-          <!-- END: Section 1 -->
 
-          <!-- BEGIN: Section 2 - Project Selection Sorted by Distance -->
-          <div class="bg-white border border-slate-200 rounded-md p-5 shadow-xs">
+          <!-- SECTION 2: Project Selection Sorted by Distance -->
+          <div class="bg-white border border-slate-200 rounded p-5 shadow-xs">
             <div class="flex items-center space-x-2.5 mb-1">
-              <span class="flex items-center justify-center w-6 h-6 rounded-full bg-govNavy text-white text-xs font-bold">2</span>
+              <span class="flex items-center justify-center w-6 h-6 rounded-full bg-[#0f2b5c] text-white text-xs font-bold">2</span>
               <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wide">
                 Select Civil Project in ${selectedDistrict}, ${selectedState} *
               </h2>
             </div>
             <p class="text-xs text-slate-500 mb-4 ml-8">
-              Projects are sorted in real time starting from the closest work to your selected address (<strong class="text-slate-700 font-semibold">${selectedLocality}</strong>). No formal project ID required.
+              Projects are sorted in real time starting from the closest work to your selected address (<strong class="text-slate-700 font-semibold">${selectedLocality}</strong>).
             </p>
 
             <!-- Active Projects Radio Group with Distance -->
-            <div aria-label="Select Project" class="space-y-2.5 max-h-[380px] overflow-y-auto custom-scrollbar pr-1" role="radiogroup" id="project-selection-list">
+            <div aria-label="Select Project" class="space-y-2.5 max-h-[380px] overflow-y-auto pr-1" role="radiogroup" id="project-selection-list">
               ${projectCardsHtml}
               ${sortedProjects.length === 0 ? `
                 <div class="text-center py-6 text-xs text-slate-500 bg-slate-50 rounded border border-slate-200">
@@ -652,38 +686,40 @@ export function getCitizenPortalHtml() {
               ` : ''}
             </div>
           </div>
-          <!-- END: Section 2 -->
 
-          <!-- BEGIN: Section 3 - Observation & Compulsory Photos -->
-          <div class="bg-white border border-slate-200 rounded-md p-5 shadow-xs">
+          <!-- SECTION 3: Observation & Compulsory Photos -->
+          <div class="bg-white border border-slate-200 rounded p-5 shadow-xs">
             <div class="flex items-center space-x-2.5 mb-3">
-              <span class="flex items-center justify-center w-6 h-6 rounded-full bg-govNavy text-white text-xs font-bold">3</span>
-              <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wide">On-the-Ground Observation & Compulsory Photos *</h2>
+              <span class="flex items-center justify-center w-6 h-6 rounded-full bg-[#0f2b5c] text-white text-xs font-bold">3</span>
+              <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wide">Ground Observation &amp; Compulsory Photos *</h2>
             </div>
 
             <!-- Grievance Description Textarea -->
             <div class="space-y-1.5">
               <label class="block text-xs font-semibold text-slate-700" for="complaint-text">
-                Physical Site Status & Defect Description *
+                Physical Site Status &amp; Defect Description *
               </label>
               <textarea
-                class="w-full text-xs rounded border-slate-300 p-3 text-slate-900 placeholder-slate-400 focus:border-govNavy focus:ring-govNavy"
+                class="w-full text-xs rounded border border-slate-300 p-3 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#0f2b5c]"
                 id="complaint-text"
                 placeholder="Describe physical site status in detail (e.g., contractor claimed masonry work is complete, but on site only foundation pillars stand; unpaved road shoulders; missing plumbing or electrical fittings; no workers present for 2 months)."
                 required
                 rows="4"
               >${complaintText}</textarea>
               <div class="flex justify-between items-center text-[11px] text-slate-500">
-                <span>Min 10 characters. Detail structural status or missing fixtures.</span>
+                <span>Minimum 10 characters. Detail structural status or missing fixtures.</span>
                 <span id="char-counter">Character count: ${complaintText.length}</span>
               </div>
             </div>
 
             <!-- Geo-Tagged Site Photo Upload Dropzone (COMPULSORY) -->
             <div class="mt-5">
-              <label class="block text-xs font-semibold text-slate-700 mb-1.5">
-                Attach Geo-Tagged Site Photos <span class="text-rose-600 font-bold">* Compulsory (At least 1 site photo required)</span>
-              </label>
+              <div class="flex items-center justify-between mb-1.5">
+                <label class="block text-xs font-semibold text-slate-700">
+                  Attach Geo-Tagged Site Photos <span class="text-rose-600 font-bold">* Compulsory (At least 1 site photo required)</span>
+                </label>
+                <span class="text-[11px] text-slate-400 font-medium">Max 3 photos, JPG/PNG up to 5MB</span>
+              </div>
 
               <!-- Photo Error Message if missing -->
               ${photoErrorMessage ? `
@@ -695,13 +731,13 @@ export function getCitizenPortalHtml() {
 
               <div
                 id="photo-dropzone"
-                class="border-2 border-dashed ${photoErrorMessage ? 'border-rose-400 bg-rose-50/30' : 'border-slate-300 hover:border-govNavy bg-slate-50/50'} rounded-md p-4 text-center transition cursor-pointer"
+                class="border-2 border-dashed ${photoErrorMessage ? 'border-rose-400 bg-rose-50/30' : 'border-slate-300 hover:border-[#0f2b5c] bg-slate-50/50'} rounded p-4 text-center transition cursor-pointer select-none"
               >
-                <svg aria-hidden="true" class="mx-auto h-7 w-7 text-slate-400" fill="none" stroke="currentColor" viewbox="0 0 48 48">
-                  <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-                </svg>
-                <p class="mt-1 text-xs text-slate-700 font-medium">Click to upload site photos or drag & drop</p>
-                <p class="text-[10px] text-slate-500">Max 3 photos, JPG/PNG up to 5MB each. EXIF metadata read for GPS verification.</p>
+                <div class="mx-auto w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 mb-1">
+                  <span class="material-symbols-outlined text-[20px]">add_a_photo</span>
+                </div>
+                <p class="text-xs text-slate-700 font-medium">Click to upload site photos or drag &amp; drop</p>
+                <p class="text-[10px] text-slate-500 mt-0.5">JPG / PNG format. Photographic evidence is strictly required for ground audit.</p>
                 <input
                   id="photo-file-input"
                   accept="image/jpeg,image/png"
@@ -733,7 +769,7 @@ export function getCitizenPortalHtml() {
               <div>
                 <label class="block text-xs font-semibold text-slate-700 mb-1" for="contact-name">Your Full Name (Optional)</label>
                 <input
-                  class="w-full text-xs rounded border-slate-300 py-2 px-3 text-slate-800 focus:border-govNavy focus:ring-govNavy"
+                  class="w-full text-xs rounded border border-slate-300 py-2 px-3 text-slate-800 focus:outline-none focus:border-[#0f2b5c]"
                   id="contact-name"
                   placeholder="e.g. Rajesh Patil"
                   type="text"
@@ -743,7 +779,7 @@ export function getCitizenPortalHtml() {
               <div>
                 <label class="block text-xs font-semibold text-slate-700 mb-1" for="contact-mobile">Mobile Number (Optional — for SMS Tracking)</label>
                 <input
-                  class="w-full text-xs rounded border-slate-300 py-2 px-3 text-slate-800 focus:border-govNavy focus:ring-govNavy"
+                  class="w-full text-xs rounded border border-slate-300 py-2 px-3 text-slate-800 focus:outline-none focus:border-[#0f2b5c]"
                   id="contact-mobile"
                   placeholder="e.g. 9876543210"
                   type="tel"
@@ -752,11 +788,11 @@ export function getCitizenPortalHtml() {
               </div>
             </div>
 
-            <!-- Geolocation Stamp Confirmation Notice -->
+            <!-- Geolocation Stamp Notice -->
             <div class="mt-4 bg-slate-50 border border-slate-200 rounded px-3 py-2 text-slate-600 text-xs flex items-center gap-2">
-              <span class="text-rose-600">📍</span>
+              <span class="text-[#0f2b5c]">📍</span>
               <span>
-                Coordinates <strong class="text-slate-800 font-medium">(${citizenLat.toFixed(4)}°N, ${citizenLon.toFixed(4)}°E)</strong> and locality <strong class="text-slate-800 font-medium">${selectedLocality}</strong> will be attached for on-site proximity verification.
+                Verified Coordinates <strong class="text-slate-800 font-medium">(${citizenLat.toFixed(4)}°N, ${citizenLon.toFixed(4)}°E)</strong> will be attached for on-site proximity verification.
               </span>
             </div>
 
@@ -765,71 +801,46 @@ export function getCitizenPortalHtml() {
               <div class="text-xs text-slate-600 flex items-center gap-2">
                 <input
                   checked
-                  class="rounded border-slate-300 text-govNavy focus:ring-govNavy"
+                  class="rounded border-slate-300 text-[#0f2b5c] focus:ring-[#0f2b5c]"
                   id="good-faith-cert"
                   required
                   type="checkbox"
                 />
                 <label class="cursor-pointer select-none" for="good-faith-cert">
-                  By submitting, you certify that this ground observation is submitted in good faith.
+                  I certify that this ground observation is submitted in good faith based on actual site observation.
                 </label>
               </div>
 
               <button
-                class="w-full sm:w-auto bg-govNavy hover:bg-govNavy-dark text-white font-semibold text-xs px-6 py-2.5 rounded shadow-sm transition inline-flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                class="w-full sm:w-auto bg-[#0f2b5c] hover:bg-[#1e3a8a] text-white font-semibold text-xs px-6 py-2.5 rounded shadow-sm transition inline-flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                 type="submit"
                 id="btn-submit-grievance"
                 ${isSubmitting ? 'disabled' : ''}
               >
-                <span>${isSubmitting ? 'Verifying & Submitting...' : 'Submit Grievance Report'}</span>
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
-                  <path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-                </svg>
+                <span>${isSubmitting ? 'Verifying &amp; Submitting...' : 'Submit Grievance Report →'}</span>
               </button>
             </div>
           </div>
-          <!-- END: Section 3 -->
         </form>
       </main>
-      <!-- END: PageContent -->
 
-      <!-- BEGIN: MainFooter -->
-      <footer class="bg-white border-t border-govBorder py-6 mt-auto">
-        <div class="max-w-6xl mx-auto px-4 text-center">
-          <p class="text-xs font-semibold text-slate-700 tracking-wide">
-            Official Government Audit Portal • Public Grievance Intake Framework • Governed under MoSPI & CAG Audit Guidelines
-          </p>
-          <p class="text-[11px] text-slate-500 mt-1 max-w-2xl mx-auto">
-            Academic & Research Prototype: This interface is engineered exclusively for Smart India Hackathon 2026 evaluating MoSPI Problem Statement SIH26102. Not an official Government of India portal.
-          </p>
-          <div class="mt-3 flex items-center justify-center space-x-3 text-[11px] text-slate-400">
-            <span>SIH26102</span>
-            <span>•</span>
-            <span>SETU Framework v2.4</span>
-            <span>•</span>
-            <a class="hover:underline" href="#/">Privacy Policy</a>
-            <span>•</span>
-            <a class="hover:underline" href="#/">Citizen Charter</a>
-          </div>
-        </div>
-      </footer>
-      <!-- END: MainFooter -->
+      ${getGovernmentFooterHtml()}
     </div>
   `;
 }
 
 /**
- * Geolocation trigger
+ * Geolocation trigger with user-interaction preservation
  */
-function triggerGeolocation(appEl) {
+function triggerGeolocation(appEl, explicitUserClick = false) {
   if (!navigator.geolocation) {
     portalState.geoStatus = 'unavailable';
-    mountCitizenPortal(appEl);
     return;
   }
 
   portalState.geoStatus = 'detecting';
-  mountCitizenPortal(appEl);
+  const gpsBtn = appEl?.querySelector('#btn-detect-gps');
+  if (gpsBtn) gpsBtn.textContent = 'Detecting...';
 
   navigator.geolocation.getCurrentPosition(
     (position) => {
@@ -837,31 +848,40 @@ function triggerGeolocation(appEl) {
       portalState.reportedLocation = { latitude, longitude };
       portalState.geoStatus = 'granted';
 
-      // Find nearest project in catalog to auto-suggest state and district
-      let nearest = null;
-      let minDistance = Infinity;
-      allProjects.forEach((p) => {
-        const pLat = p.siteCoordinates?.latitude ?? p.latitude;
-        const pLon = p.siteCoordinates?.longitude ?? p.longitude;
-        if (pLat != null && pLon != null) {
-          const d = calculateHaversineDistance(latitude, longitude, pLat, pLon);
-          if (d < minDistance) {
-            minDistance = d;
-            nearest = p;
+      // Auto-suggest nearest project only on explicit user click or clean initial state
+      if (explicitUserClick || portalState.complaintText.length === 0) {
+        let nearest = null;
+        let minDistance = Infinity;
+        allProjects.forEach((p) => {
+          const pLat = p.siteCoordinates?.latitude ?? p.latitude;
+          const pLon = p.siteCoordinates?.longitude ?? p.longitude;
+          if (pLat != null && pLon != null) {
+            const d = calculateHaversineDistance(latitude, longitude, pLat, pLon);
+            if (d < minDistance) {
+              minDistance = d;
+              nearest = p;
+            }
           }
-        }
-      });
+        });
 
-      if (nearest) {
-        portalState.selectedState = nearest.state;
-        portalState.selectedDistrict = nearest.district;
-        portalState.selectedProjectId = nearest.id;
+        if (nearest) {
+          portalState.selectedState = nearest.state;
+          portalState.selectedDistrict = nearest.district;
+          portalState.selectedProjectId = nearest.id;
+        }
       }
-      mountCitizenPortal(appEl);
+
+      if (appEl) {
+        syncDomToPortalState(appEl);
+        mountCitizenPortal(appEl);
+      }
     },
     () => {
       portalState.geoStatus = 'denied';
-      mountCitizenPortal(appEl);
+      if (appEl) {
+        const btn = appEl.querySelector('#btn-detect-gps');
+        if (btn) btn.textContent = 'GPS Unavailable / Denied';
+      }
     },
     { timeout: 7000, enableHighAccuracy: false }
   );
@@ -874,11 +894,10 @@ export function mountCitizenPortal(appEl) {
   if (!appEl) return;
   appEl.innerHTML = getCitizenPortalHtml();
 
-  // On first mount, auto-request browser location
+  // On first mount, auto-request browser location quietly without wiping inputs
   if (!hasAutoRequestedGeo) {
     hasAutoRequestedGeo = true;
-    triggerGeolocation(appEl);
-    return;
+    triggerGeolocation(appEl, false);
   }
 
   // If in confirmation view, wire "Submit Another Report"
@@ -900,7 +919,7 @@ export function mountCitizenPortal(appEl) {
     return;
   }
 
-  // Header Search / Track Form
+  // Header Search / Track Form: works within citizen portal without unauthenticated login redirects
   const trackForm = appEl.querySelector('#header-track-form');
   if (trackForm) {
     trackForm.addEventListener('submit', (e) => {
@@ -909,19 +928,42 @@ export function mountCitizenPortal(appEl) {
       const val = trackInput ? trackInput.value.trim() : '';
       if (!val) return;
 
+      portalState.trackingQuery = val;
+
       if (val.toUpperCase().startsWith('PRJ-')) {
-        window.location.hash = `#/project/${encodeURIComponent(val)}`;
+        // Direct project search: match project in allProjects and highlight it
+        const targetProj = allProjects.find((p) => p.id.toUpperCase() === val.toUpperCase());
+        if (targetProj) {
+          portalState.selectedState = targetProj.state;
+          portalState.selectedDistrict = targetProj.district;
+          portalState.selectedProjectId = targetProj.id;
+          portalState.submitErrorMessage = '';
+          syncDomToPortalState(appEl);
+          mountCitizenPortal(appEl);
+
+          // Scroll to project card
+          setTimeout(() => {
+            const card = appEl.querySelector(`[data-project-id="${targetProj.id}"]`);
+            if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }, 50);
+        } else {
+          portalState.submitErrorMessage = `Project '${val}' was not found in the MPLADS public catalog.`;
+          mountCitizenPortal(appEl);
+        }
       } else {
-        // Show tracking confirmation for complaint
+        // Citizen grievance tracking ID
+        const complaintId = val.toUpperCase().startsWith('CIT-') ? val.toUpperCase() : `CIT-2026-${val}`;
+        const targetProj = allProjects.find((p) => p.id === portalState.selectedProjectId) || allProjects[0];
         portalState.submissionConfirmation = {
-          id: val.toUpperCase().startsWith('CIT-') ? val.toUpperCase() : `CIT-2026-${val}`,
-          projectId: portalState.selectedProjectId || 'PRJ-IND-2013',
-          projectName: 'Establishment of Interactive STEM Robotic Lab in Higher Secondary School, Chennai',
-          district: portalState.selectedDistrict,
-          state: portalState.selectedState,
+          id: complaintId,
+          projectId: targetProj.id,
+          projectName: targetProj.name,
+          district: targetProj.district,
+          state: targetProj.state,
           submittedAt: '2026-08-20T10:30:00Z',
           status: 'Field Inspection Scheduled (District Vigilance)',
           photoCount: 2,
+          reportedLocation: portalState.reportedLocation,
         };
         mountCitizenPortal(appEl);
       }
@@ -932,7 +974,8 @@ export function mountCitizenPortal(appEl) {
   const gpsBtn = appEl.querySelector('#btn-detect-gps');
   if (gpsBtn) {
     gpsBtn.addEventListener('click', () => {
-      triggerGeolocation(appEl);
+      syncDomToPortalState(appEl);
+      triggerGeolocation(appEl, true);
     });
   }
 
@@ -940,6 +983,7 @@ export function mountCitizenPortal(appEl) {
   const stateSelect = appEl.querySelector('#state-select');
   if (stateSelect) {
     stateSelect.addEventListener('change', (e) => {
+      syncDomToPortalState(appEl);
       const newState = e.target.value;
       portalState.selectedState = newState;
       const districts = getDistrictsForState(newState);
@@ -963,6 +1007,7 @@ export function mountCitizenPortal(appEl) {
   const districtSelect = appEl.querySelector('#district-select');
   if (districtSelect) {
     districtSelect.addEventListener('change', (e) => {
+      syncDomToPortalState(appEl);
       const newDistrict = e.target.value;
       portalState.selectedDistrict = newDistrict;
 
@@ -983,6 +1028,7 @@ export function mountCitizenPortal(appEl) {
   const localitySelect = appEl.querySelector('#locality-select');
   if (localitySelect) {
     localitySelect.addEventListener('change', (e) => {
+      syncDomToPortalState(appEl);
       const newLocName = e.target.value;
       portalState.selectedLocality = newLocName;
 
@@ -1007,23 +1053,23 @@ export function mountCitizenPortal(appEl) {
     });
   }
 
-  // Project Selection clicks
+  // Project Selection clicks: expands basic project details on selected card
   const projectCards = appEl.querySelectorAll('.setu-project-card-label');
   projectCards.forEach((card) => {
-    card.addEventListener('click', () => {
+    card.addEventListener('click', (e) => {
+      // Don't re-trigger if clicking inside the details box or interactive elements
+      if (e.target.closest('.setu-project-details-box')) {
+        return;
+      }
       const pid = card.getAttribute('data-project-id');
       if (pid && pid !== portalState.selectedProjectId) {
         portalState.selectedProjectId = pid;
-        // Update visual radio selection
-        projectCards.forEach((c) => {
-          const isMatch = c.getAttribute('data-project-id') === pid;
-          const radio = c.querySelector('input[type="radio"]');
-          if (radio) radio.checked = isMatch;
-          c.classList.toggle('border-govNavy', isMatch);
-          c.classList.toggle('bg-blue-50/40', isMatch);
-          c.classList.toggle('ring-1', isMatch);
-          c.classList.toggle('ring-govNavy', isMatch);
-        });
+        syncDomToPortalState(appEl);
+        const listEl = appEl.querySelector('#project-selection-list');
+        const prevScroll = listEl ? listEl.scrollTop : 0;
+        mountCitizenPortal(appEl);
+        const newListEl = appEl.querySelector('#project-selection-list');
+        if (newListEl) newListEl.scrollTop = prevScroll;
       }
     });
   });
@@ -1060,30 +1106,38 @@ export function mountCitizenPortal(appEl) {
   const fileInput = appEl.querySelector('#photo-file-input');
 
   if (dropzone && fileInput) {
-    dropzone.addEventListener('click', () => {
-      fileInput.click();
+    dropzone.addEventListener('click', (e) => {
+      if (e.target !== fileInput) {
+        fileInput.click();
+      }
+    });
+
+    fileInput.addEventListener('click', (e) => {
+      e.stopPropagation();
     });
 
     dropzone.addEventListener('dragover', (e) => {
       e.preventDefault();
-      dropzone.classList.add('border-govNavy', 'bg-blue-50/30');
+      dropzone.classList.add('border-[#0f2b5c]', 'bg-blue-50/30');
     });
 
     dropzone.addEventListener('dragleave', (e) => {
       e.preventDefault();
-      dropzone.classList.remove('border-govNavy', 'bg-blue-50/30');
+      dropzone.classList.remove('border-[#0f2b5c]', 'bg-blue-50/30');
     });
 
     dropzone.addEventListener('drop', (e) => {
       e.preventDefault();
-      dropzone.classList.remove('border-govNavy', 'bg-blue-50/30');
+      dropzone.classList.remove('border-[#0f2b5c]', 'bg-blue-50/30');
       if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+        syncDomToPortalState(appEl);
         handlePhotoFiles(e.dataTransfer.files, appEl);
       }
     });
 
     fileInput.addEventListener('change', (e) => {
       if (e.target.files && e.target.files.length > 0) {
+        syncDomToPortalState(appEl);
         handlePhotoFiles(e.target.files, appEl);
       }
     });
@@ -1094,6 +1148,7 @@ export function mountCitizenPortal(appEl) {
   removeBtns.forEach((btn) => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
+      syncDomToPortalState(appEl);
       const idx = parseInt(btn.getAttribute('data-photo-index'), 10);
       if (!isNaN(idx) && idx >= 0 && idx < portalState.attachedPhotos.length) {
         portalState.attachedPhotos.splice(idx, 1);
@@ -1108,12 +1163,13 @@ export function mountCitizenPortal(appEl) {
   if (form) {
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+      syncDomToPortalState(appEl);
       portalState.submitErrorMessage = '';
       portalState.photoErrorMessage = '';
 
-      const complaintText = textarea ? textarea.value.trim() : portalState.complaintText.trim();
-      const citizenName = nameInput ? nameInput.value.trim() : portalState.citizenName.trim();
-      const phone = mobileInput ? mobileInput.value.trim() : portalState.phone.trim();
+      const complaintText = portalState.complaintText.trim();
+      const citizenName = portalState.citizenName.trim();
+      const phone = portalState.phone.trim();
 
       // VALIDATION 1: Project must be selected
       if (!portalState.selectedProjectId) {
@@ -1129,7 +1185,7 @@ export function mountCitizenPortal(appEl) {
         return;
       }
 
-      // VALIDATION 3: COMPULSORY SITE PHOTOS (User Requirement)
+      // VALIDATION 3: COMPULSORY SITE PHOTOS
       if (!portalState.attachedPhotos || portalState.attachedPhotos.length === 0) {
         portalState.photoErrorMessage = 'Site Photo Required: Attaching at least one geo-tagged photograph of the site is mandatory to verify ground reality and register a valid grievance.';
         portalState.submitErrorMessage = 'Mandatory photograph missing. Please attach at least 1 photo of the work site before submitting.';
@@ -1210,18 +1266,36 @@ export function mountCitizenPortal(appEl) {
 }
 
 /**
- * Handles multiple photo file uploads via FileReader
+ * Handles multiple photo file uploads via FileReader with file-type and size validation
  */
 function handlePhotoFiles(fileList, appEl) {
   const files = Array.from(fileList);
   const remainingSlots = 3 - portalState.attachedPhotos.length;
-  if (remainingSlots <= 0) return;
+  if (remainingSlots <= 0) {
+    portalState.photoErrorMessage = 'Maximum 3 site photographs allowed.';
+    mountCitizenPortal(appEl);
+    return;
+  }
 
-  const toAdd = files.slice(0, remainingSlots);
+  const validImages = files.filter((f) => f.type.startsWith('image/'));
+  if (validImages.length === 0) {
+    portalState.photoErrorMessage = 'Please select valid image files (JPG or PNG).';
+    mountCitizenPortal(appEl);
+    return;
+  }
+
+  // Check 5MB limit
+  const oversized = validImages.some((f) => f.size > 5 * 1024 * 1024);
+  if (oversized) {
+    portalState.photoErrorMessage = 'File size exceeds 5MB limit. Please upload images under 5MB each.';
+    mountCitizenPortal(appEl);
+    return;
+  }
+
+  const toAdd = validImages.slice(0, remainingSlots);
   let loaded = 0;
 
   toAdd.forEach((file) => {
-    if (!file.type.startsWith('image/')) return;
     const reader = new FileReader();
     reader.onload = (event) => {
       portalState.attachedPhotos.push({
@@ -1230,6 +1304,12 @@ function handlePhotoFiles(fileList, appEl) {
         dataUrl: event.target.result,
       });
       portalState.photoErrorMessage = '';
+      loaded += 1;
+      if (loaded === toAdd.length) {
+        mountCitizenPortal(appEl);
+      }
+    };
+    reader.onerror = () => {
       loaded += 1;
       if (loaded === toAdd.length) {
         mountCitizenPortal(appEl);

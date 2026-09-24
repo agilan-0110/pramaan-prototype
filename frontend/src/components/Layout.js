@@ -1,5 +1,5 @@
 /**
- * SETU Layout Shell Component
+ * PRAMAAN Layout Shell Component
  * 
  * Implements the government audit dashboard layout:
  * - Navy institutional header with project title/logo, role indicator, and logout.
@@ -63,8 +63,8 @@ export const ROLE_NAV_PERMISSIONS = {
   'auditor_cag': ['projects', 'status-trail', 'unresolved-completion', 'observations', 'override-log'],
   'State Nodal Authority': ['projects', 'escalations', 'compliance', 'duplicates', 'trend', 'alerts'],
   'state_nodal': ['projects', 'escalations', 'compliance', 'duplicates', 'trend', 'alerts'],
-  'District Authority': ['projects', 'evidence-tranche', 'risk', 'compliance', 'citizen-reports', 'audit-trail', 'alerts'],
-  'district_authority': ['projects', 'evidence-tranche', 'risk', 'compliance', 'citizen-reports', 'audit-trail', 'alerts'],
+  'District Authority': ['projects', 'evidence-tranche', 'risk', 'compliance', 'duplicates', 'citizen-reports', 'audit-trail', 'alerts'],
+  'district_authority': ['projects', 'evidence-tranche', 'risk', 'compliance', 'duplicates', 'citizen-reports', 'audit-trail', 'alerts'],
   'Implementing Agency': ['projects', 'evidence', 'invoices', 'utilization-certificates', 'audit-trail'],
   'implementing_agency': ['projects', 'evidence', 'invoices', 'utilization-certificates', 'audit-trail'],
   'MP Office': ['projects', 'submit-proposal'],
@@ -154,7 +154,7 @@ export function resolveSessionRole(explicitRole = null) {
 }
 
 export function getLayoutHtml({
-  projectName = 'SETU',
+  projectName = 'PRAMAAN',
   subtitle = 'Audit & Monitoring Platform',
   role = null,
   navItems = [
@@ -270,7 +270,7 @@ export function getLayoutHtml({
     const allowedNavIds = ROLE_NAV_PERMISSIONS[roleKey] || (
       roleKey.toLowerCase().includes('mospi')
         ? ['projects', 'escalations', 'compliance', 'duplicates', 'citizen-reports', 'trend', 'alerts']
-        : ['projects', 'risk', 'compliance', 'citizen-reports', 'audit-trail', 'alerts']
+        : ['projects', 'evidence-tranche', 'risk', 'compliance', 'duplicates', 'citizen-reports', 'audit-trail', 'alerts']
     );
     filteredNavItems = navItems.filter((item) => allowedNavIds.includes(item.id));
   }
@@ -307,7 +307,7 @@ export function getLayoutHtml({
     name: 'Dr. A. K. Sen, IES',
     title: 'Joint Secretary (Central Nodal Desk)',
     roleBadge: 'National Apex Desk',
-    tag: 'MoSPI SIH26102'
+    tag: 'MoSPI Central'
   } : isStateRole ? {
     name: 'K. S. Narayanan, IAS',
     title: 'Principal Secretary (Planning & Nodal TN)',
@@ -358,15 +358,14 @@ export function getLayoutHtml({
         <div class="h-16 w-full px-margin-desktop flex items-center justify-between border-b border-primary-container">
           <div class="flex items-center gap-space-lg">
             <div class="flex items-center gap-space-md">
-              <div class="h-9 w-9 bg-primary-container text-on-primary rounded flex items-center justify-center font-bold text-base shadow-sm border border-primary-container">
-                SETU
+              <div class="h-9 w-auto px-2 bg-primary-container text-on-primary rounded flex items-center justify-center font-bold text-xs tracking-wider shadow-sm border border-primary-container">
+                PRAMAAN
               </div>
               <div class="flex flex-col">
                 <div class="flex items-center gap-space-sm">
-                  <span class="font-headline-md text-headline-md tracking-tight uppercase text-on-primary font-bold">SETU</span>
-                  <span class="px-space-xs py-0.5 bg-secondary-container text-on-secondary-container text-[10px] font-bold rounded tracking-wider uppercase">SIH26102 APEX</span>
+                  <span class="font-headline-md text-headline-md tracking-tight uppercase text-on-primary font-bold">PRAMAAN</span>
                 </div>
-                <span class="font-label-sm text-label-sm text-primary-fixed opacity-90 hidden sm:inline-block">MoSPI & CAG National Audit & Monitoring Grid</span>
+                <span class="font-label-sm text-label-sm text-primary-fixed opacity-90 hidden sm:inline-block">MoSPI &amp; CAG National Audit &amp; Monitoring Grid</span>
               </div>
             </div>
 

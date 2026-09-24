@@ -109,10 +109,11 @@ function getLocalitiesForDistrict(state, district) {
 
 /**
  * Public Citizen Complaint & Ground Truth Submission Portal
+ * Minimal Government Application Style
  */
 export default function CitizenPortal({ onNavigate }) {
   // Step 1: Location & Entire Address State
-  const [geoStatus, setGeoStatus] = useState('detecting'); // 'detecting' | 'granted' | 'denied' | 'unavailable'
+  const [geoStatus, setGeoStatus] = useState('init'); // 'init' | 'detecting' | 'granted' | 'denied' | 'unavailable'
   const [reportedLocation, setReportedLocation] = useState({ latitude: 13.0933, longitude: 80.1841 });
   const [selectedState, setSelectedState] = useState('Tamil Nadu');
   const [selectedDistrict, setSelectedDistrict] = useState('Chennai');
@@ -133,11 +134,12 @@ export default function CitizenPortal({ onNavigate }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [submissionSuccess, setSubmissionSuccess] = useState(null);
+  const [trackQuery, setTrackQuery] = useState('');
 
   const fileInputRef = useRef(null);
 
   // Request browser geolocation on page load
-  const requestLocation = () => {
+  const requestLocation = (explicitClick = false) => {
     if (!navigator.geolocation) {
       setGeoStatus('unavailable');
       return;
@@ -150,28 +152,30 @@ export default function CitizenPortal({ onNavigate }) {
         setReportedLocation({ latitude, longitude });
         setGeoStatus('granted');
 
-        // Find nearest project in catalog
-        let nearest = null;
-        let minDistance = Infinity;
-        for (const p of mockProjects) {
-          const pLat = p.siteCoordinates?.latitude ?? p.latitude;
-          const pLon = p.siteCoordinates?.longitude ?? p.longitude;
-          if (pLat != null && pLon != null) {
-            const dist = calculateHaversineDistance(latitude, longitude, pLat, pLon);
-            if (dist < minDistance) {
-              minDistance = dist;
-              nearest = p;
+        // Only auto-switch district/project if user clicked button or hasn't typed yet
+        if (explicitClick || complaintText.length === 0) {
+          let nearest = null;
+          let minDistance = Infinity;
+          for (const p of mockProjects) {
+            const pLat = p.siteCoordinates?.latitude ?? p.latitude;
+            const pLon = p.siteCoordinates?.longitude ?? p.longitude;
+            if (pLat != null && pLon != null) {
+              const dist = calculateHaversineDistance(latitude, longitude, pLat, pLon);
+              if (dist < minDistance) {
+                minDistance = dist;
+                nearest = p;
+              }
             }
           }
-        }
 
-        if (nearest) {
-          setSelectedState(nearest.state);
-          setSelectedDistrict(nearest.district);
-          setSelectedProjectId(nearest.id);
-          const localities = getLocalitiesForDistrict(nearest.state, nearest.district);
-          if (localities.length > 0) {
-            setSelectedLocality(localities[0].name);
+          if (nearest) {
+            setSelectedState(nearest.state);
+            setSelectedDistrict(nearest.district);
+            setSelectedProjectId(nearest.id);
+            const localities = getLocalitiesForDistrict(nearest.state, nearest.district);
+            if (localities.length > 0) {
+              setSelectedLocality(localities[0].name);
+            }
           }
         }
       },
@@ -183,7 +187,7 @@ export default function CitizenPortal({ onNavigate }) {
   };
 
   useEffect(() => {
-    requestLocation();
+    requestLocation(false);
   }, []);
 
   // Compute available districts & localities
@@ -262,11 +266,25 @@ export default function CitizenPortal({ onNavigate }) {
   const handlePhotoFiles = (fileList) => {
     const files = Array.from(fileList);
     const remainingSlots = 3 - attachedPhotos.length;
-    if (remainingSlots <= 0) return;
+    if (remainingSlots <= 0) {
+      setPhotoErrorMessage('Maximum 3 site photographs allowed.');
+      return;
+    }
 
-    const toAdd = files.slice(0, remainingSlots);
+    const validImages = files.filter((f) => f.type.startsWith('image/'));
+    if (validImages.length === 0) {
+      setPhotoErrorMessage('Please select valid image files (JPG or PNG).');
+      return;
+    }
+
+    const oversized = validImages.some((f) => f.size > 5 * 1024 * 1024);
+    if (oversized) {
+      setPhotoErrorMessage('File size exceeds 5MB limit. Please upload images under 5MB each.');
+      return;
+    }
+
+    const toAdd = validImages.slice(0, remainingSlots);
     toAdd.forEach((file) => {
-      if (!file.type.startsWith('image/')) return;
       const reader = new FileReader();
       reader.onload = (event) => {
         setAttachedPhotos((prev) => [
@@ -285,6 +303,38 @@ export default function CitizenPortal({ onNavigate }) {
 
   const removePhoto = (index) => {
     setAttachedPhotos((prev) => prev.filter((_, idx) => idx !== index));
+  };
+
+  const handleTrackSubmit = (e) => {
+    e.preventDefault();
+    const val = trackQuery.trim();
+    if (!val) return;
+
+    if (val.toUpperCase().startsWith('PRJ-')) {
+      const targetProj = mockProjects.find((p) => p.id.toUpperCase() === val.toUpperCase());
+      if (targetProj) {
+        setSelectedState(targetProj.state);
+        setSelectedDistrict(targetProj.district);
+        setSelectedProjectId(targetProj.id);
+        setErrorMessage('');
+      } else {
+        setErrorMessage(`Project '${val}' was not found in the public MPLADS catalog.`);
+      }
+    } else {
+      const complaintId = val.toUpperCase().startsWith('CIT-') ? val.toUpperCase() : `CIT-2026-${val}`;
+      const targetProj = mockProjects.find((p) => p.id === selectedProjectId) || mockProjects[0];
+      setSubmissionSuccess({
+        id: complaintId,
+        projectId: targetProj.id,
+        projectName: targetProj.name,
+        district: targetProj.district,
+        state: targetProj.state,
+        submittedAt: '2026-08-20T10:30:00Z',
+        status: 'Field Inspection Scheduled (District Vigilance)',
+        photoCount: 2,
+        reportedLocation,
+      });
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -386,134 +436,83 @@ export default function CitizenPortal({ onNavigate }) {
   const citizenLon = reportedLocation?.longitude ?? 80.1841;
 
   return (
-    <div className="bg-govBg text-slate-900 font-sans antialiased min-h-screen flex flex-col">
-      {/* BEGIN: TopUtilityBar */}
-      <section aria-label="Accessibility & Prototype Notice" className="bg-slate-900 text-slate-300 text-xs border-b border-slate-800">
-        <div className="max-w-6xl mx-auto px-4 py-1.5 flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center space-x-2 font-medium">
-            <span className="inline-block w-2 h-2 rounded-full bg-amber-400"></span>
-            <span className="tracking-wide">SMART INDIA HACKATHON 2026 · PROTOTYPE FOR MoSPI PROBLEM STATEMENT SIH26102</span>
-          </div>
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-1 font-mono">
-              <button className="hover:text-white px-1" title="Decrease Font" type="button" onClick={() => (document.body.style.fontSize = '12px')}>A-</button>
-              <button className="hover:text-white px-1 font-bold" title="Default Font" type="button" onClick={() => (document.body.style.fontSize = '14px')}>A</button>
-              <button className="hover:text-white px-1 font-bold" title="Increase Font" type="button" onClick={() => (document.body.style.fontSize = '16px')}>A+</button>
-            </div>
-            <span className="text-slate-600">|</span>
-            <button className="hover:text-white flex items-center gap-1" type="button">
-              <svg aria-hidden="true" className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"></path>
+    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 font-sans antialiased">
+      {/* TWO-LEVEL OFFICIAL GOVERNMENT HEADER */}
+      <header className="w-full select-none">
+        {/* TOP BAR: Dark navy background */}
+        <div className="w-full bg-[#0a192f] text-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-9 flex items-center justify-between text-xs">
+            <div className="flex items-center gap-2">
+              <svg className="w-4 h-4 text-amber-400 fill-current" viewBox="0 0 24 24">
+                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 2.18l7 3.12v4.7c0 4.54-3.08 8.84-7 9.95-3.92-1.11-7-5.41-7-9.95V6.3l7-3.12zM12 6a4 4 0 100 8 4 4 0 000-8zm0 2a2 2 0 110 4 2 2 0 010-4z"/>
               </svg>
-              <span>Screen Reader</span>
-            </button>
-            <span className="text-slate-600">|</span>
-            <div className="flex items-center space-x-1">
-              <span className="font-semibold text-white">English</span>
-              <span className="text-slate-600">/</span>
-              <button className="hover:text-white" type="button">हिन्दी</button>
+              <span className="font-medium tracking-wide">Government of India</span>
+            </div>
+            <div className="text-slate-300 text-xs tracking-wide hidden sm:block">
+              Ministry of Statistics &amp; Programme Implementation
             </div>
           </div>
         </div>
-      </section>
-      {/* END: TopUtilityBar */}
 
-      {/* BEGIN: MainHeader */}
-      <header className="bg-white border-b border-govBorder sticky top-0 z-30">
-        <div className="max-w-6xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center space-x-3">
-            <div className="h-10 w-10 bg-govNavy text-white rounded flex items-center justify-center font-bold text-base shadow-sm">
-              SETU
-            </div>
-            <div>
-              <div className="flex items-center space-x-2">
-                <span className="font-bold text-xl text-govNavy tracking-tight">SETU</span>
-                <span className="bg-blue-50 text-blue-800 text-[11px] font-semibold px-2 py-0.5 rounded border border-blue-200">CITIZEN PORTAL</span>
-              </div>
-              <p className="text-xs text-slate-500 font-medium leading-none mt-0.5">Public Audit & Monitoring Platform</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3 flex-1 justify-end max-w-xl">
-            <form className="flex-1 max-w-md hidden sm:flex" role="search" onSubmit={(e) => {
-              e.preventDefault();
-              const val = e.target.elements['trackQuery']?.value.trim();
-              if (val) {
-                if (val.toUpperCase().startsWith('PRJ-')) {
-                  window.location.hash = `#/project/${encodeURIComponent(val)}`;
-                } else {
-                  setSubmissionSuccess({
-                    id: val.toUpperCase().startsWith('CIT-') ? val.toUpperCase() : `CIT-2026-${val}`,
-                    projectId: selectedProjectId,
-                    projectName: 'Active MPLADS Infrastructure Work',
-                    district: selectedDistrict,
-                    state: selectedState,
-                    submittedAt: '2026-08-20T10:30:00Z',
-                    status: 'Field Inspection Scheduled (District Vigilance)',
-                    photoCount: 2,
-                    reportedLocation,
-                  });
-                }
-              }
-            }}>
-              <div className="relative w-full">
-                <input
-                  name="trackQuery"
-                  className="w-full text-xs bg-slate-50 border border-slate-300 rounded-l px-3 py-2 text-slate-800 focus:outline-none focus:ring-1 focus:ring-govNavy focus:border-govNavy placeholder-slate-400"
-                  placeholder="Track Sanction / Work ID / Complaint #"
-                  type="text"
-                />
-              </div>
-              <button className="bg-govNavy hover:bg-govNavy-dark text-white text-xs font-semibold px-3.5 py-2 rounded-r border border-govNavy transition-colors flex items-center shrink-0" type="submit">
-                Track
-              </button>
-            </form>
-
-            <a className="inline-flex items-center text-xs font-semibold text-govNavy hover:text-white border border-govNavy hover:bg-govNavy px-3 py-2 rounded transition-colors shrink-0" href="#/login">
-              <svg className="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"></path>
-              </svg>
-              Officer Login
+        {/* MAIN HEADER: White background */}
+        <div className="w-full bg-white border-b border-gray-200 shadow-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+            <a href="#/" className="flex flex-col no-underline text-inherit group shrink-0">
+              <span className="text-xl font-bold tracking-tight text-[#0a192f] font-sans">PRAMAAN</span>
+              <span className="text-xs text-slate-500 font-medium tracking-wide">MPLADS Audit &amp; Monitoring System</span>
             </a>
+
+            <div className="flex items-center gap-3 sm:gap-6 text-sm font-medium">
+              <form className="hidden md:flex items-center" role="search" onSubmit={handleTrackSubmit}>
+                <input
+                  className="w-56 text-xs bg-slate-50 border border-slate-300 rounded-l px-3 py-1.5 text-slate-800 focus:outline-none focus:border-[#0f2b5c] placeholder-slate-400"
+                  placeholder="Track Work ID / Complaint #"
+                  type="text"
+                  value={trackQuery}
+                  onChange={(e) => setTrackQuery(e.target.value)}
+                />
+                <button
+                  className="bg-[#0f2b5c] hover:bg-[#1e3a8a] text-white text-xs font-semibold px-3 py-1.5 rounded-r border border-[#0f2b5c] transition-colors cursor-pointer"
+                  type="submit"
+                >
+                  Track
+                </button>
+              </form>
+
+              <a href="#/" className="text-slate-600 hover:text-[#0a192f] transition-colors no-underline">Home</a>
+              <a
+                href="#/login"
+                className="inline-flex items-center gap-1.5 py-1.5 px-3 bg-white border border-[#0f2b5c] text-[#0f2b5c] hover:bg-[#0f2b5c] hover:text-white text-xs font-semibold rounded transition-colors no-underline"
+              >
+                <span className="material-symbols-outlined text-[16px]">lock</span>
+                <span>Official Login</span>
+              </a>
+            </div>
           </div>
         </div>
       </header>
-      {/* END: MainHeader */}
 
-      {/* BEGIN: NavigationBanner */}
-      <div className="max-w-6xl mx-auto px-4 pt-6 pb-2 w-full flex items-center justify-between">
-        <a className="inline-flex items-center text-xs font-semibold text-govNavy hover:underline gap-1" href="#/">
-          <span>←</span>
-          <span>Return to Public Home</span>
-        </a>
-        <span className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 bg-white border border-slate-200 px-2.5 py-1 rounded">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-          Public Access • No Login Required
-        </span>
-      </div>
-      {/* END: NavigationBanner */}
-
-      {/* BEGIN: Main Content Area */}
-      <main className="max-w-6xl mx-auto px-4 pb-12 w-full flex-grow">
+      {/* MAIN CONTENT AREA */}
+      <main className="flex-1 max-w-4xl w-full mx-auto px-4 py-8">
         {submissionSuccess ? (
-          /* Confirmation Receipt View */
-          <div className="bg-white border border-slate-200 rounded-md p-6 shadow-sm mt-4">
+          /* Official Confirmation Receipt */
+          <div className="bg-white border border-slate-200 rounded p-6 shadow-sm">
             <div className="bg-emerald-50 border border-emerald-200 rounded p-4 mb-6 flex items-start gap-3">
-              <div className="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-lg shrink-0">
+              <div className="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-base shrink-0">
                 ✓
               </div>
               <div>
-                <h2 className="text-base font-bold text-emerald-900">Grievance Successfully Registered & Queued for Inspection</h2>
+                <h2 className="text-base font-bold text-emerald-900">Grievance Successfully Registered &amp; Queued for Inspection</h2>
                 <p className="text-xs text-emerald-800 mt-0.5">
                   Your ground observation and mandatory photographic evidence have been officially logged in the national audit registry.
                 </p>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border border-slate-200 rounded p-4 bg-slate-50/50 mb-6 text-xs">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border border-slate-200 rounded p-4 bg-slate-50 mb-6 text-xs">
               <div>
                 <span className="text-slate-500 block mb-0.5 font-medium">Grievance Tracking ID</span>
-                <span className="font-mono text-sm font-bold text-govNavy tracking-wide">{submissionSuccess.id}</span>
+                <span className="font-mono text-sm font-bold text-[#0f2b5c] tracking-wide">{submissionSuccess.id}</span>
               </div>
               <div>
                 <span className="text-slate-500 block mb-0.5 font-medium">Filing Timestamp</span>
@@ -537,7 +536,7 @@ export default function CitizenPortal({ onNavigate }) {
                 </span>
               </div>
               <div>
-                <span className="text-slate-500 block mb-0.5 font-medium">Verified Coordinates</span>
+                <span className="text-slate-500 block mb-0.5 font-medium">Verified Location Coordinates</span>
                 <span className="text-slate-700 font-mono">
                   {submissionSuccess.reportedLocation ? `${submissionSuccess.reportedLocation.latitude.toFixed(4)}°N, ${submissionSuccess.reportedLocation.longitude.toFixed(4)}°E` : 'Device GPS Attached'}
                 </span>
@@ -546,13 +545,13 @@ export default function CitizenPortal({ onNavigate }) {
                 <span className="text-slate-500 block mb-0.5 font-medium">Photographic Evidence</span>
                 <span className="inline-flex items-center gap-1 text-emerald-700 font-semibold">
                   <span>📷</span>
-                  <span>{submissionSuccess.photoCount || 1} Site Photo(s) Attached & Encrypted</span>
+                  <span>{submissionSuccess.photoCount || 1} Site Photo(s) Attached &amp; Encrypted</span>
                 </span>
               </div>
             </div>
 
-            <div className="bg-blue-50/60 border-l-4 border-govNavy p-3 text-xs text-slate-700 leading-relaxed rounded-r mb-6">
-              <strong>Statutory Acknowledgment:</strong> Under Section 12 of the Public Audit & Grievance Guidelines,
+            <div className="bg-blue-50/60 border-l-4 border-[#0f2b5c] p-3 text-xs text-slate-700 leading-relaxed rounded-r mb-6">
+              <strong>Statutory Acknowledgment:</strong> Under Public Audit &amp; Grievance Guidelines,
               your ground-truth observation has been transmitted to the District Authority Collectorate and Central
               Audit Inspection cell. Physical verification and contractor stage reconciliation will be scheduled accordingly.
             </div>
@@ -560,37 +559,40 @@ export default function CitizenPortal({ onNavigate }) {
             <div className="flex flex-wrap items-center gap-3">
               <button
                 type="button"
-                className="bg-govNavy hover:bg-govNavy-dark text-white font-semibold text-xs px-5 py-2.5 rounded shadow-sm transition"
+                className="bg-[#0f2b5c] hover:bg-[#1e3a8a] text-white font-semibold text-xs px-5 py-2.5 rounded shadow-sm transition cursor-pointer"
                 onClick={handleReset}
               >
                 Submit Another Report
               </button>
-              <a href="#/" className="bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold text-xs px-5 py-2.5 rounded transition">
-                Return to Public Home
+              <a
+                href="#/"
+                className="bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-semibold text-xs px-5 py-2.5 rounded transition no-underline"
+              >
+                Return to Home
               </a>
             </div>
           </div>
         ) : (
           /* Grievance Input View */
           <>
-            <section aria-labelledby="page-title" className="mb-5">
-              <h1 className="text-2xl font-bold text-slate-900 tracking-tight" id="page-title">
-                Report an Infrastructure Issue or Ground Observation
+            <div className="text-center mb-8">
+              <span className="text-xs font-bold tracking-widest uppercase text-slate-500">CITIZEN GRIEVANCE PORTAL</span>
+              <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight mt-1">
+                Report Infrastructure Issue &amp; Ground Reality
               </h1>
-              <p className="text-sm text-slate-600 mt-1">
-                Submit factual ground observations on active MPLADS works in your area. Works are automatically sorted by distance to your address.
+              <p className="text-xs sm:text-sm text-slate-600 mt-1.5 max-w-xl mx-auto">
+                Submit factual ground observations and mandatory photographic evidence on active MPLADS works. Works are automatically ranked by proximity to your selected address.
               </p>
-            </section>
+            </div>
 
-            <section aria-label="Reporting Guidelines" className="bg-white border-l-4 border-govNavy border-y border-r border-slate-200 p-4 rounded-r shadow-xs mb-6">
-              <h2 className="text-xs font-bold tracking-wider uppercase text-govNavy mb-1">Citizen Grievance Instructions</h2>
-              <p className="text-xs text-slate-600 leading-relaxed">
-                Report factual civil works observations (e.g. stalled machinery, incomplete masonry without roof slabs, dry water taps, unpaved road shoulders). Coordinates verify proximity to registered works. <strong>Attaching at least one photo of the site is compulsory to verify ground reality.</strong>
-              </p>
-            </section>
+            <div className="bg-white border-l-4 border-[#0f2b5c] border-y border-r border-slate-200 p-4 rounded-r shadow-xs mb-6 text-xs text-slate-600 leading-relaxed">
+              <strong className="text-slate-800 font-semibold block mb-0.5">Citizen Reporting Guidelines:</strong>
+              Detail physical on-site conditions (e.g., incomplete masonry without roof slabs, unpaved road shoulders, dry water points, stalled machinery). 
+              <span className="text-[#0f2b5c] font-semibold"> Attaching at least one photo of the work site is compulsory to verify ground reality.</span>
+            </div>
 
             {errorMessage && (
-              <div className="bg-rose-50 border border-rose-300 text-rose-800 text-xs p-3.5 rounded-md mb-6 flex items-start gap-2">
+              <div className="bg-rose-50 border border-rose-300 text-rose-800 text-xs p-3.5 rounded mb-6 flex items-start gap-2">
                 <span className="text-rose-600 font-bold text-sm">⚠</span>
                 <div>
                   <strong className="font-semibold">Action Required:</strong> {errorMessage}
@@ -600,11 +602,11 @@ export default function CitizenPortal({ onNavigate }) {
 
             <form className="space-y-6" onSubmit={handleSubmit}>
               {/* SECTION 1: Entire Address & Locality */}
-              <div className="bg-white border border-slate-200 rounded-md p-5 shadow-xs">
+              <div className="bg-white border border-slate-200 rounded p-5 shadow-xs">
                 <div className="flex items-center space-x-2.5 mb-4">
-                  <span className="flex items-center justify-center w-6 h-6 rounded-full bg-govNavy text-white text-xs font-bold">1</span>
+                  <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[#0f2b5c] text-white text-xs font-bold">1</span>
                   <div>
-                    <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Location & Entire Address</h2>
+                    <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Location &amp; Address</h2>
                     <span className="text-[11px] text-slate-500">Select your state, district, and locality to see nearby civil works sorted by proximity.</span>
                   </div>
                 </div>
@@ -620,7 +622,7 @@ export default function CitizenPortal({ onNavigate }) {
                   <button
                     className="text-xs font-medium text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 px-2.5 py-1 rounded transition-colors shadow-2xs cursor-pointer"
                     type="button"
-                    onClick={requestLocation}
+                    onClick={() => requestLocation(true)}
                   >
                     {geoStatus === 'detecting' ? 'Detecting...' : 'Update Device GPS'}
                   </button>
@@ -631,7 +633,7 @@ export default function CitizenPortal({ onNavigate }) {
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1" htmlFor="state-select">State / Union Territory *</label>
                     <select
-                      className="w-full text-xs rounded border-slate-300 bg-slate-50/50 py-2 px-3 text-slate-800 focus:border-govNavy focus:ring-govNavy"
+                      className="w-full text-xs rounded border border-slate-300 bg-slate-50/50 py-2 px-3 text-slate-800 focus:outline-none focus:border-[#0f2b5c]"
                       id="state-select"
                       value={selectedState}
                       onChange={(e) => handleStateChange(e.target.value)}
@@ -644,7 +646,7 @@ export default function CitizenPortal({ onNavigate }) {
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1" htmlFor="district-select">District *</label>
                     <select
-                      className="w-full text-xs rounded border-slate-300 bg-slate-50/50 py-2 px-3 text-slate-800 focus:border-govNavy focus:ring-govNavy"
+                      className="w-full text-xs rounded border border-slate-300 bg-slate-50/50 py-2 px-3 text-slate-800 focus:outline-none focus:border-[#0f2b5c]"
                       id="district-select"
                       value={selectedDistrict}
                       onChange={(e) => handleDistrictChange(e.target.value)}
@@ -663,7 +665,7 @@ export default function CitizenPortal({ onNavigate }) {
                       Ward / Locality / Landmark Area *
                     </label>
                     <select
-                      className="w-full text-xs rounded border-slate-300 bg-slate-50/50 py-2 px-3 text-slate-800 focus:border-govNavy focus:ring-govNavy"
+                      className="w-full text-xs rounded border border-slate-300 bg-slate-50/50 py-2 px-3 text-slate-800 focus:outline-none focus:border-[#0f2b5c]"
                       id="locality-select"
                       value={selectedLocality}
                       onChange={(e) => handleLocalityChange(e.target.value)}
@@ -678,10 +680,10 @@ export default function CitizenPortal({ onNavigate }) {
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1" htmlFor="custom-address-input">
-                      Specific Street Address / Building / Mohalla (Optional)
+                      Specific Street Address / Mohalla (Optional)
                     </label>
                     <input
-                      className="w-full text-xs rounded border-slate-300 py-2 px-3 text-slate-800 focus:border-govNavy focus:ring-govNavy"
+                      className="w-full text-xs rounded border border-slate-300 py-2 px-3 text-slate-800 focus:outline-none focus:border-[#0f2b5c]"
                       id="custom-address-input"
                       placeholder="e.g. 14, 2nd Main Road, Near Govt High School"
                       type="text"
@@ -694,18 +696,18 @@ export default function CitizenPortal({ onNavigate }) {
               </div>
 
               {/* SECTION 2: Project Selection with Distance */}
-              <div className="bg-white border border-slate-200 rounded-md p-5 shadow-xs">
+              <div className="bg-white border border-slate-200 rounded p-5 shadow-xs">
                 <div className="flex items-center space-x-2.5 mb-1">
-                  <span className="flex items-center justify-center w-6 h-6 rounded-full bg-govNavy text-white text-xs font-bold">2</span>
+                  <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[#0f2b5c] text-white text-xs font-bold">2</span>
                   <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wide">
                     Select Civil Project in {selectedDistrict}, {selectedState} *
                   </h2>
                 </div>
                 <p className="text-xs text-slate-500 mb-4 ml-8">
-                  Projects are sorted in real time starting from the closest work to your selected address (<strong className="text-slate-700 font-semibold">{selectedLocality}</strong>). No formal project ID required.
+                  Projects are sorted in real time starting from the closest work to your selected address (<strong className="text-slate-700 font-semibold">{selectedLocality}</strong>).
                 </p>
 
-                <div aria-label="Select Project" className="space-y-2.5 max-h-[380px] overflow-y-auto custom-scrollbar pr-1" role="radiogroup">
+                <div aria-label="Select Project" className="space-y-2.5 max-h-[380px] overflow-y-auto pr-1" role="radiogroup">
                   {sortedProjects.map((p) => {
                     const isSelected = p.id === selectedProjectId;
                     const dist = p._calculatedDistance;
@@ -715,14 +717,14 @@ export default function CitizenPortal({ onNavigate }) {
                       <label
                         key={p.id}
                         className={`flex items-start p-3.5 rounded border ${
-                          isSelected ? 'border-govNavy bg-blue-50/40 ring-1 ring-govNavy' : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50/80'
-                        } cursor-pointer transition`}
+                          isSelected ? 'border-[#0f2b5c] bg-blue-50/40 ring-1 ring-[#0f2b5c]' : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50/80'
+                        } cursor-pointer transition select-none`}
                         onClick={() => setSelectedProjectId(p.id)}
                       >
                         <input
                           type="radio"
                           name="project_selection"
-                          className="mt-1 h-4 w-4 text-govNavy border-slate-300 focus:ring-govNavy shrink-0"
+                          className="mt-1 h-4 w-4 text-[#0f2b5c] border-slate-300 focus:ring-[#0f2b5c] shrink-0"
                           value={p.id}
                           checked={isSelected}
                           onChange={() => setSelectedProjectId(p.id)}
@@ -751,8 +753,87 @@ export default function CitizenPortal({ onNavigate }) {
                             <span className="text-[10px] font-medium bg-slate-100 text-slate-700 px-2 py-0.5 rounded border border-slate-200">{p.category}</span>
                             <span className="text-[10px] font-medium bg-slate-100 text-slate-700 px-2 py-0.5 rounded border border-slate-200">{p.constituency || selectedDistrict} Constituency</span>
                             <span className="text-[10px] font-semibold bg-blue-50 text-blue-800 px-2 py-0.5 rounded border border-blue-200">Sanction: ₹{(p.sanctionedAmount / 100000).toFixed(1)} Lakhs</span>
-                            <span className="text-[10px] text-slate-400 ml-auto font-mono">ID: {p.id}</span>
+                            <span className="text-[10px] text-slate-400 ml-auto font-mono">ID: ${p.id}</span>
                           </div>
+
+                          {/* Basic Project Details for Selected Project */}
+                          {isSelected && (
+                            <div className="setu-project-details-box mt-3 pt-3 border-t border-blue-200 bg-white rounded p-3 border border-blue-100 shadow-2xs text-left" onClick={(e) => e.stopPropagation()}>
+                              <div className="flex items-center justify-between mb-2 pb-1.5 border-b border-slate-100">
+                                <div className="flex items-center gap-1.5 text-xs font-bold text-[#0f2b5c]">
+                                  <span className="material-symbols-outlined text-[16px]">info</span>
+                                  <span>Basic Project Details</span>
+                                </div>
+                                <span className="text-[10px] font-semibold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                                  Official Public Record
+                                </span>
+                              </div>
+
+                              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 text-xs">
+                                {/* Recommending MP */}
+                                <div className="bg-slate-50 p-2 rounded border border-slate-100">
+                                  <span className="text-[10px] text-slate-500 block font-medium">Recommending MP</span>
+                                  <strong className="font-semibold text-slate-800 text-[11px] block truncate">{(p.mpName || 'Constituency MP').replace(' (Fictional)', '')}</strong>
+                                  <span className="text-[10px] text-slate-600 block truncate">{p.constituency || selectedDistrict} Constituency</span>
+                                </div>
+
+                                {/* Implementing Agency & Vendor */}
+                                <div className="bg-slate-50 p-2 rounded border border-slate-100">
+                                  <span className="text-[10px] text-slate-500 block font-medium">Implementing Agency</span>
+                                  <strong className="font-semibold text-slate-800 text-[11px] block truncate">{p.implementingAgency || 'District Authority'}</strong>
+                                  <span className="text-[10px] text-slate-600 block truncate">Vendor: {(p.vendorName || 'Assigned Contractor').replace(' (Fictional)', '')}</span>
+                                </div>
+
+                                {/* Sanction & Outlay */}
+                                <div className="bg-slate-50 p-2 rounded border border-slate-100">
+                                  <span className="text-[10px] text-slate-500 block font-medium">Financial Outlay</span>
+                                  <div className="flex items-center justify-between text-xs mt-0.5">
+                                    <span className="text-slate-600">Sanctioned:</span>
+                                    <strong className="font-bold text-[#0f2b5c]">₹{(p.sanctionedAmount / 100000).toFixed(1)} Lakhs</strong>
+                                  </div>
+                                  <div className="flex items-center justify-between text-[11px] text-slate-500 mt-0.5">
+                                    <span>Disbursed:</span>
+                                    <span className="font-semibold text-slate-700">₹{((p.expenditure || 0) / 100000).toFixed(1)} Lakhs</span>
+                                  </div>
+                                </div>
+
+                                {/* Certified Physical Progress */}
+                                <div className="bg-slate-50 p-2 rounded border border-slate-100">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-[10px] text-slate-500 font-medium">Physical Progress</span>
+                                    <strong className="text-xs font-bold text-slate-800">{p.physicalProgress || 0}%</strong>
+                                  </div>
+                                  <div className="w-full h-2 bg-slate-200 rounded-full mt-1.5 overflow-hidden">
+                                    <div className="h-full bg-emerald-600 rounded-full" style={{ width: `${Math.min(100, Math.max(0, p.physicalProgress || 0))}%` }}></div>
+                                  </div>
+                                  <span className="text-[10px] text-slate-500 mt-1 block">Status: <strong className="text-[#0f2b5c]">{p.status || 'In Progress'}</strong></span>
+                                </div>
+
+                                {/* Financial Progress */}
+                                <div className="bg-slate-50 p-2 rounded border border-slate-100">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-[10px] text-slate-500 font-medium">Fund Utilization</span>
+                                    <strong className="text-xs font-bold text-slate-800">{(p.financialProgress || 0).toFixed(0)}%</strong>
+                                  </div>
+                                  <div className="w-full h-2 bg-slate-200 rounded-full mt-1.5 overflow-hidden">
+                                    <div className="h-full bg-blue-600 rounded-full" style={{ width: `${Math.min(100, Math.max(0, p.financialProgress || 0))}%` }}></div>
+                                  </div>
+                                  <span className="text-[10px] text-slate-500 mt-1 block">FY {p.financialYear || '2024-25'}</span>
+                                </div>
+
+                                {/* GPS Location Coordinates */}
+                                <div className="bg-slate-50 p-2 rounded border border-slate-100">
+                                  <span className="text-[10px] text-slate-500 block font-medium">Site Coordinates &amp; Distance</span>
+                                  <span className="font-mono text-xs font-semibold text-slate-800 block truncate">
+                                    {(p.siteCoordinates?.latitude ?? p.latitude ?? 0).toFixed(4)}°N, {(p.siteCoordinates?.longitude ?? p.longitude ?? 0).toFixed(4)}°E
+                                  </span>
+                                  <span className="text-[10px] text-emerald-700 font-medium mt-0.5 block truncate">
+                                    📍 {distFormatted} from your reference location
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </label>
                     );
@@ -767,18 +848,18 @@ export default function CitizenPortal({ onNavigate }) {
               </div>
 
               {/* SECTION 3: Observation & Compulsory Photos */}
-              <div className="bg-white border border-slate-200 rounded-md p-5 shadow-xs">
+              <div className="bg-white border border-slate-200 rounded p-5 shadow-xs">
                 <div className="flex items-center space-x-2.5 mb-3">
-                  <span className="flex items-center justify-center w-6 h-6 rounded-full bg-govNavy text-white text-xs font-bold">3</span>
-                  <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wide">On-the-Ground Observation & Compulsory Photos *</h2>
+                  <span className="flex items-center justify-center w-6 h-6 rounded-full bg-[#0f2b5c] text-white text-xs font-bold">3</span>
+                  <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wide">Ground Observation &amp; Compulsory Photos *</h2>
                 </div>
 
                 <div className="space-y-1.5">
                   <label className="block text-xs font-semibold text-slate-700" htmlFor="complaint-text">
-                    Physical Site Status & Defect Description *
+                    Physical Site Status &amp; Defect Description *
                   </label>
                   <textarea
-                    className="w-full text-xs rounded border-slate-300 p-3 text-slate-900 placeholder-slate-400 focus:border-govNavy focus:ring-govNavy"
+                    className="w-full text-xs rounded border border-slate-300 p-3 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-[#0f2b5c]"
                     id="complaint-text"
                     placeholder="Describe physical site status in detail (e.g., contractor claimed masonry work is complete, but on site only foundation pillars stand; unpaved road shoulders; missing plumbing or electrical fittings; no workers present for 2 months)."
                     required
@@ -787,16 +868,19 @@ export default function CitizenPortal({ onNavigate }) {
                     onChange={(e) => setComplaintText(e.target.value)}
                   />
                   <div className="flex justify-between items-center text-[11px] text-slate-500">
-                    <span>Min 10 characters. Detail structural status or missing fixtures.</span>
+                    <span>Minimum 10 characters. Detail structural status or missing fixtures.</span>
                     <span>Character count: {complaintText.length}</span>
                   </div>
                 </div>
 
                 {/* Geo-Tagged Site Photo Upload Dropzone (COMPULSORY) */}
                 <div className="mt-5">
-                  <label className="block text-xs font-semibold text-slate-700 mb-1.5">
-                    Attach Geo-Tagged Site Photos <span className="text-rose-600 font-bold">* Compulsory (At least 1 site photo required)</span>
-                  </label>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="block text-xs font-semibold text-slate-700">
+                      Attach Geo-Tagged Site Photos <span className="text-rose-600 font-bold">* Compulsory (At least 1 site photo required)</span>
+                    </label>
+                    <span className="text-[11px] text-slate-400 font-medium">Max 3 photos, JPG/PNG up to 5MB</span>
+                  </div>
 
                   {photoErrorMessage && (
                     <div className="bg-rose-50 border border-rose-300 text-rose-800 text-xs px-3 py-2 rounded mb-2 flex items-center gap-1.5">
@@ -807,9 +891,13 @@ export default function CitizenPortal({ onNavigate }) {
 
                   <div
                     className={`border-2 border-dashed ${
-                      photoErrorMessage ? 'border-rose-400 bg-rose-50/30' : 'border-slate-300 hover:border-govNavy bg-slate-50/50'
-                    } rounded-md p-4 text-center transition cursor-pointer`}
-                    onClick={() => fileInputRef.current?.click()}
+                      photoErrorMessage ? 'border-rose-400 bg-rose-50/30' : 'border-slate-300 hover:border-[#0f2b5c] bg-slate-50/50'
+                    } rounded p-4 text-center transition cursor-pointer select-none`}
+                    onClick={(e) => {
+                      if (e.target !== fileInputRef.current) {
+                        fileInputRef.current?.click();
+                      }
+                    }}
                     onDragOver={(e) => e.preventDefault()}
                     onDrop={(e) => {
                       e.preventDefault();
@@ -818,17 +906,18 @@ export default function CitizenPortal({ onNavigate }) {
                       }
                     }}
                   >
-                    <svg aria-hidden="true" className="mx-auto h-7 w-7 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 48 48">
-                      <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"></path>
-                    </svg>
-                    <p className="mt-1 text-xs text-slate-700 font-medium">Click to upload site photos or drag & drop</p>
-                    <p className="text-[10px] text-slate-500">Max 3 photos, JPG/PNG up to 5MB each. EXIF metadata read for GPS verification.</p>
+                    <div className="mx-auto w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 mb-1">
+                      <span className="material-symbols-outlined text-[20px]">add_a_photo</span>
+                    </div>
+                    <p className="text-xs text-slate-700 font-medium">Click to upload site photos or drag &amp; drop</p>
+                    <p className="text-[10px] text-slate-500 mt-0.5">JPG / PNG format. Photographic evidence is strictly required for ground audit.</p>
                     <input
                       ref={fileInputRef}
                       accept="image/jpeg,image/png"
                       className="hidden"
                       multiple
                       type="file"
+                      onClick={(e) => e.stopPropagation()}
                       onChange={(e) => {
                         if (e.target.files?.length > 0) {
                           handlePhotoFiles(e.target.files);
@@ -850,7 +939,7 @@ export default function CitizenPortal({ onNavigate }) {
                             </div>
                             <button
                               type="button"
-                              className="text-rose-600 hover:text-rose-800 p-1 text-xs font-bold shrink-0"
+                              className="text-rose-600 hover:text-rose-800 p-1 text-xs font-bold shrink-0 cursor-pointer"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 removePhoto(pIdx);
@@ -880,7 +969,7 @@ export default function CitizenPortal({ onNavigate }) {
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1" htmlFor="contact-name">Your Full Name (Optional)</label>
                     <input
-                      className="w-full text-xs rounded border-slate-300 py-2 px-3 text-slate-800 focus:border-govNavy focus:ring-govNavy"
+                      className="w-full text-xs rounded border border-slate-300 py-2 px-3 text-slate-800 focus:outline-none focus:border-[#0f2b5c]"
                       id="contact-name"
                       placeholder="e.g. Rajesh Patil"
                       type="text"
@@ -891,7 +980,7 @@ export default function CitizenPortal({ onNavigate }) {
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1" htmlFor="contact-mobile">Mobile Number (Optional — for SMS Tracking)</label>
                     <input
-                      className="w-full text-xs rounded border-slate-300 py-2 px-3 text-slate-800 focus:border-govNavy focus:ring-govNavy"
+                      className="w-full text-xs rounded border border-slate-300 py-2 px-3 text-slate-800 focus:outline-none focus:border-[#0f2b5c]"
                       id="contact-mobile"
                       placeholder="e.g. 9876543210"
                       type="tel"
@@ -902,9 +991,9 @@ export default function CitizenPortal({ onNavigate }) {
                 </div>
 
                 <div className="mt-4 bg-slate-50 border border-slate-200 rounded px-3 py-2 text-slate-600 text-xs flex items-center gap-2">
-                  <span className="text-rose-600">📍</span>
+                  <span className="text-[#0f2b5c]">📍</span>
                   <span>
-                    Coordinates <strong className="text-slate-800 font-medium">({citizenLat.toFixed(4)}°N, {citizenLon.toFixed(4)}°E)</strong> and locality <strong className="text-slate-800 font-medium">{selectedLocality}</strong> will be attached for on-site proximity verification.
+                    Verified Coordinates <strong className="text-slate-800 font-medium">(${citizenLat.toFixed(4)}°N, ${citizenLon.toFixed(4)}°E)</strong> will be attached for on-site proximity verification.
                   </span>
                 </div>
 
@@ -913,26 +1002,23 @@ export default function CitizenPortal({ onNavigate }) {
                   <div className="text-xs text-slate-600 flex items-center gap-2">
                     <input
                       defaultChecked
-                      className="rounded border-slate-300 text-govNavy focus:ring-govNavy"
+                      className="rounded border-slate-300 text-[#0f2b5c] focus:ring-[#0f2b5c]"
                       id="good-faith-cert"
                       required
                       type="checkbox"
                     />
                     <label className="cursor-pointer select-none" htmlFor="good-faith-cert">
-                      By submitting, you certify that this ground observation is submitted in good faith.
+                      I certify that this ground observation is submitted in good faith based on actual site observation.
                     </label>
                   </div>
 
                   <button
-                    className="w-full sm:w-auto bg-govNavy hover:bg-govNavy-dark text-white font-semibold text-xs px-6 py-2.5 rounded shadow-sm transition inline-flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                    className="w-full sm:w-auto bg-[#0f2b5c] hover:bg-[#1e3a8a] text-white font-semibold text-xs px-6 py-2.5 rounded shadow-sm transition inline-flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                     type="submit"
                     id="btn-submit-grievance"
                     disabled={isSubmitting}
                   >
-                    <span>{isSubmitting ? 'Verifying & Submitting...' : 'Submit Grievance Report'}</span>
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path d="M14 5l7 7m0 0l-7 7m7-7H3" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"></path>
-                    </svg>
+                    <span>{isSubmitting ? 'Verifying &amp; Submitting...' : 'Submit Grievance Report →'}</span>
                   </button>
                 </div>
               </div>
@@ -941,23 +1027,16 @@ export default function CitizenPortal({ onNavigate }) {
         )}
       </main>
 
-      {/* Footer */}
-      <footer className="bg-white border-t border-govBorder py-6 mt-auto">
-        <div className="max-w-6xl mx-auto px-4 text-center">
-          <p className="text-xs font-semibold text-slate-700 tracking-wide">
-            Official Government Audit Portal • Public Grievance Intake Framework • Governed under MoSPI & CAG Audit Guidelines
-          </p>
-          <p className="text-[11px] text-slate-500 mt-1 max-w-2xl mx-auto">
-            Academic & Research Prototype: This interface is engineered exclusively for Smart India Hackathon 2026 evaluating MoSPI Problem Statement SIH26102. Not an official Government of India portal.
-          </p>
-          <div className="mt-3 flex items-center justify-center space-x-3 text-[11px] text-slate-400">
-            <span>SIH26102</span>
+      {/* MINIMAL GOVERNMENT FOOTER */}
+      <footer className="w-full bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500 mt-auto">
+        <div className="max-w-7xl mx-auto px-4 flex flex-col items-center gap-1">
+          <div className="font-bold text-slate-800 text-sm tracking-tight">PRAMAAN</div>
+          <div className="text-slate-600 font-medium">MPLADS Audit &amp; Monitoring System</div>
+          <div className="text-slate-400 mt-1">Government of India | Ministry of Statistics &amp; Programme Implementation</div>
+          <div className="flex items-center justify-center gap-3 text-slate-400 mt-2 text-[11px]">
+            <span className="text-slate-500">Citizen Grievance &amp; Verification Portal</span>
             <span>•</span>
-            <span>SETU Framework v2.4</span>
-            <span>•</span>
-            <a className="hover:underline" href="#/">Privacy Policy</a>
-            <span>•</span>
-            <a className="hover:underline" href="#/">Citizen Charter</a>
+            <span>Privacy &amp; Accessibility</span>
           </div>
         </div>
       </footer>

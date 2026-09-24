@@ -58,3 +58,16 @@
 2026-09-23 20:14 - Build and verify Implementing Agency role-scoped dashboard endpoint GET /dashboard/implementing-agency with zero oversight leakage - status: done
 2026-09-23 20:15 - Build and verify MP Office role-scoped dashboard endpoint GET /dashboard/mp-office and contextual GET /dashboard/me with privilege escalation enforcement - status: done
 2026-09-23 20:29 - Wire frontend dashboard UI to live role-scoped statistics endpoints and render Simulated disclosures - status: done
+2026-09-23 20:50 - Wire and verify operational action workflows across all 6 statutory official roles with zero-oversight and milestone gating enforcement - status: done
+2026-09-23 21:35 - Complete repository-wide branding migration from SETU to PRAMAAN - status: done
+2026-09-23 21:40 - Redesign landing screen into an extremely minimal official government gateway page with Citizen Portal and Official Login cards - status: done
+2026-09-23 23:20 - Fix broken System Alerts ReferenceError, restore Evidence & Tranche Review Queue, wire modal infrastructure and filters across all 6 official roles - status: done
+2026-09-24 04:05 - Redesign PRAMAAN Official Login page into minimal official government gateway with single-row role cards - status: done
+2026-09-24 04:15 - Refine Citizen Portal with minimal official government design, fix geolocation input wipe, photo upload and tracking bugs - status: done
+2026-09-24 04:25 - Display structured basic project details with MP, agency, financial outlay, progress, and coordinates upon selecting a civil project in Citizen Portal - status: done
+2026-09-24 04:35 - Remove orange SIH26102 APEX badge and replace orange secondary theme tokens across entire platform - status: done
+2026-09-24 05:07 - Fix Implementing Agency project scoping leakage, restrict Assigned Works to assigned line agency, and wire operational action modals (Evidence, Invoice, Progress, UC) - status: done
+2026-09-24 05:32 - Trace entire cross-role flow end-to-end (Parts A-F, items 1-17) and verify code implementation - status: done
+2026-09-24 05:42 - Redirect District Authority to project overview on evidence accept with direct bill sanctioning and tranche release - status: done
+2026-09-24 05:58 - Fix stale project cache and hard reload wiping accepted evidence status across District overview and review queues - status: done
+2026-09-24 06:30 - Generate comprehensive, truthful, and verified README.md for PRAMAAN repository - status: done

@@ -1,5 +1,5 @@
 """
-Compliance Rule Engine Service for SETU.
+Compliance Rule Engine Service for PRAMAAN.
 
 Evaluates statutory compliance and procedural integrity rules for MPLADS projects:
 1. Category Expenditure Ceiling Breach

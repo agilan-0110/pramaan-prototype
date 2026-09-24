@@ -1,1 +1,1 @@
-"""SETU Backend Application Package."""
+"""PRAMAAN Backend Application Package."""

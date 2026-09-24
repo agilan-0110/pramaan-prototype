@@ -1,5 +1,5 @@
 /**
- * SETU Design Tokens
+ * PRAMAAN Design Tokens
  * 
  * Aesthetic & Design Philosophy:
  * - Institutional government audit dashboard (MoSPI / CAG / District Authority).

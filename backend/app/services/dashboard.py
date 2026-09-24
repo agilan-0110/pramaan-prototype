@@ -1,5 +1,5 @@
 """
-SETU Role-Scoped Dashboard Statistics Aggregator Service.
+PRAMAAN Role-Scoped Dashboard Statistics Aggregator Service.
 
 Consolidates portfolio metrics, alert severities, flag lifecycle distributions,
 time-series trends, and category fund utilization per statutory role and jurisdiction:

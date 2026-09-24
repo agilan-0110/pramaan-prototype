@@ -1,5 +1,5 @@
 """
-Trend Analysis Service for SETU.
+Trend Analysis Service for PRAMAAN.
 
 Provides time-series aggregations and fiscal year-end seasonal fund-dumping
 ("March Rush") detection across MPLADS infrastructure projects:

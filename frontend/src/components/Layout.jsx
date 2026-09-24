@@ -7,7 +7,7 @@ import './Layout.css';
  */
 export default function Layout({
   children,
-  projectName = 'SETU',
+  projectName = 'PRAMAAN',
   subtitle = 'PM-GatiShakti & MPLADS Audit Platform',
   role = null,
   onLogout,

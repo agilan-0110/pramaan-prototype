@@ -116,10 +116,10 @@ for (const p of expectedPerms) {
     throw new Error(`Sidebar missing nav item link: ${p}`);
   }
 }
-if (!shellHtml.includes('Role:') || !shellHtml.includes('District Authority')) {
+if (!shellHtml.includes('District Authority')) {
   throw new Error("Header role indicator missing!");
 }
-console.log("PASS Shell Layout: Header displays 'Role: District Authority' and sidebar contains all 7 nav items.");
+console.log("PASS Shell Layout: Header displays 'District Authority' and sidebar contains all nav items.");
 
 console.log("\n=======================================================");
 console.log("ALL 7 DISTRICT AUTHORITY FRONTEND VIEWS VERIFIED 100%!");

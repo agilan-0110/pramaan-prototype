@@ -1,5 +1,5 @@
 """
-Alerts Aggregator Service for SETU.
+Alerts Aggregator Service for PRAMAAN.
 
 Combines, enriches, and prioritizes oversight signals across all four analytical modules:
 1. Financial Risk Engine (risk.py) — HIGH and CRITICAL risk score anomalies with SHAP explanations.
@@ -148,7 +148,7 @@ class AlertsAggregatorService:
             alert_copy["statusHistory"] = alert.get("statusHistory", [
                 {
                     "status": alert_copy["status"],
-                    "changedBy": f"SETU {alert.get('sourceModule', 'analytical').capitalize()} Engine",
+                    "changedBy": f"PRAMAAN {alert.get('sourceModule', 'analytical').capitalize()} Engine",
                     "timestamp": ts,
                     "notes": "Oversight signal generated and initialized in OPEN status.",
                 }

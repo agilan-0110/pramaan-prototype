@@ -1,5 +1,5 @@
 /**
- * SETU Project Detail Data Layer
+ * PRAMAAN Project Detail Data Layer
  * 
  * Wired directly to:
  * - /backend/app/data/mockProjects.json
@@ -9381,14 +9381,44 @@ const FALLBACK_COMPLAINTS = [
 export let allProjects = FALLBACK_PROJECTS;
 export let allComplaints = FALLBACK_COMPLAINTS;
 
+export function updateProjectCache(projectData) {
+  if (!projectData || !projectData.id) return;
+  if (typeof window !== 'undefined') {
+    window._setuCurrentProject = projectData;
+    if (!Array.isArray(window._setuCurrentProjects)) window._setuCurrentProjects = [];
+    const cpIdx = window._setuCurrentProjects.findIndex(p => p.id === projectData.id);
+    if (cpIdx >= 0) window._setuCurrentProjects[cpIdx] = projectData;
+    else window._setuCurrentProjects.push(projectData);
+
+    if (!Array.isArray(window._setuScopedProjects)) window._setuScopedProjects = [];
+    const spIdx = window._setuScopedProjects.findIndex(p => p.id === projectData.id);
+    if (spIdx >= 0) window._setuScopedProjects[spIdx] = projectData;
+    else window._setuScopedProjects.push(projectData);
+  }
+  if (Array.isArray(allProjects)) {
+    const apIdx = allProjects.findIndex(p => p.id === projectData.id);
+    if (apIdx >= 0) allProjects[apIdx] = projectData;
+    else allProjects.push(projectData);
+  }
+}
+if (typeof window !== 'undefined') {
+  window.updateProjectCache = updateProjectCache;
+}
+
 export async function initProjectData() {
   if (typeof fetch !== 'function') return;
   try {
-    const res = await fetch('http://127.0.0.1:8000/projects');
+    const token = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('setu_auth_token') : null;
+    const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+    const res = await fetch('http://127.0.0.1:8000/projects', { headers });
     if (res.ok) {
       const data = await res.json();
       if (Array.isArray(data) && data.length > 0) {
         allProjects = data;
+        if (typeof window !== 'undefined') {
+          window._setuCurrentProjects = data;
+          window._setuScopedProjects = data;
+        }
       }
     }
   } catch {}
@@ -9399,6 +9429,9 @@ export async function initProjectData() {
  */
 export function getProjectById(projectId) {
   if (typeof window !== 'undefined') {
+    if (window._setuCurrentProject && window._setuCurrentProject.id === projectId) {
+      return window._setuCurrentProject;
+    }
     if (Array.isArray(window._setuCurrentProjects)) {
       const match = window._setuCurrentProjects.find((p) => p.id === projectId);
       if (match) return match;
@@ -10093,7 +10126,7 @@ export function getProjectDetailHtml(projectId, activeTab = 'overview') {
                   Utilization Certificate Successfully Transmitted
                 </div>
                 <div style="font-size: 13px; color: #047857; line-height: 1.5;">
-                  Statutory Form GFR-12A has been certified by Executive Engineer, ${p.implementingAgency}, and recorded on the SETU central audit ledger. Project financial accounts are officially closed.
+                  Statutory Form GFR-12A has been certified by Executive Engineer, ${p.implementingAgency}, and recorded on the PRAMAAN central audit ledger. Project financial accounts are officially closed.
                 </div>
                 <div style="margin-top: 8px; font-family: var(--setu-font-mono); font-size: 12px; color: #065f46;">
                   Ref: <strong>${ucRefNo}</strong> • Certified Expenditure: ₹${Number(p.expenditure).toLocaleString('en-IN')}
@@ -10616,12 +10649,12 @@ export function getProjectDetailHtml(projectId, activeTab = 'overview') {
   // Check if current milestone evidence is ACCEPTED
   const evidenceList = p.evidenceArtifacts || [];
   const invoiceList = p.invoices || [];
-  const hasAcceptedEvidence = (evidenceList.length > 0 && evidenceList.some(e => e.status === 'ACCEPTED')) ||
-                              (invoiceList.length > 0 && invoiceList.some(i => i.status === 'ACCEPTED')) ||
+  const hasAcceptedEvidence = (evidenceList.length > 0 && evidenceList.some(e => e.reviewStatus === 'ACCEPTED' || e.status === 'ACCEPTED')) ||
+                              (invoiceList.length > 0 && invoiceList.some(i => i.reviewStatus === 'ACCEPTED' || i.status === 'ACCEPTED')) ||
                               (p.physicalProgress >= 50 && evidenceList.length === 0);
 
-  const pendingEvidenceCount = evidenceList.filter(e => e.status === 'PENDING' || !e.status).length +
-                               invoiceList.filter(i => i.status === 'PENDING' || !i.status).length;
+  const pendingEvidenceCount = evidenceList.filter(e => (e.reviewStatus === 'PENDING' || e.status === 'PENDING' || (!e.reviewStatus && !e.status))).length +
+                               invoiceList.filter(i => (i.reviewStatus === 'PENDING' || i.status === 'PENDING' || (!i.reviewStatus && !i.status))).length;
 
   // Count compliance flags
   const complianceCount = (p.costOverrun ? 1 : 0) + 
@@ -10747,6 +10780,127 @@ export function getProjectDetailHtml(projectId, activeTab = 'overview') {
           </div>
         </div>
       </div>
+
+      <div class="setu-metric-grid" style="margin-top: var(--setu-space-4);">
+        <div class="setu-metric-box">
+          <span class="setu-metric-label">Sanctioned Budget</span>
+          <span class="setu-metric-value">₹${Number(p.sanctionedAmount || p.estimatedCost || 5000000).toLocaleString('en-IN')}</span>
+          <span class="setu-metric-meta">Approved Administrative Sanction</span>
+        </div>
+        <div class="setu-metric-box">
+          <span class="setu-metric-label">Disbursed Expenditure</span>
+          <span class="setu-metric-value">₹${Number(p.expenditure || 0).toLocaleString('en-IN')}</span>
+          <span class="setu-metric-meta">${p.financialProgress ? p.financialProgress.toFixed(1) : '0.0'}% of Sanctioned Budget</span>
+        </div>
+        <div class="setu-metric-box">
+          <span class="setu-metric-label">Unspent Balance</span>
+          <span class="setu-metric-value">₹${Number(Math.max(0, (p.sanctionedAmount || p.estimatedCost || 5000000) - (p.expenditure || 0))).toLocaleString('en-IN')}</span>
+          <span class="setu-metric-meta">Remaining Project Funds</span>
+        </div>
+        <div class="setu-metric-box">
+          <span class="setu-metric-label">Physical Stage</span>
+          <span class="setu-metric-value" style="color: ${p.physicalProgress === 100 ? '#059669' : 'var(--setu-color-primary-navy)'};">
+            ${p.physicalProgress}%
+          </span>
+          <span class="setu-metric-meta">${p.status}</span>
+        </div>
+      </div>
+
+      <!-- Milestone Gated Tranche Disbursement Control Card -->
+      <div class="setu-card" style="margin-top: var(--setu-space-4); border-left: 4px solid ${hasAcceptedEvidence ? '#059669' : '#cbd5e1'}; background: ${hasAcceptedEvidence ? '#f0fdf4' : '#f8fafc'}; padding: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+          <div style="max-width: 620px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <h4 style="margin: 0; font-size: 15px; font-weight: 700; color: ${hasAcceptedEvidence ? '#065f46' : 'var(--setu-color-primary-navy)'};">
+                💳 Statutory Milestone Tranche Disbursement Control
+              </h4>
+              <span class="setu-badge" style="${hasAcceptedEvidence ? 'background: #dcfce7; color: #15803d; border: 1px solid #86efac;' : 'background: #f1f5f9; color: #64748b; border: 1px solid #e2e8f0;'} font-size: 11px;">
+                ${hasAcceptedEvidence ? '✓ Gating Clearance Granted' : '🔒 Evidence Gate Locked'}
+              </span>
+            </div>
+            <p style="margin: 6px 0 0 0; font-size: 13px; color: var(--setu-color-text-secondary); line-height: 1.5;">
+              ${hasAcceptedEvidence 
+                ? 'Milestone physical evidence & contractor invoices have been ACCEPTED by District Authority. Next fund installment can now be disbursed.' 
+                : 'Tranche release gated: District Authority must inspect and ACCEPT the Junior Technical Engineer photo artifacts and GST invoice under the "Evidence & Invoices" tab before subsequent funds can be released.'}
+            </p>
+          </div>
+          <div>
+            ${hasAcceptedEvidence ? `
+              <button type="button" class="setu-btn-primary" onclick="if(window.setuOpenTrancheReleaseModal) window.setuOpenTrancheReleaseModal('${p.id}', ${p.sanctionedAmount || 5000000}, ${p.expenditure || 0});" style="padding: 10px 22px; font-size: 13px; cursor: pointer; background: #059669; border-radius: 4px; color: white; font-weight: 700; display: inline-flex; align-items: center; gap: 8px;">
+                <span>💳</span> Release Next Tranche
+              </button>
+            ` : `
+              <button type="button" disabled title="Locked: Milestone stage evidence must be ACCEPTED first" style="padding: 10px 20px; font-size: 13px; border-radius: 4px; background: #f1f5f9; color: #94a3b8; border: 1px solid #e2e8f0; cursor: not-allowed; display: inline-flex; align-items: center; gap: 8px; font-weight: 600;">
+                <span>🔒</span> Release Next Tranche (Locked)
+              </button>
+            `}
+          </div>
+        </div>
+      </div>
+
+      <!-- Contractor Bills & Invoices Sanctioning Card -->
+      ${invoiceList.length > 0 ? `
+        <div class="setu-card" style="margin-top: var(--setu-space-4); border-left: 4px solid #1e3a8a; background: #ffffff; padding: 20px; border: 1px solid var(--setu-color-border-subtle);">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+            <div>
+              <h4 style="margin: 0; font-size: 15px; font-weight: 700; color: var(--setu-color-primary-navy); display: flex; align-items: center; gap: 8px;">
+                <span>📄</span> Contractor Bills & Tax Invoices (${invoiceList.length})
+              </h4>
+              <div style="font-size: 12px; color: var(--setu-color-text-secondary); margin-top: 2px;">
+                Contractor vouchers submitted for stage milestone payment clearance.
+              </div>
+            </div>
+            <a href="#/project/${p.id}" onclick="const btn = document.getElementById('tab-btn-evidence-review'); if(btn) btn.click();" style="font-size: 12px; color: #0284c7; text-decoration: none; font-weight: 600;">
+              View All Uploads & Evidence →
+            </a>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            ${invoiceList.map((inv) => {
+              const invStatus = inv.reviewStatus || inv.status || 'PENDING';
+              const isAcceptedInv = invStatus === 'ACCEPTED';
+              const isRejectedInv = invStatus === 'REJECTED' || invStatus === 'REJECTED_RESUBMISSION_REQUIRED';
+              const isPendingInv = !isAcceptedInv && !isRejectedInv;
+              return `
+                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                  <div>
+                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                      <span class="setu-detail-id-tag">INV: ${inv.invoiceNumber}</span>
+                      <span style="font-weight: 700; color: var(--setu-color-primary-navy); font-size: 14px;">₹${Number(inv.claimedAmount || 0).toLocaleString('en-IN')}</span>
+                      ${isAcceptedInv ? `
+                        <span class="setu-badge" style="background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; font-size: 11px; font-weight: 700;">✓ AUDITED & SANCTIONED</span>
+                      ` : isRejectedInv ? `
+                        <span class="setu-badge" style="background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; font-size: 11px; font-weight: 700;">✕ REJECTED</span>
+                      ` : `
+                        <span class="setu-badge" style="background: #fffbeb; color: #92400e; border: 1px solid #fde68a; font-size: 11px; font-weight: 700;">⏳ PENDING SANCTION</span>
+                      `}
+                      <span class="setu-badge" style="background: #e0e7ff; color: #3730a3; border: 1px solid #c7d2fe; font-size: 10px;">Simulated GST OCR</span>
+                    </div>
+                    <div style="font-size: 12px; color: var(--setu-color-text-secondary);">
+                      Vendor: <strong>${inv.vendorName || p.vendorName || 'Assigned Contractor'}</strong> • GSTIN: <code style="font-family: var(--setu-font-mono); color: #0284c7;">${inv.gstin || 'Active'}</code>
+                    </div>
+                  </div>
+                  ${isDistrictRole ? `
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                      ${isPendingInv ? `
+                        <button type="button" class="setu-btn-primary" onclick="if(window.setuReviewInvoice) window.setuReviewInvoice('${p.id}', '${inv.invoiceNumber}', 'ACCEPTED');" style="padding: 7px 16px; font-size: 12px; background: #059669; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;">
+                          ✓ Sanction Bill
+                        </button>
+                        <button type="button" onclick="if(window.setuReviewInvoice) window.setuReviewInvoice('${p.id}', '${inv.invoiceNumber}', 'REJECTED');" style="padding: 7px 14px; font-size: 12px; background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; border-radius: 4px; cursor: pointer; font-weight: 600;">
+                          ✕ Reject
+                        </button>
+                      ` : isAcceptedInv ? `
+                        <span style="font-size: 12px; color: #059669; font-weight: 600;">✓ Ready for Disbursement</span>
+                      ` : `
+                        <span style="font-size: 12px; color: #dc2626; font-weight: 600;">✕ Resubmission Required</span>
+                      `}
+                    </div>
+                  ` : ''}
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      ` : ''}
 
       ${isCompleted ? `
         <div class="setu-card" style="margin-top: var(--setu-space-4); border-left: 4px solid #0284c7; background: #f0f9ff; padding: 18px;">
@@ -10914,9 +11068,9 @@ export function getProjectDetailHtml(projectId, activeTab = 'overview') {
           ${evidenceList.length > 0 ? `
             <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px;">
               ${evidenceList.map((ev, idx) => {
-                const evStatus = ev.status || 'PENDING';
+                const evStatus = ev.reviewStatus || ev.status || 'PENDING';
                 const isAccepted = evStatus === 'ACCEPTED';
-                const isRejectedEv = evStatus === 'REJECTED_RESUBMISSION_REQUIRED';
+                const isRejectedEv = evStatus === 'REJECTED_RESUBMISSION_REQUIRED' || evStatus === 'REJECTED';
                 return `
                   <div class="setu-card" style="padding: 16px; border: 1px solid var(--setu-color-border-subtle); background: white; border-radius: 6px; display: flex; flex-direction: column; justify-content: space-between;">
                     <div>
@@ -10998,9 +11152,9 @@ export function getProjectDetailHtml(projectId, activeTab = 'overview') {
           ${invoiceList.length > 0 ? `
             <div style="display: flex; flex-direction: column; gap: 12px;">
               ${invoiceList.map((inv) => {
-                const invStatus = inv.status || 'PENDING';
+                const invStatus = inv.reviewStatus || inv.status || 'PENDING';
                 const isAcceptedInv = invStatus === 'ACCEPTED';
-                const isRejectedInv = invStatus === 'REJECTED';
+                const isRejectedInv = invStatus === 'REJECTED' || invStatus === 'REJECTED_RESUBMISSION_REQUIRED';
                 return `
                   <div class="setu-card" style="padding: 16px; border: 1px solid var(--setu-color-border-subtle); background: white; border-radius: 6px;">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 8px;">
@@ -11342,7 +11496,7 @@ export function getProjectDetailHtml(projectId, activeTab = 'overview') {
             <div class="setu-timeline-dot ${isHighRisk ? 'setu-timeline-dot-flagged' : ''}"></div>
             <span class="setu-timeline-date">2026-06-30 • 09:00 AM</span>
             <span class="setu-timeline-action">${isHighRisk ? `Risk Engine Flag Generated (Score: ${p.riskScore})` : 'Routine Compliance Verification Completed'}</span>
-            <span class="setu-timeline-actor">Evaluated by SETU National Monitoring Engine</span>
+            <span class="setu-timeline-actor">Evaluated by PRAMAAN National Monitoring Engine</span>
           </div>
         </div>
       </div>
@@ -11724,7 +11878,7 @@ export function getProjectDetailHtml(projectId, activeTab = 'overview') {
               </p>
               <div class="bg-surface-container rounded p-space-xs text-label-sm font-label-sm text-on-surface-variant flex items-center gap-2">
                 <span class="material-symbols-outlined text-[16px] text-tertiary-container">done_all</span>
-                <span>MoSPI SIH Audit Engine auto-correlated with Contractor Milestone Log</span>
+                <span>MoSPI Audit Engine auto-correlated with Contractor Milestone Log</span>
               </div>
             </div>
           </div>
@@ -11803,7 +11957,7 @@ export function getProjectDetailHtml(projectId, activeTab = 'overview') {
       <!-- Statutory Breadcrumb & Context Navigation Bar -->
       <div class="w-full bg-surface-container-low rounded p-space-sm border border-outline-variant/20 flex flex-wrap items-center justify-between gap-space-sm text-label-sm font-label-sm">
         <div class="flex items-center gap-space-xs text-on-surface-variant flex-wrap">
-          <a class="hover:text-primary transition-colors font-medium" href="#/dashboard">SETU Dashboard</a>
+          <a class="hover:text-primary transition-colors font-medium" href="#/dashboard">PRAMAAN Dashboard</a>
           <span class="text-outline-variant">/</span>
           <span class="text-on-surface-variant">${p.state} Register</span>
           <span class="text-outline-variant">/</span>
@@ -11916,7 +12070,7 @@ export function getProjectDetailHtml(projectId, activeTab = 'overview') {
           <div class="flex items-center justify-between pb-space-xs border-b border-surface-variant">
             <div>
               <h3 class="text-headline-md font-headline-md text-primary font-bold">Submit Citizen Ground Observation</h3>
-              <p class="text-body-sm font-body-sm text-on-surface-variant">MPLADS Statutory Social Audit System · SIH26102</p>
+              <p class="text-body-sm font-body-sm text-on-surface-variant">MPLADS Statutory Social Audit System</p>
             </div>
             <button class="text-on-surface-variant hover:text-primary" onclick="document.getElementById('audit-modal')?.classList.add('hidden')" type="button">
               <span class="material-symbols-outlined">close</span>

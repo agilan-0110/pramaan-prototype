@@ -1,5 +1,5 @@
 Write-Host "================================================================" -ForegroundColor Cyan
-Write-Host "          SETU - PUBLIC AUDIT & INFRASTRUCTURE MONITORING" -ForegroundColor Cyan
+Write-Host "          PRAMAAN - PUBLIC AUDIT & INFRASTRUCTURE MONITORING" -ForegroundColor Cyan
 Write-Host "================================================================" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "Starting Backend API (Port 8000) and Frontend Portal (Port 3000)..." -ForegroundColor Yellow

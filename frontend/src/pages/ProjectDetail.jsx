@@ -5,7 +5,7 @@ import { getProjectDetailHtml, getRiskExplanation, fetchLiveCitizenReports } fro
 export { getProjectDetailHtml, getRiskExplanation, fetchLiveCitizenReports };
 
 /**
- * SETU Project Detail Component
+ * PRAMAAN Project Detail Component
  * 
  * Renders complete project details with strict RBAC:
  * - Oversight roles (MP, District, State, MoSPI, CAG): Full financial, compliance, citizen grievance, and risk tabs.
